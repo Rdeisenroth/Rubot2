@@ -1,0 +1,70 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/config.json"
+            ],
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "prefix": {
+                        "type": "string",
+                        "description": "the Default Bot Prefix",
+                        "default": "!"
+                    },
+                    "token": {
+                        "type": "string",
+                        "pattern": "^[MN][A-Za-z\\d]{23}\\.[\\w-]{6}\\.[\\w-]{27}$",
+                        "description": "The Discord Bot Token"
+                    },
+                    "ownerID": {
+                        "type": "string",
+                        "pattern": "^\\d{18}$",
+                        "description": "the Bot owner Client ID"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "the Bot Version"
+                    },
+                    "current_season": {
+                        "type": "string",
+                        "description": "the Current Rocket League Season"
+                    },
+                    "rlstatsapikey": {
+                        "type": "string",
+                        "description": "the rlstats.net Api Key"
+                    },
+                    "steamapikey": {
+                        "type": "string",
+                        "description": "the Steam API Key"
+                    },
+                    "googlemapsapikey": {
+                        "type": "string",
+                        "description": "the Google Maps API Key"
+                    },
+                    "ballchasingapikey": {
+                        "type": "string",
+                        "description": "the Google Maps API Key"
+                    },
+                    "mysqlhost": {
+                        "type": "string",
+                        "description": "the Mysql Host"
+                    },
+                    "mysqluser": {
+                        "type": "string",
+                        "description": "the Mysql User"
+                    },
+                    "mysqlpassword": {
+                        "type": "string",
+                        "description": "the Mysql Password"
+                    },
+                    "main_schema_name": {
+                        "type": "string",
+                        "description": "the Name of the Main MySQL Database / Schema of the Bot"
+                    },
+                },
+                "required": ["prefix","token","owner_id","version","mysqlhost","mysqlpassword","main_schema_name"]
+            }
+        }
+    ],
+}
