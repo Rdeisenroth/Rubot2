@@ -25,6 +25,7 @@
         "emitDecoratorMetadata": true,
         "resolveJsonModule": true,
         "outDir": "dist",
+        "allowJs": true,
         "typeRoots": [
             "node_modules/@types",
             "typings/index.d.ts"

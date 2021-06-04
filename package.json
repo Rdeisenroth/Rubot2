@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^15.6.2",
+    "colors": "^1.4.0",
     "commonjs": "^0.0.1",
+    "consola": "^2.15.3",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "glob": "^7.1.6",

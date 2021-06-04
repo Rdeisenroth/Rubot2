@@ -22,6 +22,15 @@
                         "pattern": "^\\d{18}$",
                         "description": "the Bot owner Client ID"
                     },
+                    // "owners": {
+                    //     "type": "array",
+                    //     "items": {
+                    //         "type": "string",
+                    //         "pattern": "^\\d{18}$",
+                    //     },
+                    //     "minItems": 1,
+                    //     "description": "the Bot owner Client IDs"
+                    // },
                     "version": {
                         "type": "string",
                         "description": "the Bot Version"

@@ -1,9 +1,10 @@
-import { Client, ClientEvents } from "discord.js";
+import { Client, ClientEvents, Message } from "discord.js";
+import { Bot } from "../src/bot";
 
 /**
  * The Bot Configuration File
  */
-export type Configuration = {
+export type BotConfig = {
     /**
      * the Default Bot Prefix
      */
@@ -72,5 +73,55 @@ export interface BotEvent<K extends keyof ClientEvents> {
 //     (client: Client, ...args: any[]): Promise<void>
 // }
 export interface ExecuteEvent<K extends keyof ClientEvents> {
-    (client: Client, ...args: ClientEvents[K]): Promise<boolean>
+    (client: Bot, ...args: ClientEvents[K]): Promise<boolean>
+}
+
+export interface RunCommand {
+    (client: Bot, message: Message, args: string[]):Promise<any>;
+}
+
+/**
+ * Definition of a Command for Type Safety
+ */
+export interface Command {
+    /**
+     * the Command Name
+     */
+    name: string;
+    /**
+     * the Command Aliases
+     */
+    aliases?: string[];
+    /**
+     * the Command Description
+     */
+    description?: string;
+    /**
+     * the Command Cooldown in ms
+     */
+    cooldown?: number;
+    /**
+     * Whether the Command requires at least one Argument
+     */
+    args?: boolean;
+    /**
+     * The Paramers after command name surrounded with <>
+     */
+    usage?: string;
+    /**
+     * Wheter the Command Can only be executed on Guilds (=Servers)
+     */
+    guildOnly?: boolean;
+    /**
+     * the Category of the Command
+     */
+    category?: string;
+    /**
+     * Whether the Command should be excluded from the regular Help Command
+     */
+    invisible?: boolean;
+    /**
+     * Executes the Command
+     */
+    execute: RunCommand;
 }
