@@ -16,6 +16,9 @@ export const execute: ExecuteEvent<"message"> = async (client, message) => {
 
     // Prepare command for execution
     const args = message.content.slice(prefix.length).split(/ +/);
+    // const flags = client.parser(message.content.slice(prefix.length));
+    // const args = flags._;
+    // console.log(flags);
     const commandName = (args.shift() as string).toLowerCase();
     const command = client.commands.get(commandName) || client.commands.find(cmd => (cmd.aliases != undefined) && cmd.aliases.includes(commandName));
     // if command was not found, just return to not interfere with other bots

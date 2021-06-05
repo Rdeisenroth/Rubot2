@@ -1,4 +1,5 @@
 import { Client, ClientEvents, Message } from "discord.js";
+import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 
 /**

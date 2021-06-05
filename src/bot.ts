@@ -5,6 +5,8 @@ import glob from 'glob';
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
+import parser from 'yargs-parser';
+import * as mongoose from 'mongoose';
 const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
@@ -14,6 +16,7 @@ export class Bot extends Client {
     public ownerID?: string;
     public prefix: string = "!";
     public utils = utils;
+    public parser = parser;
     public constructor() {
         super();
     }
