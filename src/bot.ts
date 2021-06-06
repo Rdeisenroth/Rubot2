@@ -1,13 +1,13 @@
 import { Client, Collection, Message } from "discord.js";
 import consola, { Consola } from 'consola';
 import { BotConfig, BotEvent, Command } from "../typings";
-import glob from 'glob';
+// import glob from 'glob';
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
 import parser from 'yargs-parser';
 import * as mongoose from 'mongoose';
-const globPromise = promisify(glob);
+// const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
     public commands: Collection<string, Command> = new Collection();
@@ -26,29 +26,28 @@ export class Bot extends Client {
      * @param config The bot Configuration
      */
     public async start(config: BotConfig): Promise<void> {
-        this.logger.info("starting Bot...")
+        this.logger.info("starting Bot...");
         // Read config
         this.ownerID = config.ownerID;
         this.prefix = config.prefix;
         this.login(config.token).catch((e) => this.logger.error(e));
 
         // Commands
-        const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+        const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        // console.log("Command Files:" + JSON.stringify(commandFiles));
         //iterate over all the commands to store them in a collection
         for (const file of commandFiles) {
-            const command: Command = require(`./commands/${file}`);
+            const command: Command = await import(`${__dirname}/commands/${file}`);
             console.log(`command: ${file}, name: ${JSON.stringify(command.name)}`)
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
             this.commands.set(command.name, command);
         }
 
-        // Events
-        const eventFiles: string[] = await globPromise(
-            `${__dirname}/events/**/*{.js,.ts}`
-        );
-        eventFiles.map(async (eventFile: string) => {
-            const event = (await import(eventFile)) as BotEvent<any>;
+        // Event Files
+        const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        await eventFiles.map(async (eventFile: string) => {
+            const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
             console.log(`file: ${eventFile}, name: ${JSON.stringify(event.name)}`);
             this.on(event.name, event.execute.bind(null, this));
         });

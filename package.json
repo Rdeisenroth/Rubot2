@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "watch": "tsc -p tsconfig.json -w",
-    "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\""
+    "test": "jest --detectOpenHandles"
   },
   "author": "Ruben Deisenroth",
   "license": "ISC",

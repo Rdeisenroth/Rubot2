@@ -78,7 +78,7 @@ export interface ExecuteEvent<K extends keyof ClientEvents> {
 }
 
 export interface RunCommand {
-    (client: Bot, message: Message, args: string[]):Promise<any>;
+    (client: Bot, message?: Message, args: string[]):Promise<any>;
 }
 
 /**
