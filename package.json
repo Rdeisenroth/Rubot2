@@ -5,7 +5,7 @@
   "main": "/dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "rm -rf dist/; tsc --build tsconfig.json; node dist/index.js",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest --detectOpenHandles"
   },
