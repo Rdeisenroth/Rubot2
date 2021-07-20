@@ -6,7 +6,7 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
 import parser from 'yargs-parser';
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 // const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
@@ -17,6 +17,8 @@ export class Bot extends Client {
     public prefix: string = "!";
     public utils = utils;
     public parser = parser;
+    public database = mongoose;
+    public readonly initTimestamp = Date.now();
     public constructor() {
         super();
     }
@@ -33,23 +35,38 @@ export class Bot extends Client {
         this.login(config.token).catch((e) => this.logger.error(e));
 
         // Commands
+        this.logger.info("Loading Commands...");
         const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
         // console.log("Command Files:" + JSON.stringify(commandFiles));
         //iterate over all the commands to store them in a collection
         for (const file of commandFiles) {
             const command: Command = await import(`${__dirname}/commands/${file}`);
-            console.log(`command: ${file}, name: ${JSON.stringify(command.name)}`)
+            console.log(`-${JSON.stringify(command.name)} ($./commands/${file})`)
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
             this.commands.set(command.name, command);
         }
 
         // Event Files
+        this.logger.info("Loading Events...");
         const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
         await eventFiles.map(async (eventFile: string) => {
             const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
-            console.log(`file: ${eventFile}, name: ${JSON.stringify(event.name)}`);
+            console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
             this.on(event.name, event.execute.bind(null, this));
         });
+
+        // Connect to db
+        mongoose.connect(
+            config.mongodb_connection_url,
+            { useNewUrlParser: true, useUnifiedTopology: true },
+            (err) => {
+                if(err){
+                    throw err;
+                } else {
+                    this.logger.info('connected to DB!!');
+                }
+            }
+        );
     }
 }

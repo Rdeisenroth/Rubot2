@@ -71,6 +71,10 @@
                         "type": "string",
                         "description": "the Name of the Main MySQL Database / Schema of the Bot"
                     },
+                    "mongodb_connection_url": {
+                        "type": "string",
+                        "description": "the Mongo DB Connection URL"
+                    },
                 },
                 "required": ["prefix","token","owner_id","version","mysqlhost","mysqlpassword","main_schema_name"]
             }

@@ -58,6 +58,10 @@ export type BotConfig = {
      * the Name of the Main MySQL Database / Schema of the Bot
      */
     main_schema_name: string;
+    /**
+     * the Mongo DB Connection URL
+     */
+    mongodb_connection_url: string;
 };
 
 export abstract class ClientEventListener<K extends keyof ClientEvents> {

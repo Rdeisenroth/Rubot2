@@ -36,7 +36,8 @@ beforeEach(() => {
         "mysqlhost": "localhost",
         "mysqluser": "root",
         "mysqlpassword": "a Super secure Passwort",
-        "main_schema_name": "botdb"
+        "main_schema_name": "botdb",
+        "mongodb_connection_url": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>"
     };
 })
 
