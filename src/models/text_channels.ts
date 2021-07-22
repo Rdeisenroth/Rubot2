@@ -3,17 +3,17 @@ import mongoose from "mongoose";
 const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelModel>({
     channel_type: {
         type: Number,
-        enum: [0, 1,2,3,4,5,6,7],
+        enum: [0, 1, 2, 3, 4, 5, 6, 7],
         required: true
     },
-    whitelist_user_groups: [{
-        type: String,
-        required: true
-    }],
-    blacklist_user_groups: [{
-        type: String,
-        required: true
-    }],
+    // whitelist_user_groups: [{
+    //     type: String,
+    //     required: true
+    // }],
+    // blacklist_user_groups: [{
+    //     type: String,
+    //     required: true
+    // }],
     managed: {
         type: Boolean,
         required: true,
@@ -40,10 +40,23 @@ const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelMo
  * Database Representation of a Discord Channel
  */
 export interface Channel {
+    /**
+     * The Channel Type
+     */
     channel_type: ChannelType,
-    whitelist_user_groups: string[],
-    blacklist_user_groups: string[],
+    // whitelist_user_groups: string[],
+    // blacklist_user_groups: string[],
+    /**
+     * Whether the Channel is being managed by or relevant to the bot
+     */
     managed: boolean,
+    /**
+     * The Parent Category channel
+     */
+    category?: string,
+    /**
+     * The Channel owner
+     */
     owner?: String
 }
 
@@ -52,7 +65,13 @@ export interface TextChannel extends Channel {
      * Channel Specific Prefix, cuz why not? :D
      */
     prefix?: string,
+    /**
+     * If the Bot is enabled in this channel
+     */
     listen_for_commands: boolean,
+    /**
+     * WHETHER THE CHANNEL IS CAPS-ONLY
+     */
     rage_channel?: boolean,
 }
 

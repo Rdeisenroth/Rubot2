@@ -1,7 +1,8 @@
 import ChannelType, { EmojiIdentifierResolvable, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 import GuildSchema, { Guild } from "../models/guilds";
-import { VoiceChannel } from "../models/voice_channels";
+import { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
+import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
 
 const command: Command = {
     name: 'setjointocreate',
@@ -30,20 +31,30 @@ const command: Command = {
             {
                 $push: {
                     "voice_channels": {
+                        _id: channel.id,
                         channel_type: 2,
+                        owner: message.author.id,
                         locked: false,
                         managed: true,
-                        owner: message.author.id,
-                        blacklist_user_groups: [],
-                        whitelist_user_groups: [],
+                        // blacklist_user_groups: [],
+                        // whitelist_user_groups: [],
                         permitted: [],
                         afkhell: false,
+                        spawner: {
+                            owner: message.author.id,
+                            supervisor_roles: [],
+                            permission_overwrites: [{ id: message.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
+                            max_users: 5,
+                            parent: channel.parentID,
+                        },
                     } as VoiceChannel
                 }
             },
             { upsert: true, setDefaultsOnInsert: true },
         );
         console.log(updated);
+        message.reply("Done.")
+        // message.guild?.channels.create("", {})
     }
 }
 

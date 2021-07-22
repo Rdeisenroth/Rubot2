@@ -1,8 +1,8 @@
 // import mongoose from 'mongoose';
 import mongoose from "mongoose";
-import GuildSettingsSchema, { GuildSettings } from "./guild_settings";
-import TextChannelSchema, { TextChannel } from "./text_channels";
-import VoiceChannelSchema, { VoiceChannel } from "./voice_channels";
+import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
+import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_channels";
+import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 
 /**
  * A Schema For storing and Managing Guilds
@@ -63,6 +63,9 @@ export interface Guild {
 
 export interface GuildDocument extends Guild, mongoose.Document {
     // List getters or non model methods here
+    text_channels: TextChannelDocument[],
+    voice_channels: VoiceChannelDocument[],
+    guild_settings: GuildSettingsDocument,
 }
 
 export interface GuildModel extends mongoose.Model<GuildDocument> {
