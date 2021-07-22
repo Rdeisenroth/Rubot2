@@ -65,6 +65,11 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         type: VoiceChannelSpawnerSchema,
         required: true,
     },
+    temporary: {
+        type: Boolean,
+        required: false,
+        default: false,
+    }
 })
 
 export interface VoiceChannel extends Channel {
@@ -88,6 +93,10 @@ export interface VoiceChannel extends Channel {
      * Makes the Channel a spawner Channel which creates a new channel for every joined member
      */
     spawner?: VoiceChannelSpawner,
+    /**
+     * If the VC is a Temporary Voice Channel
+     */
+    temporary?: boolean,
 }
 
 export interface VoiceChannelDocument extends VoiceChannel, mongoose.Document {

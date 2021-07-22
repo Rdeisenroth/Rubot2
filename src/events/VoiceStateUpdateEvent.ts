@@ -1,19 +1,21 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
 import { Client, ClientEvents, Collection, OverwriteData } from "discord.js";
 import GuildSchema, { Guild } from "../models/guilds";
+import VoiceChannelSchema, { VoiceChannel } from "../models/voice_channels";
+import { spawn } from "child_process";
 export const name = "voiceStateUpdate";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
-
     const oldUserChannel = oldState.channel;
     const newUserChannel = newState.channel;
 
+    // New Channel/switch Channel
     if (newState.channel && newState.channel.guild) {
 
         var guild = newState.channel.guild;
 
         // Get Channel from DB
-        const guildData = (await GuildSchema.findById(guild.id).lean());
+        const guildData = (await GuildSchema.findById(guild.id));
         const channelData = guildData!.voice_channels.find(x => x._id == newState.channelID!);
         if (channelData) {
 
@@ -23,7 +25,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 const spawner = channelData.spawner!;
 
                 // Figure out Name
-                var name: string = `${newState.member!.displayName}'s VC`;
+                var name = `${newState.member!.displayName}'s VC`;
+                const shortname = name;
                 if (spawner.name) {
                     name = spawner.name;
                     // Interpolate String
@@ -63,6 +66,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     });
                 }
 
+                // TODO: Error Handling
+
                 // Create new Voice Channel
                 const createdVC = await guild.channels.create(name, {
                     type: 'voice',
@@ -77,7 +82,74 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 } catch (error) {
                     throw new Error("USER_NOT_MOVABLE");
                 }
+
+                // Create Database Entry
+                const updated = await GuildSchema.updateOne(
+                    { _id: guild.id },
+                    {
+                        $push: {
+                            "voice_channels": {
+                                _id: createdVC.id,
+                                channel_type: 2,
+                                owner: newState.member!.id,
+                                locked: spawner.lock_initially,
+                                managed: true,
+                                // blacklist_user_groups: [],
+                                // whitelist_user_groups: [],
+                                permitted: [],
+                                afkhell: false,
+                                category: spawner.parent,
+                                temporary: true,
+                            } as VoiceChannel
+                        }
+                    },
+                    { upsert: true, setDefaultsOnInsert: true },
+                );
+                // console.log(updated);
+                console.log(`Created TEMP VC: ${shortname} on ${guild.name}`);
             }
+        }
+
+    }
+    if (oldUserChannel && newUserChannel?.id != oldUserChannel?.id) {
+
+        var guild = oldUserChannel.guild;
+
+        // Get Channel from DB
+        const guildData = (await GuildSchema.findById(guild.id));
+        const channelData = guildData!.voice_channels.find(x => x._id == oldState.channelID!);
+
+        if (channelData) {
+            if (channelData.temporary && oldUserChannel.members.size == 0) {
+
+                // remove vc
+                if (oldUserChannel.deletable) {
+                    await oldUserChannel.delete();
+                } else {
+                    client.logger.error("Temp VC Not deletable: " + oldUserChannel.id);
+                }
+
+                // get name for logging
+                var cName = oldUserChannel.name;
+
+                if(channelData.locked) {
+                    cName = cName.substring(1);
+                }
+
+                // remove DB entry
+                const updated = await GuildSchema.updateOne(
+                    { _id: guild.id },
+                    {
+                        $pull: {
+                            "voice_channels": { _id: oldUserChannel.id }
+                        }
+                    },
+                    { upsert: true, setDefaultsOnInsert: true },
+                );
+                // console.log(updated);
+                console.log(`deleted TEMP VC: ${cName} on ${guild.name}`);
+            }
+
         }
     }
 
