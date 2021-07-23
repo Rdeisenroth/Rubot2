@@ -133,7 +133,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 var cName = oldUserChannel.name;
 
                 if(channelData.locked) {
-                    cName = cName.substring(1);
+                    cName = cName.split("🔓", 2)[1];
                 }
 
                 // remove DB entry
