@@ -35,10 +35,6 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         type: String,
         required: false,
     },
-    listen_for_commands: {
-        type: String,
-        required: true,
-    },
     category: {
         type: String,
         required: false
@@ -63,13 +59,18 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
     },
     spawner: {
         type: VoiceChannelSpawnerSchema,
-        required: true,
+        required: false,
     },
     temporary: {
         type: Boolean,
         required: false,
         default: false,
-    }
+    },
+    supervisors: {
+        type: [String],
+        required: false,
+        default: [],
+    },
 })
 
 export interface VoiceChannel extends Channel {
@@ -97,6 +98,10 @@ export interface VoiceChannel extends Channel {
      * If the VC is a Temporary Voice Channel
      */
     temporary?: boolean,
+    /**
+     * The Channel Supervisor Roles/ User IDs
+     */
+    supervisors?: string[],
 }
 
 export interface VoiceChannelDocument extends VoiceChannel, mongoose.Document {

@@ -40,9 +40,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         name = name.replace(`\${${key}}`, value as string);
                     }
                 }
-                if (!spawner.lock_initially) {
-                    name = "🔓" + name;
-                }
+                // if (!spawner.lock_initially) {
+                //     name = "🔓" + name;
+                // }
 
                 // Channel Permissions
                 var permoverrides: OverwriteData[] = spawner.permission_overwrites;
@@ -132,9 +132,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 // get name for logging
                 var cName = oldUserChannel.name;
 
-                if(channelData.locked) {
-                    cName = cName.split("🔓", 2)[1];
-                }
+                // if(!channelData.locked) {
+                //     cName = cName.substring("🔓".length);
+                // }
 
                 // remove DB entry
                 const updated = await GuildSchema.updateOne(
