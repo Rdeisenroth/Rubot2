@@ -68,12 +68,21 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                 // TODO: Error Handling
 
+                var bitrates = [
+                    96000,   // Unboosted
+                    128000,  // Boost Level 1
+                    256000,  // Boost Level 2
+                    384000   // Boost Level 3
+                ]
+
+
                 // Create new Voice Channel
                 const createdVC = await guild.channels.create(name, {
                     type: 'voice',
                     permissionOverwrites: permoverrides,
                     parent: spawner.parent,
-                    userLimit: spawner.max_users
+                    userLimit: spawner.max_users,
+                    bitrate: bitrates[guild.premiumTier]
                 });
 
                 // Move Member
