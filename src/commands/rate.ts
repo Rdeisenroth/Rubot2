@@ -1,7 +1,10 @@
+import { MessageEmbed } from "discord.js";
+import { Command, RunCommand } from "../../typings";
+
 /**
- * @type {import ("../../typings").Command}
+ * The Command Definition
  */
-module.exports = {
+const command: Command = {
     name: 'rate',
     aliases: ['judge', 'evaluate', 'r8'],
     usage: '<anything to rate>',
@@ -15,7 +18,7 @@ module.exports = {
          * The Possible Answers that get returned with weights to the Categories
          * @type {[String[],Number]}
          */
-        var Answers = [['normal', 98], ['insanely good', 1], ['insanely bad', 1]];
+        var Answers: [string, number][] = [['normal', 98], ['insanely good', 1], ['insanely bad', 1]];
         var shuffeled1 = client.utils.general.shuffleArraywithWeights(Answers);
         let chosennumber;
         switch (shuffeled1) {
@@ -45,6 +48,11 @@ module.exports = {
                 break;
         }
         // await message.reply(`I rate \`${chosennumber}/10\``);
-        await client.utils.embeds.MessageEmbed(message, `__Rating System__`, `I rate \`${chosennumber}/10\`${customtext}`);
+        await client.utils.embeds.SimpleEmbed(message!, `__Rating System__`, `I rate \`${chosennumber}/10\`${customtext}`);
     },
 };
+
+/**
+ * Exporting the Command using CommonJS
+ */
+module.exports = command;

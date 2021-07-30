@@ -1,4 +1,4 @@
-import { Client, ClientEvents, Message } from "discord.js";
+import { Client, ClientEvents, Collection, Message } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 
@@ -81,8 +81,34 @@ export interface ExecuteEvent<K extends keyof ClientEvents> {
     (client: Bot, ...args: ClientEvents[K]): Promise<boolean>
 }
 
+/**
+ * The Code that's being executed when the Command is run
+ */
 export interface RunCommand {
-    (client: Bot, message?: Message, args: string[]):Promise<any>;
+    (
+        /**
+         * the Bot Client Instance
+         */
+        client: Bot,
+        /**
+         * The Message that called for the command
+         */
+        message?: Message,
+        /**
+         * The Command Arguments
+         */
+        args: string[]): Promise<any>;
+}
+
+/**
+ * The Code that's being executed when the Command is initialized
+ */
+export interface InitCommand {
+    (
+        /**
+         * the Bot Client Instance
+         */
+        client: Bot): Promise<any>;
 }
 
 /**
@@ -126,7 +152,22 @@ export interface Command {
      */
     invisible?: boolean;
     /**
+     * A Function that Is executed before the Command is loaded
+     */
+    init?: InitCommand;
+    /**
      * Executes the Command
      */
     execute: RunCommand;
+}
+
+export interface SubcommandHandler extends Command {
+    /**
+     * A Collection of Subcommands, that is expected to be populated after init() was called
+     */
+    subcommands: Collection<string, Command>;
+    /**
+     * This Function populates the subcommands field and can do other init stuff
+     */
+    init: InitCommand;
 }

@@ -41,10 +41,17 @@ export class Bot extends Client {
         //iterate over all the commands to store them in a collection
         for (const file of commandFiles) {
             const command: Command = await import(`${__dirname}/commands/${file}`);
-            console.log(`-${JSON.stringify(command.name)} ($./commands/${file})`)
+            console.log(`-${JSON.stringify(command.name)} ($./commands/${file})`);
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
             this.commands.set(command.name, command);
+            // Let The initialisation Code completely run before continuing
+            if (command.init) {
+                let initPromise = command.init(this);
+                while (initPromise instanceof Promise) {
+                    initPromise = await initPromise;
+                }
+            }
         }
 
         // Event Files
@@ -61,7 +68,7 @@ export class Bot extends Client {
             config.mongodb_connection_url,
             { useNewUrlParser: true, useUnifiedTopology: true },
             (err) => {
-                if(err){
+                if (err) {
                     throw err;
                 } else {
                     this.logger.info('connected to DB!!');

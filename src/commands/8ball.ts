@@ -1,7 +1,10 @@
+import { MessageEmbed } from "discord.js";
+import { Command, RunCommand } from "../../typings";
+
 /**
- * @type {import ("../../typings").Command}
+ * The Command Definition
  */
-module.exports = {
+const command: Command = {
     name: '8ball',
     aliases: ['8b', 'answermyquestion', 'amq'],
     guildOnly: false,
@@ -13,7 +16,7 @@ module.exports = {
          * The Possible Answers that get returned with weights to the Categories
          * @type {[String[],Number]}
          */
-        var Answers = [[["It is certain.",
+        var Answers: [string[], number][] = [[["It is certain.",
             "As I see it, yes.",
             "It is decidedly so.",
             "Most likely.",
@@ -33,12 +36,17 @@ module.exports = {
             "Outlook not so good.",
             "Very doubtful."], 4]];
         var eightballemoji = await client.emojis.cache.get("668488605068558337");
-        var shuffleled1;
-        for (var i = 0; i < 1000; i++) {
-            shuffleled1 = client.utils.general.shuffleArraywithWeights(Answers);
-            //console.log(shuffleled1);
-            if (i == 1000) console.log(">:(")
-        }
-        await client.utils.embeds.MessageEmbed(message, `__8 Ball__`, `${eightballemoji} ${await client.utils.general.shuffleArray(shuffleled1)}`)
+        var shuffleled1:string[] = [];
+        // for (var i = 0; i < 1000; i++) {
+        //     shuffleled1 = client.utils.general.shuffleArraywithWeights(Answers);
+        //     //console.log(shuffleled1);
+        //     if (i == 1000) console.log(">:(")
+        // }
+        await client.utils.embeds.SimpleEmbed(message!, `__8 Ball__`, `${eightballemoji} ${await client.utils.general.shuffleArray(shuffleled1)}`);
     },
 };
+
+/**
+ * Exporting the Command using CommonJS
+ */
+module.exports = command;

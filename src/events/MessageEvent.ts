@@ -13,7 +13,7 @@ export const execute: ExecuteEvent<"message"> = async (client, message) => {
 
     if (message.content.toLowerCase() == `<@!${client.user!.id}> prefix`) {
         // message.reply(`The Bot Prefix is:\n\`${client.prefix}\``);
-        client.utils.embeds.MessageEmbed(message, `The Prefix for this Channel is:`, client.prefix, undefined, undefined, null);
+        client.utils.embeds.SimpleEmbed(message, `The Prefix for this Channel is:`, client.prefix);
     }
 
     // no need to continue if message does not start with a Prefix
