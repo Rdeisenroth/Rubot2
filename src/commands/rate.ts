@@ -19,7 +19,7 @@ const command: Command = {
          * @type {[String[],Number]}
          */
         var Answers: [string, number][] = [['normal', 98], ['insanely good', 1], ['insanely bad', 1]];
-        var shuffeled1 = client.utils.general.shuffleArraywithWeights(Answers);
+        var shuffeled1 = client.utils.general.getRandomEntryWithWeights(Answers);
         let chosennumber;
         switch (shuffeled1) {
             case "insanely good":

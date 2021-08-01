@@ -76,4 +76,8 @@ export class Bot extends Client {
             }
         );
     }
+
+    // public async createGuildCommand(data:any, guildId:string) {
+    //     return await this.api.appl
+    // }
 }

@@ -34,7 +34,9 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
         } else {
             client.logger.error(JSON.stringify(updated));
         }
-
+        // Post slash Commands
+        // TODO: Per Guild Slash Command Config
+        // let res = client.api
     }
 
     await client.user?.setPresence({ status: 'online', activity: { name: 'The name is Bot, Rubot.', type: "PLAYING" }, afk: false });

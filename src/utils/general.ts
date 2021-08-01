@@ -26,14 +26,24 @@ export const getRandomInt = (min: number, max: number) => {
  */
 export const countDigits = (number: number) => (Math.floor(number) === number) ? 0 : number.toString().split('.')[1].length;
 
-export const shuffleArray: <T>(array: T[]) => T = (array) => {
+/**
+ * Chooses Random Element off an Array
+ * @param array The Non-empty Array to choose a random Entry off
+ * @returns the Chosen Entry
+ */
+export const getRandomEntry: <T>(array: T[]) => T = (array) => {
     if (!isArraywithContent(array)) {
         throw new TypeError("The given Argument is not an array or is empty")
     }
     return array[getRandomInt(0, array.length - 1)];
 }
 
-export const shuffleArraywithWeights: <T>(array: [T, number][]) => T = (array) => {
+/**
+ * Chooses Random Element off an Array and considers weights
+ * @param array The Weighted Array (Entries are Arrays with The actual entry and a weight > 0)
+ * @returns The chosen Entry
+ */
+export const getRandomEntryWithWeights: <T>(array: [T, number][]) => T = (array) => {
     if (!isArraywithContent(array)) {
         throw new TypeError("The given Argument is not a weighted array or is empty");
     }
