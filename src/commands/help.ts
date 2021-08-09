@@ -1,4 +1,5 @@
-import { EmojiIdentifierResolvable, MessageEmbed } from "discord.js";
+import { EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
+import yargsParser from "yargs-parser";
 import { Command, RunCommand } from "../../typings";
 
 
@@ -8,16 +9,29 @@ const command: Command = {
     aliases: ['commands'],
     usage: '[command name]',
     cooldown: 5,
+    options: [{
+        description: 'Get Help of a Specific Command',
+        name: 'command',
+        type: "STRING",
+        required: false,
+        // choices: {}
+    }],
     category: "Miscellaneous",
-    execute: async (client, message, args) => {
+    execute: async (client, interaction, args) => {
         const commands = client.commands;
         const prefix = client.prefix;
-        const flags = client.parser(args, { alias: { "showall": ["showinvis", "showinvisible", "all", "a"] }, boolean: ["showall"], default: { showall: false } });
+        let flags: yargsParser.Arguments;
+        if (interaction instanceof Message) {
+            flags = client.parser(args, { alias: { "showall": ["showinvis", "showinvisible", "all", "a"] }, boolean: ["showall"], default: { showall: false } });
+        } else {
+            let commandArg = interaction?.options.getString("command", command.options![0].required);
+            flags = { "_": commandArg ? [commandArg] : [], $0: "help" }
+        }
         let owner = client.users.cache.find(m => m.id == client.ownerID);
         let embed = new MessageEmbed();
-        if (message!.guild) {
-            embed.setColor(message!.guild.me!.roles.highest.color || 0x7289da)
-            embed.setAuthor(`${message!.guild.me!.displayName} Help`, message!.guild.iconURL()!);
+        if (interaction!.guild) {
+            embed.setColor(interaction!.guild.me!.roles.highest.color || 0x7289da)
+            embed.setAuthor(`${interaction!.guild.me!.displayName} Help`, interaction!.guild.iconURL()!);
         } else {
             embed.setColor(0x7289da)
             embed.setAuthor(`${client.user!.username} Help`)
@@ -42,6 +56,9 @@ const command: Command = {
          * General Help
          */
         if (!flags._.length) {
+            if (interaction!.guild) {
+                embed.setDescription(`These are the available commands for ${interaction!.guild ? interaction!.guild.me!.displayName : client.user!.username}\n The bot prefix is: \`${prefix}\``);
+            }
             // Populate Command Categories (we do this every time because commands can change at runtime)
             var commandCount = 0;
             commands.forEach((command) => {
@@ -62,11 +79,6 @@ const command: Command = {
                     embed.addField(`❯ ${`${catName}`} [${cat.commands.length}]:`, cat.commands.map(x => `\`${x.name}\``).join(', '));
                 }
             }
-
-            if (message!.guild) {
-                embed.setDescription(`These are the available commands for ${message!.guild ? message!.guild.me!.displayName : client.user!.username}\n The bot prefix is: \`${prefix}\``);
-            }
-
             embed.setFooter(`${owner ? `© 2021 ${owner.tag} | ` : ""}Total Commands: ${commandCount}`, owner?.displayAvatarURL());
         }
         /**
@@ -75,13 +87,11 @@ const command: Command = {
         else if (flags._.length == 1) {
             const cmdName = flags._[0];
             const command = commands.get(cmdName) || commands.find(c => c.aliases! && c.aliases.includes(cmdName));
-            if (owner) {
-                embed.setFooter(`© 2021 ${owner.tag}`, owner.displayAvatarURL());
-            }
             if (!command) {
-                await client.utils.errors.errorMessage(message!, `"${cmdName}"is not a valid command, ${message!.author}!\nUse \`${prefix + name}\` to get a list of available Commands.`);
+                await client.utils.errors.errorMessage(interaction!, `"${cmdName}"is not a valid command, ${client.utils.general.getUser(interaction)}!\nUse \`${prefix + name}\` to get a list of available Commands.`);
                 return;
             }
+            // textContent += `\nThe bot prefix is: \`${prefix}\``;
             embed.setDescription(`The bot prefix is: \`${prefix}\``);
             var commandtext = `• **Name:** ${command.name}`;
             if (command.category) commandtext += `\n• **Category:** ${command.category}`
@@ -90,11 +100,14 @@ const command: Command = {
             if (command.usage) commandtext += `\n• **Usage:** ${prefix}${command.name} ${command.usage}`
             if (command.cooldown) commandtext += `\n• **Cooldown:** ${command.cooldown || 0} second(s)`
             embed.addField(`❯ ${command.name}-help:`, commandtext);
+            if (owner) {
+                embed.setFooter(`© 2021 ${owner.tag}`, owner.displayAvatarURL());
+            }
         } else {
-            await client.utils.errors.errorMessage(message!, `Invalid argument Count: ${flags._.length}. Please do not put any arguments after the command name...`);
+            await client.utils.errors.errorMessage(interaction!, `Invalid argument Count: ${flags._.length}. Please do not put any arguments after the command name...`);
             return;
         }
-        await message!.channel.send({ embeds: [embed] });
+        await interaction!.reply({ embeds: [embed] });
     }
 }
 

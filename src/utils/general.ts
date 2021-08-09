@@ -1,3 +1,5 @@
+import ChannelType, { Interaction, Message } from "discord.js";
+
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
  *
@@ -58,4 +60,44 @@ export const getRandomEntryWithWeights: <T>(array: [T, number][]) => T = (array)
         }
     }
     return array[0][0];
+}
+
+
+/**
+ * Creates a clean User object from an Interaction
+ * @param interaction  the Interaction to get the User from
+ * @returns the User or null
+ */
+export const getUser = (interaction: Message | Interaction | undefined) => {
+    // Check if user is in VC
+    if (!interaction) {
+        return null;
+    }
+    if (interaction instanceof Message) {
+        return interaction.author;
+    } else if (interaction instanceof Interaction) {
+        return interaction.user;
+    }
+    return null;
+}
+/**
+ * Creates a clean Member object from an Interaction
+ * @param interaction  the Interaction to get the Member from
+ * @returns the Member or null
+ */
+export const getMember = (interaction: Message | Interaction | undefined) => {
+    // Check if user is in VC
+    if (!interaction || !interaction.guild) {
+        return null;
+    }
+    if (interaction instanceof Message) {
+        return interaction.member;
+    } else if (interaction instanceof Interaction) {
+        let memberId = interaction.user.id;
+        let member = interaction.guild.members.cache.find(x => x.id === memberId);
+        if (member) {
+            return member;
+        }
+    }
+    return null;
 }

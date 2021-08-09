@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { Interaction, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 
 /**
@@ -12,8 +12,13 @@ const command: Command = {
     guildOnly: false,
     description: 'Judges your stupid stuff as x/10 (11/10 is possible)',
     category: "Fun",
-    async execute(client, message, args) {
-
+    options: [{
+        name: 'query',
+        description: 'The Thing to Rate',
+        type: "STRING",
+        required: false,
+    }],
+    async execute(client, interaction, args) {
         /**
          * The Possible Answers that get returned with weights to the Categories
          * @type {[String[],Number]}
@@ -33,10 +38,11 @@ const command: Command = {
                 break;
         }
         var customtext = "";
+        let query = (interaction instanceof Interaction) ? interaction.options.getString("query", false) : args.join(" ");
         /**
          * some rng manipulation ;)
          */
-        switch (args.join(" ")) {
+        switch (query) {
             case "apple":
             case "Apple":
                 chosennumber = 0;
@@ -48,7 +54,7 @@ const command: Command = {
                 break;
         }
         // await message.reply(`I rate \`${chosennumber}/10\``);
-        await client.utils.embeds.SimpleEmbed(message!, `__Rating System__`, `I rate \`${chosennumber}/10\`${customtext}`);
+        await client.utils.embeds.SimpleEmbed(interaction!, `__Rating System__`, `${interaction instanceof Interaction && query ? "> " + query + "\n" : ""}I rate \`${chosennumber}/10\`${customtext}`);
     },
 };
 

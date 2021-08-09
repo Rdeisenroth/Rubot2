@@ -1,4 +1,4 @@
-import { Client, ClientEvents, Collection, Message } from "discord.js";
+import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, Interaction, Message } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 
@@ -93,7 +93,7 @@ export interface RunCommand {
         /**
          * The Message that called for the command
          */
-        message?: Message,
+        interaction?: Message | CommandInteraction,
         /**
          * The Command Arguments
          */
@@ -126,7 +126,7 @@ export interface Command {
     /**
      * the Command Description
      */
-    description?: string;
+    description: string;
     /**
      * the Command Cooldown in ms
      */
@@ -135,6 +135,10 @@ export interface Command {
      * Whether the Command requires at least one Argument
      */
     args?: boolean;
+    /**
+     * Data to parse for slash Commands
+     */
+    options?: ApplicationCommandOptionData[],
     /**
      * The Paramers after command name surrounded with <>
      */

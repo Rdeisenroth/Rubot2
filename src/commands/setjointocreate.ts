@@ -12,18 +12,20 @@ const command: Command = {
     cooldown: 5,
     category: "Miscellaneous",
     guildOnly: true,
-    execute: async (client, message, args) => {
+    execute: async (client, interaction, args) => {
         let owner = client.users.cache.find(m => m.id == client.ownerID);
-        if (message?.author.id !== client.ownerID as String) {
-            return await message?.reply(`You do not have permission to execute this command.`);
+        let member = client.utils.general.getMember(interaction);
+        if (!member || member.id !== client.ownerID as String) {
+            await interaction?.reply(`You do not have permission to execute this command.`);
+            return;
         }
 
-        const g = message.guild!;
+        const g = interaction!.guild!;
 
         // Find channel
         const channel = g!.channels.cache.find(x => x.id == args[0]);
         if (!channel) {
-            return await message?.reply(`Channel could not be found.`);
+            return await interaction?.reply(`Channel could not be found.`);
         }
 
         const updated = await GuildSchema.updateOne(
@@ -33,7 +35,7 @@ const command: Command = {
                     "voice_channels": {
                         _id: channel.id,
                         channel_type: 2,
-                        owner: message.author.id,
+                        owner: member.id,
                         locked: false,
                         managed: true,
                         // blacklist_user_groups: [],
@@ -41,9 +43,9 @@ const command: Command = {
                         permitted: [],
                         afkhell: false,
                         spawner: {
-                            owner: message.author.id,
+                            owner: member.id,
                             supervisor_roles: [],
-                            permission_overwrites: [{ id: message.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
+                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
                             max_users: 5,
                             parent: channel.parentId,
                         },
@@ -53,7 +55,7 @@ const command: Command = {
             { upsert: true, setDefaultsOnInsert: true },
         );
         console.log(updated);
-        message.reply("Done.")
+        interaction!.reply({ content: "Done." })
         // message.guild?.channels.create("", {})
     }
 }

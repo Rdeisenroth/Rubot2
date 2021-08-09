@@ -53,6 +53,7 @@ test('start() Command Handling', async () => {
     // Create Mock Command
     const mockCommand1: Command = {
         name: "test1",
+        description: "",
         execute: async (client, message, args) => {
             return "i got executed."
         }

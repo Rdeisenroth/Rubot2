@@ -1,51 +1,49 @@
-import { ColorResolvable, Guild, GuildResolvable, Message, MessageEmbed, UserResolvable } from "discord.js";
-
+import { ColorResolvable, CommandInteraction, Guild, GuildResolvable, Interaction, Message, MessageEmbed, UserResolvable } from "discord.js";
+import { APIMessage } from 'discord-api-types/v9';
 import * as utils from './utils';
 
 /**
  *Creates a message Embed and sends it in the Channel of the given Message
  *
- * @param {import ("discord.js").Message} message the message object to respond to
- * @param {String} title the title of the embed
- * @param {String} text The text for the Description of the embed
- * @param {Number} [style] The Style of the Embed
- * @param {Number} [deleteinterval] Automatically delete message after x seconds
- * @returns {Promise<import ("discord.js").MessageEmbed>} embedObject
+ * @param interaction the message object to respond to
+ * @param title the title of the embed
+ * @param text The text for the Description of the embed
+ * @param style The Style of the Embed
+ * @param deleteinterval Automatically delete message after x seconds
+ * @returns embedObject
  */
-export const SimpleEmbed = async (message: Message, title: string, text?: string, style?: number, deleteinterval?: number, fields?: string[]) => {//TODO Constructor for no repetitive embed creating
-    return new Promise((resolve, reject) => {
-        try {
-            let embed = new MessageEmbed();
-            if (message && message.guild && message.guild.me) {
-                embed.setColor(message.guild.me.roles.highest.color);
-            } else {
-                embed.setColor(0x7289da)
-            }
+export const SimpleEmbed = async (interaction: Message | CommandInteraction, title: string, text?: string, style?: number, deleteinterval?: number, fields?: string[]) => {//TODO Constructor for no repetitive embed creating
+    if (!interaction.channel) {
+        throw new Error("Embed Requires a Channel");
+    }
+    let embed = new MessageEmbed();
+    if (interaction && interaction.guild && interaction.guild.me) {
+        embed.setColor(interaction.guild.me.roles.highest.color);
+    } else {
+        embed.setColor(0x7289da)
+    }
 
-            //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
-            embed.setTitle(title);
-            embed.setDescription(`${text}`);
-            if (fields && utils.general.isArraywithContent(fields) && fields.length % 2 !== 0) {
-                for (let i = 0; i < fields.length - 2; i += 2) {
-                    try {
-                        embed.addField(fields[i], fields[i + 1])
-                    } catch (err) {
-                        return reject(err)
-                    }
-
-                }
-            } else {
-                //return reject('Invalid Fields Array')
-            }
-            if (deleteinterval) {
-                resolve(message.channel.send({ embeds: [embed] }).then(m => setTimeout(() => message.delete(), deleteinterval)));
-            } else {
-                resolve(message.channel.send({ embeds: [embed] }));
-            }
-        } catch (err) {
-            reject(err)
+    //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
+    embed.setTitle(title);
+    embed.setDescription(`${text}`);
+    if (fields && utils.general.isArraywithContent(fields) && fields.length % 2 !== 0) {
+        for (let i = 0; i < fields.length - 2; i += 2) {
+            embed.addField(fields[i], fields[i + 1])
         }
-    })
+    } else {
+        //return reject('Invalid Fields Array')
+    }
+    let res = await interaction.reply({ embeds: [embed] });
+    let m: Message | APIMessage | null = null;
+    if (res instanceof Message) {
+        m = res;
+    } else if (interaction instanceof CommandInteraction) {
+        m = await interaction.fetchReply();
+    }
+    if (deleteinterval) {
+        setTimeout(() => m instanceof Message ? m.delete() : (interaction as CommandInteraction).deleteReply(), deleteinterval);
+    }
+    return m;
 }
 
 /**

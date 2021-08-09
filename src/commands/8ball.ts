@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { Interaction, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 
 /**
@@ -10,7 +10,13 @@ const command: Command = {
     guildOnly: false,
     description: 'Gives a random Answer to your stupid questions',
     category: "Fun",
-    async execute(client, message, args) {
+    options: [{
+        name: "query",
+        description: "The Query String",
+        type: "STRING",
+        required: false,
+    }],
+    async execute(client, interaction, args) {
 
         /**
          * The Possible Answers that get returned with weights to the Categories
@@ -44,7 +50,8 @@ const command: Command = {
             "No. No, Absolutely not."], 4]];
         var eightballemoji = await client.emojis.cache.get("668488605068558337");
         var answerDirection = client.utils.general.getRandomEntryWithWeights(Answers);
-        await client.utils.embeds.SimpleEmbed(message!, `__8 Ball__`, `${eightballemoji} ${await client.utils.general.getRandomEntry(answerDirection)}`);
+        let query = (interaction instanceof Interaction) ? interaction.options.getString("query", false) : args.join(" ");
+        await client.utils.embeds.SimpleEmbed(interaction!, `__8 Ball__`, `${interaction instanceof Interaction && query ? "> " + query + "\n" : ""}${eightballemoji} ${await client.utils.general.getRandomEntry(answerDirection)}`);
     },
 };
 

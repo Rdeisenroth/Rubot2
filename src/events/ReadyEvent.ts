@@ -1,10 +1,29 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents } from "discord.js";
+import { ApplicationCommandData, ApplicationCommandOptionChoice, Client, ClientEvents } from "discord.js";
 import * as colors from "colors";
 import GuildSchema, { Guild } from "../models/guilds";
 
 export const execute: ExecuteEvent<"ready"> = async (client) => {
     // -- Setup Databases -- //
+
+    // Global Slash Commands
+    const data: ApplicationCommandData[] = [];
+
+    // for(const c of [...client.commands.values()]){
+    //     if(!c.guildOnly){
+    //         data.push({
+    //             name: c.name,
+    //             description: c.description,
+    //         })
+    //     }
+    // }
+    // data.push({
+    //     name: 'lel',
+    //     description: 'kek',
+    // });
+
+    // const command = await client.application?.commands.set(data);
+    // console.log(command);
 
     // Guilds
     client.logger.info(`Processing Guilds`);
@@ -36,7 +55,25 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
         }
         // Post slash Commands
         // TODO: Per Guild Slash Command Config
-        // let res = client.api
+        const data: ApplicationCommandData[] = [];
+
+        for (const c of [...client.commands.values()]) {
+            let commandData: ApplicationCommandData = {
+                name: c.name,
+                description: c.description,
+                options: c.options,
+            }
+            // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
+            if(c.name==="help"){
+                let cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val,key) => {
+                    return {name: key, value:key}
+                });
+                commandData.options![0].choices = cmdChoices;
+            }
+            data.push(commandData)
+        }
+        const command = await g.commands.set(data);
+        console.log(command)
     }
 
     await client.user?.setPresence({ status: 'online', activities: [{ name: 'The name is Bot, Rubot.', type: "PLAYING" }], afk: false });
