@@ -20,7 +20,23 @@ export class Bot extends Client {
     public database = mongoose;
     public readonly initTimestamp = Date.now();
     public constructor() {
-        super();
+        super({
+            intents: [
+                "DIRECT_MESSAGES",
+                "DIRECT_MESSAGE_REACTIONS",
+                "DIRECT_MESSAGE_TYPING",
+                "GUILDS",
+                "GUILD_BANS",
+                "GUILD_EMOJIS_AND_STICKERS",
+                "GUILD_INTEGRATIONS",
+                "GUILD_INVITES",
+                "GUILD_MEMBERS",
+                "GUILD_MESSAGES",
+                "GUILD_MESSAGE_REACTIONS",
+                "GUILD_MESSAGE_TYPING",
+                // "GUILD_PRESENCES",
+                "GUILD_VOICE_STATES"],
+        });
     }
 
     /**

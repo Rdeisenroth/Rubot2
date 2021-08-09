@@ -6,9 +6,9 @@ export const errorMessage = async (message: Message, error: string | Error, dele
     embed.setColor(message.guild?.me?.roles.highest.color ? message.guild.me.roles.highest.color || 0x7289da : 0x7289da);
     embed.setTitle(`:x: __An Error Occured:__`)
     embed.setDescription((error instanceof Error) ? `${error.message}` : `${error}`);
-    const sentMsg: Message = await message.channel.send(embed);
+    const sentMsg: Message = await message.channel.send({ embeds: [embed]});
     if (deleteinterval) {
-        sentMsg.delete({ timeout: deleteinterval });
+        setTimeout(() => message.delete(), deleteinterval);
     }
     return sentMsg;
 }

@@ -38,9 +38,9 @@ export const SimpleEmbed = async (message: Message, title: string, text?: string
                 //return reject('Invalid Fields Array')
             }
             if (deleteinterval) {
-                resolve(message.channel.send(embed).then(m => m.delete({ timeout: deleteinterval })));
+                resolve(message.channel.send({ embeds: [embed] }).then(m => setTimeout(() => message.delete(), deleteinterval)));
             } else {
-                resolve(message.channel.send(embed));
+                resolve(message.channel.send({ embeds: [embed] }));
             }
         } catch (err) {
             reject(err)

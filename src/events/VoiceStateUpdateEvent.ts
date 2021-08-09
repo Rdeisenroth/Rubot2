@@ -1,5 +1,5 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection, OverwriteData } from "discord.js";
+import { Client, ClientEvents, Collection, OverwriteData, PremiumTier } from "discord.js";
 import GuildSchema, { Guild } from "../models/guilds";
 import VoiceChannelSchema, { VoiceChannel } from "../models/voice_channels";
 import { spawn } from "child_process";
@@ -16,7 +16,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = guildData!.voice_channels.find(x => x._id == newState.channelID!);
+        const channelData = guildData!.voice_channels.find(x => x._id == newState.channelId!);
         if (channelData) {
 
             // Check if Channel is Spawner
@@ -68,21 +68,22 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                 // TODO: Error Handling
 
-                var bitrates = [
-                    96000,   // Unboosted
-                    128000,  // Boost Level 1
-                    256000,  // Boost Level 2
-                    384000   // Boost Level 3
-                ]
+
+                var bitrates: { [name in PremiumTier]: number } = {
+                    "NONE": 96000,     // Unboosted
+                    "TIER_1": 128000,  // Boost Level 1
+                    "TIER_2": 256000,  // Boost Level 2
+                    "TIER_3": 384000   // Boost Level 3
+                }
 
 
                 // Create new Voice Channel
                 const createdVC = await guild.channels.create(name, {
-                    type: 'voice',
+                    type: 'GUILD_VOICE',
                     permissionOverwrites: permoverrides,
                     parent: spawner.parent,
                     userLimit: spawner.max_users,
-                    bitrate: bitrates[guild.premiumTier]
+                    bitrate: bitrates[guild.premiumTier],
                 });
 
                 // Move Member
@@ -126,7 +127,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = guildData!.voice_channels.find(x => x._id == oldState.channelID!);
+        const channelData = guildData!.voice_channels.find(x => x._id == oldState.channelId!);
 
         if (channelData) {
             if (channelData.temporary && oldUserChannel.members.size == 0) {
@@ -162,5 +163,5 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
         }
     }
 
-    return true;
+    return;
 }

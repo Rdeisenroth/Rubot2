@@ -1,7 +1,7 @@
 import { EmojiIdentifierResolvable, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 
- 
+
 const command: Command = {
     name: 'help',
     description: 'List all of my commands or info about a specific command.',
@@ -94,7 +94,7 @@ const command: Command = {
             await client.utils.errors.errorMessage(message!, `Invalid argument Count: ${flags._.length}. Please do not put any arguments after the command name...`);
             return;
         }
-        await message!.channel.send(embed);
+        await message!.channel.send({ embeds: [embed] });
     }
 }
 

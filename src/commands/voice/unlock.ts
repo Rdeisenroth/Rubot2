@@ -49,12 +49,12 @@ const command: Command = {
         await guildData!.save();
 
         // Change permissions for everyone
-        var overwrites: OverwriteData[] = channel.permissionOverwrites.array();
+        var overwrites: OverwriteData[] = [...channel.permissionOverwrites.cache.values()];
         overwrites.push({
             id: g.roles.everyone.id,
             allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'],
         })
-        await channel.overwritePermissions(overwrites);
+        await channel.permissionOverwrites.set(overwrites);
 
         // // change channel name
         // var newName = cName;

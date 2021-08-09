@@ -37,7 +37,7 @@ beforeEach(() => {
         "mysqluser": "root",
         "mysqlpassword": "a Super secure Passwort",
         "main_schema_name": "botdb",
-        "mongodb_connection_url": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>"
+        "mongodb_connection_url": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>",
     };
 })
 
@@ -78,7 +78,7 @@ test('start() Event Handling', async () => {
     // Create every possible event
     let mockEvent1: BotEvent<"ready"> = {
         name: "ready",
-        execute: async (client) => { return true }
+        execute: async (client) => {}
     }
     // Mock the mockEvent
     jest.mock(`${process.cwd()}/events/ready.ts`, () => {

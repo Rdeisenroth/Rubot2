@@ -1,9 +1,10 @@
+import { ChannelTypes } from "discord.js/typings/enums";
 import mongoose from "mongoose";
 
 const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelModel>({
     channel_type: {
         type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7],
+        enum: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13],
         required: true
     },
     // whitelist_user_groups: [{
@@ -43,7 +44,7 @@ export interface Channel {
     /**
      * The Channel Type
      */
-    channel_type: ChannelType,
+    channel_type: ChannelTypes,
     // whitelist_user_groups: string[],
     // blacklist_user_groups: string[],
     /**

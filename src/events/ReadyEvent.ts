@@ -8,7 +8,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
 
     // Guilds
     client.logger.info(`Processing Guilds`);
-    for (const g of client.guilds.cache.array()) {
+    for (const g of [...client.guilds.cache.values()]) {
         console.log(`Processing guild "${g.name}" (${g.id})`);
         // if (!(await GuildSchema.findOne({ _id: g.id }))){
 
@@ -39,7 +39,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
         // let res = client.api
     }
 
-    await client.user?.setPresence({ status: 'online', activity: { name: 'The name is Bot, Rubot.', type: "PLAYING" }, afk: false });
+    await client.user?.setPresence({ status: 'online', activities: [{ name: 'The name is Bot, Rubot.', type: "PLAYING" }], afk: false });
     // Bot is ready
     client.logger.ready({
         message: `"${client.user?.username}" is Ready! (${(Date.now() - client.initTimestamp) / 1000}s)`,
@@ -51,7 +51,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
     console.log(`${client.channels.cache.size} channel(s)`);
     console.log(`${client.guilds.cache.size} guild(s)`);
     console.log("=".repeat(26));
-    return true;
+    return;
 }
 
 export const name = "ready";

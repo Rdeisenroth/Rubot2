@@ -21,7 +21,7 @@ const command: Command = {
             .addField('Bot Latency:', ':hourglass_flowing_sand:' + ping + 'ms', true)
             .addField('API Latency:', ':hourglass_flowing_sand:' + Math.round(client.ws.ping) + 'ms', true)
         await m.edit('Pong.');
-        message!.channel.send(embed);
+        message!.channel.send({ embeds: [embed] });
     }
 }
 

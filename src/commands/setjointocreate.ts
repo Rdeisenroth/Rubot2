@@ -45,7 +45,7 @@ const command: Command = {
                             supervisor_roles: [],
                             permission_overwrites: [{ id: message.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
                             max_users: 5,
-                            parent: channel.parentID,
+                            parent: channel.parentId,
                         },
                     } as VoiceChannel
                 }

@@ -58,12 +58,12 @@ const command: Command = {
         await guildData!.save();
 
         // Change permissions for everyone
-        var overwrites: OverwriteData[] = channel.permissionOverwrites.array();
+        var overwrites: OverwriteData[] = [...channel.permissionOverwrites.cache.values()];
         overwrites.push({
             id: g.roles.everyone.id,
             deny: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'],
         })
-        await channel.overwritePermissions(overwrites);
+        await channel.permissionOverwrites.set(overwrites);
 
         await client.utils.embeds.SimpleEmbed(message!, `Temporary Voice Channel System`, `Your Channel was **locked**.`);
     }
