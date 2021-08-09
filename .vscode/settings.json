@@ -22,15 +22,6 @@
                         "pattern": "^\\d{18}$",
                         "description": "the Bot owner Client ID"
                     },
-                    // "owners": {
-                    //     "type": "array",
-                    //     "items": {
-                    //         "type": "string",
-                    //         "pattern": "^\\d{18}$",
-                    //     },
-                    //     "minItems": 1,
-                    //     "description": "the Bot owner Client IDs"
-                    // },
                     "version": {
                         "type": "string",
                         "description": "the Bot Version"
@@ -55,28 +46,13 @@
                         "type": "string",
                         "description": "the Google Maps API Key"
                     },
-                    "mysqlhost": {
-                        "type": "string",
-                        "description": "the Mysql Host"
-                    },
-                    "mysqluser": {
-                        "type": "string",
-                        "description": "the Mysql User"
-                    },
-                    "mysqlpassword": {
-                        "type": "string",
-                        "description": "the Mysql Password"
-                    },
-                    "main_schema_name": {
-                        "type": "string",
-                        "description": "the Name of the Main MySQL Database / Schema of the Bot"
-                    },
                     "mongodb_connection_url": {
                         "type": "string",
-                        "description": "the Mongo DB Connection URL"
+                        "description": "the Mongo DB Connection URL",
+                        "default": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>"
                     },
                 },
-                "required": ["prefix","token","owner_id","version","mysqlhost","mysqlpassword","main_schema_name"]
+                "required": ["prefix","token","owner_id","version","mongodb_connection_url"]
             }
         }
     ],
