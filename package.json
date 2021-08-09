@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "rm -rf dist/; tsc --build tsconfig.json; node dist/index.js",
+    "build": "rm -rf dist/; tsc --build tsconfig.json",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest --detectOpenHandles"
   },
