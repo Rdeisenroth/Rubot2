@@ -1,6 +1,7 @@
 // import mongoose from 'mongoose';
 import mongoose from "mongoose";
 import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
+import QueueSchema, { Queue, QueueDocument } from "./queues";
 import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_channels";
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 
@@ -47,6 +48,11 @@ const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel>({
         required: true,
         default: [],
     }],
+    queues: [{
+        type: QueueSchema,
+        required: true,
+        default: [],
+    }]
 });
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
@@ -59,13 +65,15 @@ export interface Guild {
     guild_settings: GuildSettings,
     text_channels: TextChannel[],
     voice_channels: VoiceChannel[],
+    queues: Queue[],
 }
 
 export interface GuildDocument extends Guild, mongoose.Document {
     // List getters or non model methods here
     text_channels: TextChannelDocument[],
-    voice_channels: VoiceChannelDocument[],
+    voice_channels: VoiceChannel[],
     guild_settings: GuildSettingsDocument,
+    // queues: QueueDocument[],
 }
 
 export interface GuildModel extends mongoose.Model<GuildDocument> {

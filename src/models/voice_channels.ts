@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { Channel } from "./text_channels";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner } from "./voice_channel_spawner";
 
@@ -61,6 +61,13 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         type: VoiceChannelSpawnerSchema,
         required: false,
     },
+    /**
+     * A Queue that is entered with joining this Channel
+     */
+    queue: {
+        type: mongoose.Types.ObjectId,
+        required: false,
+    },
     temporary: {
         type: Boolean,
         required: false,
@@ -94,6 +101,10 @@ export interface VoiceChannel extends Channel {
      * Makes the Channel a spawner Channel which creates a new channel for every joined member
      */
     spawner?: VoiceChannelSpawner,
+    /**
+     * A Queue that is entered with joining this Channel
+     */
+    queue?: mongoose.Types.ObjectId,
     /**
      * If the VC is a Temporary Voice Channel
      */

@@ -1,8 +1,9 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection, OverwriteData, PremiumTier } from "discord.js";
+import { Client, ClientEvents, Collection, MessageEmbed, OverwriteData, PremiumTier } from "discord.js";
 import GuildSchema, { Guild } from "../models/guilds";
-import VoiceChannelSchema, { VoiceChannel } from "../models/voice_channels";
+import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
 import { spawn } from "child_process";
+import { QueueDocument } from "../models/queues";
 export const name = "voiceStateUpdate";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
@@ -16,7 +17,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = guildData!.voice_channels.find(x => x._id == newState.channelId!);
+        const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == newState.channelId!);
         if (channelData) {
 
             // Check if Channel is Spawner
@@ -117,6 +118,36 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 );
                 // console.log(updated);
                 console.log(`Created TEMP VC: ${shortname} on ${guild.name}`);
+            }else if(channelData.queue){
+                const queueId = channelData.queue;
+                const queue = (guildData?.queues as QueueDocument[]).find(x => x._id == queueId.toHexString());
+                if (!queue){
+                    client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
+                    return;
+                }
+                if (queue.join_message) {
+                    let join_message = queue.join_message;
+                    // Interpolate String
+                    for (const [key, value] of Object.entries(
+                        {
+                            "limit": queue.limit,
+                            "member_id": newState.member!.id,
+                            "user": newState.member!.user,
+                            "name": queue.name,
+                            "description": queue.description,
+                            "eta": "null",
+                            "pos": "null",
+                            "total": "null",
+                        }
+                    )) {
+                        join_message = join_message.replace(`\${${key}}`, value as string);
+                    }
+                    try {
+                        await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: join_message, color: guild.me?.roles.highest.color || 0x7289da})]});
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
             }
         }
 
@@ -127,7 +158,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = guildData!.voice_channels.find(x => x._id == oldState.channelId!);
+        const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == oldState.channelId!);
 
         if (channelData) {
             if (channelData.temporary && oldUserChannel.members.size == 0) {

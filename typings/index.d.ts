@@ -99,6 +99,24 @@ export interface RunCommand {
          */
         args: string[]): Promise<any>;
 }
+/**
+ * The Code that's being executed when the Command is run
+ */
+export interface RunSlashCommand {
+    (
+        /**
+         * the Bot Client Instance
+         */
+        client: Bot,
+        /**
+         * The Message that called for the command
+         */
+        interaction: CommandInteraction,
+        /**
+         * The Command Arguments
+         */
+        args: string[]): Promise<any>;
+}
 
 /**
  * The Code that's being executed when the Command is initialized
@@ -163,6 +181,10 @@ export interface Command {
      * Executes the Command
      */
     execute: RunCommand;
+}
+
+export interface SlashOnlyCommand extends Command {
+    execute: RunSlashCommand;
 }
 
 export interface SubcommandHandler extends Command {
