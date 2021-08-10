@@ -15,6 +15,7 @@ export class Bot extends Client {
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
     public ownerID?: string;
     public prefix: string = "!";
+    public version: string = "0.0";
     public utils = utils;
     public parser = parser;
     public database = mongoose;
@@ -48,6 +49,7 @@ export class Bot extends Client {
         // Read config
         this.ownerID = config.ownerID;
         this.prefix = config.prefix;
+        this.version = config.version;
         this.login(config.token).catch((e) => this.logger.error(e));
 
         // Commands

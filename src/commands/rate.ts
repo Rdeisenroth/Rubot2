@@ -8,7 +8,7 @@ const command: Command = {
     name: 'rate',
     aliases: ['judge', 'evaluate', 'r8'],
     usage: '<anything to rate>',
-    invisible: true,
+    invisible: false,
     guildOnly: false,
     description: 'Judges your stupid stuff as x/10 (11/10 is possible)',
     category: "Fun",

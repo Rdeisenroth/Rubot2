@@ -1,7 +1,5 @@
 {
     "compilerOptions": {
-        // "module": "commonjs",
-        // "target": "es2016",
         "target": "ES2019",
         "module": "commonjs",
         // "moduleResolution": "node",
