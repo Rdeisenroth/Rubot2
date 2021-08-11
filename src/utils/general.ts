@@ -1,4 +1,6 @@
 import ChannelType, { Interaction, Message } from "discord.js";
+import moment from "moment";
+import { StringReplacements } from "../../typings";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -100,4 +102,26 @@ export const getMember = (interaction: Message | Interaction | undefined) => {
         }
     }
     return null;
+}
+
+/**
+ * Replaces placeholders in a String with dynamic values
+ * 
+ * Default variables:
+ * 
+ *     'now':       System Time
+ *     'mem_usage': Memory Usage
+ * @param str The String to interpolate
+ * @param replacements Additional Replace values, you can also overwrite the default ones by using the same name.
+ */
+export const interpolateString = (str: string, replacements?: StringReplacements) => {
+    // Interpolate String
+    let default_replacements: StringReplacements = {
+        "now": moment().format(`DD.MMMM YYYY hh:mm:ss`),
+        "mem_usage": `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
+    }
+    for (const [key, value] of Object.entries({ ...default_replacements, ...replacements })) {
+        str = str.replace(`\${${key}}`, value as string);
+    }
+    return str;
 }

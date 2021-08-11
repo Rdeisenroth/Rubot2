@@ -197,3 +197,19 @@ export interface SubcommandHandler extends Command {
      */
     init: InitCommand;
 }
+
+/**
+ * Replacements for String Interpolation
+ */
+export type StringReplacements = {
+    [
+    /**
+     * The value that will be replaced (use ${<value>} in the string)
+     */
+    key: string
+    ]:
+    /**
+     * the replacenemt Value
+     */
+    any
+}

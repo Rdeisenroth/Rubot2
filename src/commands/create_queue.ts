@@ -54,6 +54,7 @@ const command: Command = {
             join_message: "You joined the ${name} queue.\n Your Position: ${pos}/${total}. ETA: ${eta}",
             match_found_message: "You have found a Match with ${match}. Please Join ${match_channel} if you are not moved automatically. If you don't join in ${timeout} seconds, your position in the queue is dropped.",
             timeout_message: "Your queue Timed out after ${timeout} seconds.",
+            leave_message: "You Left the ${name} queue.\nTotal Time Spent: ${time_spent}",
             entries: [],
         }
         guildData.queues.push(queue);

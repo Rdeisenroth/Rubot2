@@ -63,6 +63,13 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel>({
         required: false,
     },
     /**
+     *  A Custom Leave Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
+     */
+    leave_message: {
+        type: String,
+        required: false,
+    },
+    /**
      * The Entries of the Queue
      */
     entries: [{
@@ -110,6 +117,10 @@ export interface Queue {
      */
     timeout_message?: string,
     /**
+     *  A Custom Leave Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
+     */
+    leave_message?: string,
+    /**
      * The Entries of the Queue
      */
     entries: QueueEntry[],
@@ -120,6 +131,16 @@ QueueSchema.method('join', async function (entry: QueueEntry) {
         throw new Error('Dublicate Entry');
     }
     this.entries.push(entry);
+    await this.$parent()?.save();
+    return entry;
+});
+
+QueueSchema.method('leave', async function (discord_id: string) {
+    let entry = this.entries.find(x => x.discord_id === discord_id);
+    if (!entry) {
+        throw new Error('Not Found');
+    }
+    this.entries.splice(this.entries.indexOf(entry),1);
     await this.$parent()?.save();
     return entry;
 });
@@ -163,6 +184,11 @@ export interface QueueDocument extends Queue, mongoose.Document {
      * @param discord_id the Discord ID of the entry
      */
     getPosition(discord_id: string): number,
+    /**
+     * Leaves the queue
+     * @param discord_id The Discord ID of the entry
+     */
+    leave(discord_id: string): Promise<QueueEntry>,
 }
 
 export interface QueueModel extends mongoose.Model<QueueDocument> {

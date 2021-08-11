@@ -5,6 +5,7 @@ import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "../model
 import { spawn } from "child_process";
 import { QueueDocument } from "../models/queues";
 import { QueueEntry } from "../models/queue_entry";
+import moment from "moment";
 export const name = "voiceStateUpdate";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
@@ -32,15 +33,11 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 if (spawner.name) {
                     name = spawner.name;
                     // Interpolate String
-                    for (const [key, value] of Object.entries(
-                        {
-                            "owner_name": newState.member!.displayName,
-                            "owner": newState.member!.id,
-                            "max_users": spawner.max_users,
-                        }
-                    )) {
-                        name = name.replace(`\${${key}}`, value as string);
-                    }
+                    name = client.utils.general.interpolateString(name, {
+                        "owner_name": newState.member!.displayName,
+                        "owner": newState.member!.id,
+                        "max_users": spawner.max_users,
+                    });
                 }
                 // if (!spawner.lock_initially) {
                 //     name = "🔓" + name;
@@ -64,7 +61,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 for (const i of spawner.supervisor_roles) {
                     permoverrides.push({
                         id: i,
-                        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', "MANAGE_CHANNELS"],
+                        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', "MANAGE_CHANNELS"],
                     });
                 }
 
@@ -143,22 +140,18 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     }
                 }
                 if (queue.join_message) {
-                    let join_message = queue.join_message;
-                    // Interpolate String
-                    for (const [key, value] of Object.entries(
-                        {
-                            "limit": queue.limit,
-                            "member_id": newState.member!.id,
-                            "user": newState.member!.user,
-                            "name": queue.name,
-                            "description": queue.description,
-                            "eta": "null",
-                            "pos": queue.getPosition(queueEntry.discord_id)+1,
-                            "total": queue.entries.length,
-                        }
-                    )) {
-                        join_message = join_message.replace(`\${${key}}`, value as string);
+                    let replacements = {
+                        "limit": queue.limit,
+                        "member_id": newState.member!.id,
+                        "user": newState.member!.user,
+                        "name": queue.name,
+                        "description": queue.description,
+                        "eta": "null",
+                        "pos": queue.getPosition(queueEntry.discord_id) + 1,
+                        "total": queue.entries.length,
                     }
+                    // Interpolate String
+                    let join_message = client.utils.general.interpolateString(queue.join_message, replacements);
                     try {
                         await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: join_message, color: guild.me?.roles.highest.color || 0x7289da })] });
                     } catch (error) {
@@ -206,6 +199,41 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 );
                 // console.log(updated);
                 console.log(`deleted TEMP VC: ${cName} on ${guild.name}`);
+            } else if (channelData.queue) {
+                const queueId = channelData.queue;
+                const queue = (guildData?.queues as QueueDocument[]).find(x => x._id == queueId.toHexString());
+                if (!queue) {
+                    client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
+                    return;
+                }
+                let member_id = oldState.member!.id;
+                // Leave queue
+                if (queue.contains(member_id)) {
+                    let entry = await queue.leave(member_id);
+                    if (queue.leave_message) {
+                        try {
+                            let replacements = {
+                                "limit": queue.limit,
+                                "member_id": newState.member!.id,
+                                "user": newState.member!.user,
+                                "name": queue.name,
+                                "description": queue.description,
+                                "eta": "null",
+                                "timeout": queue.disconnect_timeout,
+                                "pos": queue.getPosition(entry.discord_id) + 1,
+                                "total": queue.entries.length,
+                                "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
+                            }
+                            // Interpolate String
+                            let leave_message = client.utils.general.interpolateString(queue.leave_message, replacements);
+                            await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: leave_message, color: guild.me?.roles.highest.color || 0x7289da })] });
+                        } catch (error) {
+                            console.log(error);
+                        }
+
+                    }
+
+                }
             }
 
         }
