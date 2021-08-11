@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { GuildDocument } from "./guilds";
+import QueueEntrySchema, { QueueEntry } from "./queue_entry";
 
 /**
  * A Schema For storing and Managing Guilds
@@ -60,6 +62,14 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel>({
         type: String,
         required: false,
     },
+    /**
+     * The Entries of the Queue
+     */
+    entries: [{
+        type: QueueEntrySchema,
+        required: true,
+        default: [],
+    }]
 });
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
@@ -99,10 +109,60 @@ export interface Queue {
      *  A Custom Timeout Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
      */
     timeout_message?: string,
+    /**
+     * The Entries of the Queue
+     */
+    entries: QueueEntry[],
 }
+
+QueueSchema.method('join', async function (entry: QueueEntry) {
+    if (this.entries.find(x => x.discord_id === entry.discord_id)) {
+        throw new Error('Dublicate Entry');
+    }
+    this.entries.push(entry);
+    await this.$parent()?.save();
+    return entry;
+});
+
+QueueSchema.method('getSortedEntries', function (limit?: number) {
+    const entries = this.entries.sort((x, y) => {
+        const x_importance = (Date.now() - (+x.joinedAt)) * (x.importance || 1);
+        const y_importance = (Date.now() - (+y.joinedAt)) * (y.importance || 1);
+        return y_importance - x_importance;
+    });
+    return entries.slice(0, limit);
+});
+
+QueueSchema.method('contains', function (discord_id: string): boolean {
+    return (this.entries.find(x => x.discord_id === discord_id)) ? true : false;
+});
+
+QueueSchema.method('getPosition', function (discord_id: string): number {
+    return this.getSortedEntries().findIndex(x => x.discord_id === discord_id);
+});
 
 export interface QueueDocument extends Queue, mongoose.Document {
     // List getters or non model methods here
+    /**
+     * Put an Entry into the Queue
+     * @param entry The Queue Entry
+     */
+    join(entry: QueueEntry): Promise<QueueEntry>,
+    /**
+     * Gets the Sorted Entries with the First ones being the ones with the highest Importance
+     * @param limit How many entries should we get at most?
+     */
+    getSortedEntries(limit?: number | undefined): QueueEntry[],
+    /**
+     * Returns true if the ID is contained in the queue
+     * @param discord_id the Discord ID to check if it's contained
+     */
+    contains(discord_id: string): boolean,
+    /**
+     * Gets the Position in the Current Queue
+     * @param discord_id the Discord ID of the entry
+     */
+    getPosition(discord_id: string): number,
 }
 
 export interface QueueModel extends mongoose.Model<QueueDocument> {
