@@ -72,15 +72,6 @@ export class Bot extends Client {
             }
         }
 
-        // Event Files
-        this.logger.info("Loading Events...");
-        const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
-        await eventFiles.map(async (eventFile: string) => {
-            const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
-            console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
-            this.on(event.name, event.execute.bind(null, this));
-        });
-
         // Connect to db
         mongoose.connect(
             config.mongodb_connection_url,
@@ -93,6 +84,15 @@ export class Bot extends Client {
                 }
             }
         );
+
+        // Event Files
+        this.logger.info("Loading Events...");
+        const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        await eventFiles.map(async (eventFile: string) => {
+            const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
+            console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
+            this.on(event.name, event.execute.bind(null, this));
+        });
     }
 
     // public async createGuildCommand(data:any, guildId:string) {
