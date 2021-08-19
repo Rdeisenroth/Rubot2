@@ -44,18 +44,22 @@ var command: SubcommandHandler = {
                     initPromise = await initPromise;
                 }
             }
-            scopts.push({ name: c.name, description: c.description, type: (((c as SubcommandHandler).subcommands) ? "SUB_COMMAND_GROUP" : "SUB_COMMAND"), options: c.options });
+            if (((c as SubcommandHandler).subcommands)) {
+                scopts.push({ name: c.name, description: c.description, type: "SUB_COMMAND_GROUP", options: (c.options as ChannelType.ApplicationCommandSubCommandData[]) });
+            } else {
+                scopts.push({ name: c.name, description: c.description, type: "SUB_COMMAND", options: (c.options as ChannelType.ApplicationCommandChoicesData[]) });
+            }
         }
         command.options = scopts;
     },
     execute: async (client, interaction, args) => {
-        let subcommand:string;
-        if(interaction instanceof Message){
+        let subcommand: string;
+        if (interaction instanceof Message) {
             if (!args || !args[0]) {
                 return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
             }
             subcommand = args.shift()!.toLowerCase();
-        } else if(interaction instanceof CommandInteraction){
+        } else if (interaction instanceof CommandInteraction) {
             subcommand = interaction.options.getSubcommand(true);
         } else {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);

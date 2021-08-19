@@ -87,7 +87,6 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
     // TODO: Per Guild Slash Command Config
     const data: ApplicationCommandData[] = [];
     // console.log([...client.commands.values()])
-    console.log("hi")
     for (const c of [...client.commands.values()]) {
         // console.log("a"+ c);
         let commandData: ApplicationCommandData = {
@@ -101,7 +100,7 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
             let cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
                 return { name: key, value: key }
             });
-            commandData.options![0].choices = cmdChoices;
+            (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
         }
         data.push(commandData)
     }

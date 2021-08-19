@@ -5,8 +5,8 @@
   "main": "/dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "rm -rf dist/; tsc --build tsconfig.json; node dist/index.js",
-    "build": "rm -rf dist/; tsc --build tsconfig.json",
+    "start": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json; node dist/index.js",
+    "build": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest --detectOpenHandles"
   },
@@ -20,7 +20,7 @@
     "common-tags": "^1.8.0",
     "commonjs": "^0.0.1",
     "consola": "^2.15.3",
-    "discord.js": "^13.0.1",
+    "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "glob": "^7.1.6",
     "inversify": "^5.1.1",
