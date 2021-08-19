@@ -115,6 +115,13 @@ export interface VoiceChannel extends Channel {
     supervisors?: string[],
 }
 
+export interface DatabaseVoiceChannel extends VoiceChannel {
+    /**
+     * The Channel ID
+     */
+    _id: string,
+}
+
 export interface VoiceChannelDocument extends VoiceChannel, mongoose.Document {
 
 }

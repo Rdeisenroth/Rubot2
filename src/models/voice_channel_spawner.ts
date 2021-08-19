@@ -88,6 +88,13 @@ export interface VoiceChannelSpawner {
     parent?: string,
 }
 
+/**
+ * Used for creating Voice Channels
+ */
+export interface VoiceChannelCreateOptions extends VoiceChannelSpawner {
+    name: string,
+}
+
 export interface VoiceChannelSpawnerDocument extends VoiceChannelSpawner, mongoose.Document {
 
 }

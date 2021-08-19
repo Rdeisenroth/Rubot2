@@ -16,6 +16,7 @@ const command: Command = {
         type: "INTEGER",
         required: false,
     }],
+    defaultPermission: false,
     async execute(client, interaction, args) {
         if (!interaction) {
             return;

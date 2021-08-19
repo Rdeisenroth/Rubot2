@@ -94,6 +94,7 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
             name: c.name,
             description: c.description,
             options: c.options,
+            defaultPermission: c.defaultPermission,
         }
         // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
         if (c.name === "help") {
@@ -105,7 +106,15 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
         data.push(commandData)
     }
     try {
-        const command = await g.commands.set(data);
+        const commands = await g.commands.set(data);
+        // permissions
+        // for(const c of [...commands.values()]){
+        //     await c.permissions.add({permissions: [{
+        //         id: client.ownerID!,
+        //         type: "USER",
+        //         permission: true,
+        //     }]})
+        // }
     } catch (error) {
         console.log(error);
     }

@@ -1,6 +1,7 @@
-import ChannelType, { Interaction, Message } from "discord.js";
+import ChannelType, { GuildMember, Interaction, Message } from "discord.js";
 import moment from "moment";
 import { StringReplacements } from "../../typings";
+import { APIInteractionDataResolvedGuildMember } from 'discord-api-types/v9';
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not

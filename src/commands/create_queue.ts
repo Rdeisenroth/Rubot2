@@ -27,6 +27,7 @@ const command: Command = {
         },
     ],
     guildOnly: true,
+    defaultPermission: false,
     execute: async (client, interaction, args) => {
         if (!interaction) {
             return;

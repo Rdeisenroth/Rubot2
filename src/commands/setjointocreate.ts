@@ -12,6 +12,7 @@ const command: Command = {
     cooldown: 5,
     category: "Miscellaneous",
     guildOnly: true,
+    defaultPermission: false,
     execute: async (client, interaction, args) => {
         let owner = client.users.cache.find(m => m.id == client.ownerID);
         let member = client.utils.general.getMember(interaction);

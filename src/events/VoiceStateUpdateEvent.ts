@@ -27,63 +27,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                 const spawner = channelData.spawner!;
 
-                // Figure out Name
-                var name = `${newState.member!.displayName}'s VC`;
-                const shortname = name;
-                if (spawner.name) {
-                    name = spawner.name;
-                    // Interpolate String
-                    name = client.utils.general.interpolateString(name, {
-                        "owner_name": newState.member!.displayName,
-                        "owner": newState.member!.id,
-                        "max_users": spawner.max_users,
-                    });
-                }
-                // if (!spawner.lock_initially) {
-                //     name = "🔓" + name;
-                // }
-
-                // Channel Permissions
-                var permoverrides: OverwriteData[] = spawner.permission_overwrites;
-
-                permoverrides.push(
-                    {
-                        id: guild.me!.id,
-                        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', 'MANAGE_CHANNELS'], // Fix a bug where i cannot move Members without admin Access
-                    },
-                    {
-                        id: newState.member!.id,
-                        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'],
-                    }
-                );
-
-                // allow for Supervisors to see, join and edit the channel
-                for (const i of spawner.supervisor_roles) {
-                    permoverrides.push({
-                        id: i,
-                        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', "MANAGE_CHANNELS"],
-                    });
-                }
-
-                // TODO: Error Handling
-
-
-                var bitrates: { [name in PremiumTier]: number } = {
-                    "NONE": 96000,     // Unboosted
-                    "TIER_1": 128000,  // Boost Level 1
-                    "TIER_2": 256000,  // Boost Level 2
-                    "TIER_3": 384000   // Boost Level 3
-                }
-
-
-                // Create new Voice Channel
-                const createdVC = await guild.channels.create(name, {
-                    type: 'GUILD_VOICE',
-                    permissionOverwrites: permoverrides,
-                    parent: spawner.parent,
-                    userLimit: spawner.max_users,
-                    bitrate: bitrates[guild.premiumTier],
-                });
+                const createdVC = await client.utils.voice.createTempVC(newState.member!, spawner);
 
                 // Move Member
                 try {
@@ -92,30 +36,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     throw new Error("USER_NOT_MOVABLE");
                 }
 
-                // Create Database Entry
-                const updated = await GuildSchema.updateOne(
-                    { _id: guild.id },
-                    {
-                        $push: {
-                            "voice_channels": {
-                                _id: createdVC.id,
-                                channel_type: 2,
-                                owner: newState.member!.id,
-                                locked: spawner.lock_initially,
-                                managed: true,
-                                // blacklist_user_groups: [],
-                                // whitelist_user_groups: [],
-                                permitted: [],
-                                afkhell: false,
-                                category: spawner.parent,
-                                temporary: true,
-                            } as VoiceChannel
-                        }
-                    },
-                    { upsert: true, setDefaultsOnInsert: true },
-                );
-                // console.log(updated);
-                console.log(`Created TEMP VC: ${shortname} on ${guild.name}`);
+
+                console.log(`Created TEMP VC: ${createdVC.name} on ${guild.name}`);
             } else if (channelData.queue) {
                 const queueId = channelData.queue;
                 const queue = (guildData?.queues as QueueDocument[]).find(x => x._id == queueId.toHexString());

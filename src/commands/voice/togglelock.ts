@@ -60,7 +60,7 @@ const command: Command = {
         if (channelData.locked) {
             overwrites.push({
                 id: g.roles.everyone.id,
-                deny: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'],
+                deny: ['CONNECT', 'SPEAK'],
             })
         } else {
             overwrites.push({

@@ -58,7 +58,7 @@ export interface Channel {
     /**
      * The Channel owner
      */
-    owner?: String
+    owner?: string,
 }
 
 export interface TextChannel extends Channel {

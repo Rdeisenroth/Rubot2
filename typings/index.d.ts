@@ -181,6 +181,10 @@ export interface Command {
      * Executes the Command
      */
     execute: RunCommand;
+    /**
+     * The Default permission for Discords Command Handler (set to false to disable by default)
+     */
+    defaultPermission?: boolean;
 }
 
 export interface SlashOnlyCommand extends Command {
