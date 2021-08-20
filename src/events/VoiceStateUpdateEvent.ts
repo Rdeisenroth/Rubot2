@@ -1,5 +1,5 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection, MessageEmbed, OverwriteData, PremiumTier } from "discord.js";
+import { Client, ClientEvents, Collection, MessageActionRow, MessageButton, MessageEmbed, OverwriteData, PremiumTier } from "discord.js";
 import GuildSchema, { Guild } from "../models/guilds";
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
 import { spawn } from "child_process";
@@ -71,11 +71,24 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         "eta": "null",
                         "pos": queue.getPosition(queueEntry.discord_id) + 1,
                         "total": queue.entries.length,
+                        "time_spent": moment.duration(Date.now() - (+queueEntry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
                     }
                     // Interpolate String
                     let join_message = client.utils.general.interpolateString(queue.join_message, replacements);
                     try {
-                        await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: join_message, color: guild.me?.roles.highest.color || 0x7289da })] });
+                        await newState.member?.send({
+                            embeds: [new MessageEmbed({ title: `Queue System`, description: join_message, color: guild.me?.roles.highest.color || 0x7289da })],
+                            components: [
+                                new MessageActionRow(
+                                    {
+                                        components:
+                                            [
+                                                new MessageButton({ customId: "queue_refresh", label: "Refresh", style: "PRIMARY" }),
+                                                new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                            ]
+                                    })
+                            ],
+                        });
                     } catch (error) {
                         console.log(error);
                     }

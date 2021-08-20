@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, Interaction, Message } from "discord.js";
+import { ApplicationCommandOptionData, ButtonInteraction as bi, Client, ClientEvents, Collection, CommandInteraction, Interaction, Message, MessageComponentInteraction } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 
@@ -117,11 +117,41 @@ export interface RunSlashCommand {
          */
         args: string[]): Promise<any>;
 }
+/**
+ * The Code that's being executed when the Command is run
+ */
+export interface RunComponentInteraction {
+    (
+        /**
+         * the Bot Client Instance
+         */
+        client: Bot,
+        /**
+         * The Interaction that called the Module
+         */
+        interaction: MessageComponentInteraction,
+    )
+}
+/**
+ * The Code that's being executed when the Command is run
+ */
+export interface RunButtonInteraction {
+    (
+        /**
+         * the Bot Client Instance
+         */
+        client: Bot,
+        /**
+         * The Interaction that called the Module
+         */
+        interaction: bi,
+    )
+}
 
 /**
- * The Code that's being executed when the Command is initialized
+ * The Code that's being executed when the Module is initialized
  */
-export interface InitCommand {
+export interface InitFunction {
     (
         /**
          * the Bot Client Instance
@@ -176,7 +206,7 @@ export interface Command {
     /**
      * A Function that Is executed before the Command is loaded
      */
-    init?: InitCommand;
+    init?: InitFunction;
     /**
      * Executes the Command
      */
@@ -199,7 +229,41 @@ export interface SubcommandHandler extends Command {
     /**
      * This Function populates the subcommands field and can do other init stuff
      */
-    init: InitCommand;
+    init: InitFunction;
+}
+
+export interface ComponentInteraction {
+    /**
+     * the Custom ID to listen for
+     */
+    customID: string;
+    /**
+     * Aliases for the ID
+     */
+    aliases?: string[];
+    /**
+     * a Description of the Interaction
+     */
+    description?: string;
+    /**
+     * the Interaction Cooldown in ms
+     */
+    cooldown?: number;
+    /**
+     * A Function that Is executed before the Module is loaded
+     */
+    init?: InitFunction;
+    /**
+     * Executes the Command
+     */
+    execute: RunComponentInteraction;
+}
+
+/**
+ * A Button Interaction
+ */
+export interface ButtonInteraction extends ComponentInteraction {
+    execute: RunButtonInteraction;
 }
 
 /**

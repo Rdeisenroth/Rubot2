@@ -1,16 +1,18 @@
 import { Client, Collection, Message } from "discord.js";
 import consola, { Consola } from 'consola';
-import { BotConfig, BotEvent, Command } from "../typings";
-// import glob from 'glob';
+import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
+import glob from 'glob';
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
 import parser from 'yargs-parser';
 import mongoose from 'mongoose';
-// const globPromise = promisify(glob);
+import path from "path/posix";
+const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
     public commands: Collection<string, Command> = new Collection();
+    public componentInteractions: { buttons: Collection<string, ButtonInteraction>} = {buttons: new Collection()};
     // public aliases: Collection<string,string> = new Collection();
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
     public ownerID?: string;
@@ -66,6 +68,29 @@ export class Bot extends Client {
             // Let The initialisation Code completely run before continuing
             if (command.init) {
                 let initPromise = command.init(this);
+                while (initPromise instanceof Promise) {
+                    initPromise = await initPromise;
+                }
+            }
+        }
+
+        // Interactions
+        this.logger.info("Loading Interactions...");
+        // TODO: Slect Menus
+        let dirstring = `${__dirname}/componentInteractions/buttons`
+        let files = (await globPromise(dirstring + "/**/*.{js,ts}"));
+        // console.log("Files:" + JSON.stringify(files));
+        //iterate over all the Interactions to store them in a collection
+        for (const file of files) {
+            // .map(x => path.basename(x, path.extname(x)));
+            const interaction: ButtonInteraction = await import(file);
+            console.log(`-${JSON.stringify(interaction.customID)} (./${path.relative(__dirname, file)})`);
+            // set a new item in the Collection
+            // with the key as the command name and the value as the exported module
+            this.componentInteractions.buttons.set(interaction.customID, interaction);
+            // Let The initialisation Code completely run before continuing
+            if (interaction.init) {
+                let initPromise = interaction.init(this);
                 while (initPromise instanceof Promise) {
                     initPromise = await initPromise;
                 }

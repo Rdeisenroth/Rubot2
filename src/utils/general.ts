@@ -2,6 +2,12 @@ import ChannelType, { GuildMember, Interaction, Message } from "discord.js";
 import moment from "moment";
 import { StringReplacements } from "../../typings";
 import { APIInteractionDataResolvedGuildMember } from 'discord-api-types/v9';
+import * as fs from "fs";
+import { readdir } from "fs/promises";
+import { resolve } from 'path';
+import { promisify } from "util";
+import glob from 'glob';
+const globPromise = promisify(glob);
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -125,4 +131,13 @@ export const interpolateString = (str: string, replacements?: StringReplacements
         str = str.replace(`\${${key}}`, value as string);
     }
     return str;
+}
+
+/**
+ * Sleeps for given amount of Time
+ * @param msec the Sleep Duration in ms
+ * @returns Nothing
+ */
+export const sleep = async (msec: number) => {
+    return new Promise(resolve => setTimeout(resolve, msec));
 }
