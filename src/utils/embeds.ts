@@ -1,6 +1,10 @@
-import { ColorResolvable, CommandInteraction, Guild, GuildResolvable, Interaction, Message, MessageEmbed, UserResolvable } from "discord.js";
+import { ColorResolvable, CommandInteraction, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, ReplyMessageOptions, UserResolvable } from "discord.js";
 import { APIMessage } from 'discord-api-types/v9';
 import * as utils from './utils';
+import { SimpleEmbedOptions } from "../../typings";
+
+export async function SimpleEmbed(interaction: Message | CommandInteraction, title: string, description: string): Promise<Message | null>;
+export async function SimpleEmbed(interaction: Message | CommandInteraction, options: SimpleEmbedOptions): Promise<Message | null>;
 
 /**
  *Creates a message Embed and sends it in the Channel of the given Message
@@ -12,7 +16,7 @@ import * as utils from './utils';
  * @param deleteinterval Automatically delete message after x seconds
  * @returns embedObject
  */
-export const SimpleEmbed = async (interaction: Message | CommandInteraction, title: string, text?: string, style?: number, deleteinterval?: number, fields?: string[]) => {//TODO Constructor for no repetitive embed creating
+export async function SimpleEmbed(interaction: Message | CommandInteraction, optionsortitle: SimpleEmbedOptions | string, description?: string) {//TODO Constructor for no repetitive embed creating
     if (!interaction.channel) {
         throw new Error("Embed Requires a Channel");
     }
@@ -23,27 +27,42 @@ export const SimpleEmbed = async (interaction: Message | CommandInteraction, tit
         embed.setColor(0x7289da)
     }
 
+    let options: SimpleEmbedOptions;
+    if (typeof optionsortitle === "string") {
+        options = { title: optionsortitle, text: description };
+    } else {
+        options = optionsortitle;
+    }
+    const { title, text, style, deleteinterval, empheral, fields } = options!;
     //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
     embed.setTitle(title);
     embed.setDescription(`${text}`);
-    if (fields && utils.general.isArraywithContent(fields) && fields.length % 2 !== 0) {
-        for (let i = 0; i < fields.length - 2; i += 2) {
-            embed.addField(fields[i], fields[i + 1])
+    if (fields) {
+        for (let field of fields) {
+            embed.addField(field.name, field.value, field.inline);
         }
+    }
+    let res: void | Message;
+    if (interaction instanceof CommandInteraction) {
+        res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
     } else {
-        //return reject('Invalid Fields Array')
+        res = await interaction.reply({ embeds: [embed] });
     }
-    let res = await interaction.reply({ embeds: [embed] });
-    let m: Message | APIMessage | null = null;
     if (res instanceof Message) {
-        m = res;
+        let m = res;
+        if (deleteinterval) {
+            setTimeout(async () => {if (m.deletable) await m.delete()}, deleteinterval);
+        }
+        return m;
     } else if (interaction instanceof CommandInteraction) {
-        m = await interaction.fetchReply();
+        let m = await interaction.fetchReply();
+        if (deleteinterval && !(empheral)) {
+            setTimeout(() => interaction.deleteReply(), deleteinterval);
+        }
+        return m;
     }
-    if (deleteinterval) {
-        setTimeout(() => m instanceof Message ? m.delete() : (interaction as CommandInteraction).deleteReply(), deleteinterval);
-    }
-    return m;
+    // No Message was sent
+    return null;
 }
 
 /**

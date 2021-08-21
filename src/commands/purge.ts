@@ -60,7 +60,7 @@ const command: Command = {
         }
         const fetched = await (interaction.channel! as TextChannel).bulkDelete(amount)
             .catch(async error => { await interaction.reply(`**Error:** ${error}`) });
-        await client.utils.embeds.SimpleEmbed(interaction, 'Bulk Delete', `Deleted ${amount} Messages.`, undefined, 3000);
+        await client.utils.embeds.SimpleEmbed(interaction, { title: 'Bulk Delete', text: `Deleted ${amount} Messages.`, deleteinterval: 3000 });
     },
 };
 

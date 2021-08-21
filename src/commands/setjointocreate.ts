@@ -1,4 +1,4 @@
-import ChannelType, { EmojiIdentifierResolvable, MessageEmbed } from "discord.js";
+import ChannelType, { CategoryChannel, EmojiIdentifierResolvable, GuildChannel, Message, MessageEmbed, VoiceChannel as dvc } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 import GuildSchema, { Guild } from "../models/guilds";
 import { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
@@ -13,7 +13,27 @@ const command: Command = {
     category: "Miscellaneous",
     guildOnly: true,
     defaultPermission: false,
+    options: [{
+        name: "spawner",
+        description: "the voice Channel to set as Spawner",
+        type: "CHANNEL",
+        required: true,
+    },
+    {
+        name: "parent",
+        description: "The Parent(Category) Channel to spawn the Channels In",
+        type: "CHANNEL",
+        required: false,
+    }],
     execute: async (client, interaction, args) => {
+        if (!interaction) {
+            return;
+        }
+        if (interaction instanceof Message) {
+            await client.utils.embeds.SimpleEmbed(interaction, { title: 'Slash Only Command', text: 'This Command is Slash only but you Called it with The Prefix. use the slash Command instead.', deleteinterval: 3000 })
+            if (interaction.deletable) await interaction.delete();
+            return;
+        }
         let owner = client.users.cache.find(m => m.id == client.ownerID);
         let member = client.utils.general.getMember(interaction);
         if (!member || member.id !== client.ownerID as String) {
@@ -24,9 +44,24 @@ const command: Command = {
         const g = interaction!.guild!;
 
         // Find channel
-        const channel = g!.channels.cache.find(x => x.id == args[0]);
-        if (!channel) {
+        // const channel = g!.channels.cache.find(x => x.id == args[0]);
+        const channel = interaction.options.getChannel("spawner", true);
+        if (!channel || !(channel instanceof GuildChannel)) {
             return await interaction?.reply(`Channel could not be found.`);
+        }
+        if (!(channel instanceof dvc)) {
+            return await interaction?.reply(`Spawner channel must be a voice Channel.`);
+        }
+
+        let parent_id = channel.parentId;
+
+        let parent = interaction.options.getChannel("parent", false);
+
+        if (parent) {
+            if (!(parent instanceof CategoryChannel)) {
+                return await interaction?.reply(`Parent must be a Category Channel.`);
+            }
+            parent_id = parent.id;
         }
 
         const updated = await GuildSchema.updateOne(
@@ -38,6 +73,7 @@ const command: Command = {
                         channel_type: 2,
                         owner: member.id,
                         locked: false,
+                        temporary: false,
                         managed: true,
                         // blacklist_user_groups: [],
                         // whitelist_user_groups: [],
@@ -48,7 +84,7 @@ const command: Command = {
                             supervisor_roles: [],
                             permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
                             max_users: 5,
-                            parent: channel.parentId,
+                            parent: parent_id,
                         },
                     } as VoiceChannel
                 }

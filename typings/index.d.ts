@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ButtonInteraction as bi, Client, ClientEvents, Collection, CommandInteraction, Interaction, Message, MessageComponentInteraction } from "discord.js";
+import { ApplicationCommandOptionData, ButtonInteraction as bi, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 
@@ -280,4 +280,31 @@ export type StringReplacements = {
      * the replacenemt Value
      */
     any
+}
+
+export type SimpleEmbedOptions = {
+    /**
+     * the title of the embed
+     */
+    title:string,
+    /**
+     * The text for the Description of the embed
+     */
+    text?: string,
+    /**
+     * The Style of the Embed
+     */
+    style?: number,
+    /**
+     * Automatically delete message after x milliseconds
+     */
+    deleteinterval?: number,
+    /**
+     * The Fields of the Embed
+     */
+    fields?: EmbedFieldData[],
+    /**
+     * If the Message should only be visible for the reciever (only works for CommandInteractions)
+     */
+    empheral?: boolean,
 }
