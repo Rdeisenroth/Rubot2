@@ -71,7 +71,13 @@ var command: SubcommandHandler = {
             }
             subcommand = args.shift()!.toLowerCase();
         } else if (interaction instanceof CommandInteraction) {
-            subcommand = interaction.options.getSubcommand(true);
+            let scInteraction = (interaction as CommandInteraction & { resolved_subcommand?: ChannelType.CommandInteractionOption });
+            if (!scInteraction.resolved_subcommand) {
+                scInteraction.resolved_subcommand = scInteraction.options.data[0];
+            } else {
+                scInteraction.resolved_subcommand = scInteraction.resolved_subcommand.options![0];
+            }
+            subcommand = scInteraction.resolved_subcommand.name;
         } else {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
         }

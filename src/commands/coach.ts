@@ -1,4 +1,4 @@
-import ChannelType, { Collection, CommandInteraction, EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
+import ChannelType, { Collection, CommandInteraction, CommandInteractionOptionResolver, CommandInteractionResolvedData, EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
 import * as fs from "fs";
 import { OverwriteData } from "discord.js";
 import { Command, RunCommand, SubcommandHandler } from "../../typings";
@@ -14,7 +14,7 @@ var command: SubcommandHandler = {
     guildOnly: true,
     subcommands: new Collection(),
     options: [],
-    defaultPermission:false,
+    defaultPermission: false,
     init: async (client) => {
         const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
         //iterate over all the commands to store them in a collection
@@ -60,7 +60,13 @@ var command: SubcommandHandler = {
             }
             subcommand = args.shift()!.toLowerCase();
         } else if (interaction instanceof CommandInteraction) {
-            subcommand = interaction.options.getSubcommand(true);
+            let scInteraction = (interaction as CommandInteraction & { resolved_subcommand?: ChannelType.CommandInteractionOption });
+            if (!scInteraction.resolved_subcommand) {
+                scInteraction.resolved_subcommand = scInteraction.options.data[0];
+            } else {
+                scInteraction.resolved_subcommand = scInteraction.resolved_subcommand.options![0];
+            }
+            subcommand = scInteraction.resolved_subcommand.name;
         } else {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
         }

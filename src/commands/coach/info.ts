@@ -1,5 +1,6 @@
 import ChannelType, { EmojiIdentifierResolvable, GuildMember, Message, MessageEmbed, StageChannel } from "discord.js";
 import { OverwriteData } from "discord.js";
+import path from "path";
 import { Command, RunCommand } from "../../../typings";
 import GuildSchema, { Guild } from "../../models/guilds";
 import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
@@ -24,7 +25,7 @@ const command: Command = {
 
         const g = interaction.guild!;
 
-        client.utils.embeds.SimpleEmbed(interaction, "TODO", "Command is not Implemented Yet.")
+        client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
     }
 }
 
