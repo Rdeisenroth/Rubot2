@@ -7,25 +7,14 @@ import { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
 import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
 
 var command: SubcommandHandler = {
-    name: 'voice',
-    description: 'voice Command Handler',
-    aliases: ['v', 'vc'],
-    category: "Miscellaneous",
+    name: 'coach',
+    description: 'Coach Command Handler',
+    aliases: ['c', 'tutor', 't'],
+    category: "Coaching",
     guildOnly: true,
     subcommands: new Collection(),
-    // options: [{
-    //     name: 'voice',
-    //     description: 'The Subcommand to execute',
-    //     type: "BOOLEAN",
-    //     // required: true,
-    //     // options: scopts,
-    //     // options: [{
-    //     //     name: 'test',
-    //     //     description: "test",
-    //     //     type: "SUB_COMMAND"
-    //     // }],
-    // }],
     options: [],
+    defaultPermission:false,
     init: async (client) => {
         const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
         //iterate over all the commands to store them in a collection

@@ -1,30 +1,16 @@
 import ChannelType, { Collection, CommandInteraction, EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
 import * as fs from "fs";
 import { OverwriteData } from "discord.js";
-import { Command, RunCommand, SubcommandHandler } from "../../typings";
-import GuildSchema, { Guild } from "../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
-import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
+import { Command, RunCommand, SubcommandHandler } from "../../../typings";
+import GuildSchema, { Guild } from "../../models/guilds";
+import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
+import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
 
 var command: SubcommandHandler = {
-    name: 'voice',
-    description: 'voice Command Handler',
-    aliases: ['v', 'vc'],
-    category: "Miscellaneous",
-    guildOnly: true,
+    name: 'queue',
+    description: 'Queue Command Handler',
+    aliases: ['q'],
     subcommands: new Collection(),
-    // options: [{
-    //     name: 'voice',
-    //     description: 'The Subcommand to execute',
-    //     type: "BOOLEAN",
-    //     // required: true,
-    //     // options: scopts,
-    //     // options: [{
-    //     //     name: 'test',
-    //     //     description: "test",
-    //     //     type: "SUB_COMMAND"
-    //     // }],
-    // }],
     options: [],
     init: async (client) => {
         const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
@@ -32,7 +18,7 @@ var command: SubcommandHandler = {
         let scopts: ChannelType.ApplicationCommandOptionData[] = []
         for (const file of commandFiles) {
             const c: Command = await import(`${__dirname}/${command.name}/${file}`);
-            console.log(`\t∘${JSON.stringify(c.name)} (./commands/${command.name}/${file})`);
+            console.log(`\t\t∘${JSON.stringify(c.name)} (./commands/${command.name}/${file})`);
             // Check Command Name
             if (c.name !== c.name.toLowerCase() || !c.name.match("^[\\w-]{1,32}$")) {
                 throw new Error(`Invalid Command Name: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);

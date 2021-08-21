@@ -12,7 +12,7 @@ const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
     public commands: Collection<string, Command> = new Collection();
-    public componentInteractions: { buttons: Collection<string, ButtonInteraction>} = {buttons: new Collection()};
+    public componentInteractions: { buttons: Collection<string, ButtonInteraction> } = { buttons: new Collection() };
     // public aliases: Collection<string,string> = new Collection();
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
     public ownerID?: string;
@@ -61,7 +61,19 @@ export class Bot extends Client {
         //iterate over all the commands to store them in a collection
         for (const file of commandFiles) {
             const command: Command = await import(`${__dirname}/commands/${file}`);
-            console.log(`-${JSON.stringify(command.name)} ($./commands/${file})`);
+            console.log(`-${JSON.stringify(command.name)} (./commands/${file})`);
+            // Check Command Name
+            if (command.name !== command.name.toLowerCase() || !command.name.match("^[\\w-]{1,32}$")) {
+                throw new Error(`Invalid Command Name: ${command.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+            }
+            if (command.options) {
+                // Check Command Options
+                for (let opt of command.options) {
+                    if (opt.name !== opt.name.toLowerCase() || !opt.name.match("^[\\w-]{1,32}$")) {
+                        throw new Error(`Invalid Option Name: ${opt.name}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                    }
+                }
+            }
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
             this.commands.set(command.name, command);
