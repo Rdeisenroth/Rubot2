@@ -1,87 +1,10 @@
 import mongoose from "mongoose";
 import { GuildDocument } from "./guilds";
 import QueueEntrySchema, { QueueEntry } from "./queue_entry";
+import VoiceChannelSpawnerSchema, { VoiceChannelSpawner } from "./voice_channel_spawner";
 
 /**
- * A Schema For storing and Managing Guilds
- */
-const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel>({
-    /**
-     * The Name of the Queue
-     */
-    name: {
-        type: String,
-        required: true,
-    },
-    /**
-     * The Description of the Queue
-     */
-    description: {
-        type: String,
-        required: false,
-    },
-    /**
-     * The max Amount of Users that the queue can handle
-     */
-    limit: {
-        type: Number,
-        required: false,
-    },
-    /**
-     * The Timeout in Milliseconds if the User disconnects from the Queue (usefull for VC based Queues)
-     */
-    disconnect_timeout: {
-        type: Number,
-        required: false,
-    },
-    /**
-     * The Timeout in Milliseconds that the user is kicked off the queue After not accepting a match
-     */
-    match_timeout: {
-        type: Number,
-        required: false,
-    },
-    /**
-     * A Custom Join Message for the Queue. Use ${pos} ${total} ${eta} ${user} and so on to create Dynamic Messages.
-     */
-    join_message: {
-        type: String,
-        required: false,
-    },
-    /**
-     * A Custom Match Found Message for the Queue. Use ${pos} ${total} ${eta} ${user} and so on to create Dynamic Messages.
-     */
-    match_found_message: {
-        type: String,
-        required: false,
-    },
-    /**
-     *  A Custom Timeout Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
-     */
-    timeout_message: {
-        type: String,
-        required: false,
-    },
-    /**
-     *  A Custom Leave Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
-     */
-    leave_message: {
-        type: String,
-        required: false,
-    },
-    /**
-     * The Entries of the Queue
-     */
-    entries: [{
-        type: QueueEntrySchema,
-        required: true,
-        default: [],
-    }]
-});
-
-// TODO Find better Names so that they don't conflict with discordjs Interfaces
-/**
- * A Guild from the Database
+ * A Queue from the Database
  */
 export interface Queue {
     /**
@@ -121,10 +44,65 @@ export interface Queue {
      */
     leave_message?: string,
     /**
+     * A Template for spawning in Rooms (if empty default template is used)
+     */
+    room_spawner?: VoiceChannelSpawner,
+    /**
      * The Entries of the Queue
      */
     entries: QueueEntry[],
 }
+
+/**
+ * A Schema For storing and Managing Queues
+ */
+const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
+    name: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: false,
+    },
+    limit: {
+        type: Number,
+        required: false,
+    },
+    disconnect_timeout: {
+        type: Number,
+        required: false,
+    },
+    match_timeout: {
+        type: Number,
+        required: false,
+    },
+    join_message: {
+        type: String,
+        required: false,
+    },
+    match_found_message: {
+        type: String,
+        required: false,
+    },
+    timeout_message: {
+        type: String,
+        required: false,
+    },
+    leave_message: {
+        type: String,
+        required: false,
+    },
+    room_spawner: {
+        type: VoiceChannelSpawnerSchema,
+        required: false,
+    },
+    entries: [{
+        type: QueueEntrySchema,
+        required: true,
+        default: [],
+    }]
+});
 
 QueueSchema.method('join', async function (entry: QueueEntry) {
     if (this.entries.find(x => x.discord_id === entry.discord_id)) {
@@ -140,7 +118,7 @@ QueueSchema.method('leave', async function (discord_id: string) {
     if (!entry) {
         throw new Error('Not Found');
     }
-    this.entries.splice(this.entries.indexOf(entry),1);
+    this.entries.splice(this.entries.indexOf(entry), 1);
     await this.$parent()?.save();
     return entry;
 });

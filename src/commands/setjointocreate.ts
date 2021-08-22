@@ -82,7 +82,7 @@ const command: Command = {
                         spawner: {
                             owner: member.id,
                             supervisor_roles: [],
-                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'] }],
+                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', "MANAGE_CHANNELS"] }],
                             max_users: 5,
                             parent: parent_id,
                         },

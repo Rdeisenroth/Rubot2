@@ -23,7 +23,38 @@ const OverwriteDataSchema = new mongoose.Schema({
     },
 })
 
-const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocument, VoiceChannelSpawnerModel>({
+export interface VoiceChannelSpawner {
+    /**
+     * overwrite the VC Owner for the Bot
+     */
+    owner?: string,
+    /**
+     * The Roles that can moderate this channel
+     */
+    supervisor_roles: string[],
+    /**
+     * The Channel Permissions
+     */
+    permission_overwrites: OverwriteData[],
+    /**
+     * Limit the amount of Users that can join the channel
+     */
+    max_users?: number,
+    /**
+     * The Name of the Channel, use ${owner} and so on to create dynamic channel names
+     */
+    name?: string,
+    /**
+     * Whether the Channel should initially be locked or not
+     */
+    lock_initially?: boolean,
+    /**
+     * The Category Channel ID
+     */
+    parent?: string,
+}
+
+const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocument, VoiceChannelSpawnerModel, VoiceChannelSpawner>({
     owner: {
         type: String,
         required: false,
@@ -56,37 +87,6 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
         required: false,
     },
 })
-
-export interface VoiceChannelSpawner {
-    /**
-     * overwrite the VC Owner for the Bot
-     */
-    owner?: string,
-    /**
-     * The Roles that can moderate this channel
-     */
-    supervisor_roles: string[],
-    /**
-     * The Channel Permissions
-     */
-    permission_overwrites: OverwriteData[],
-    /**
-     * Limit the amount of Users that can join the channel
-     */
-    max_users?: number,
-    /**
-     * The Name of the Channel, use ${owner} and so on to create dynamic channel names
-     */
-    name?: string,
-    /**
-     * Whether the Channel should initially be locked or not
-     */
-    lock_initially?: boolean,
-    /**
-     * The Category Channel ID
-     */
-    parent?: string,
-}
 
 /**
  * Used for creating Voice Channels

@@ -1,7 +1,7 @@
 import { Guild, GuildMember, OverwriteData, PremiumTier } from "discord.js";
 import { Bot } from "../bot";
 import GuildSchema from "../models/guilds";
-import { DatabaseVoiceChannel, VoiceChannel } from "../models/voice_channels";
+import { VoiceChannel } from "../models/voice_channels";
 import { VoiceChannelCreateOptions, VoiceChannelSpawner } from "../models/voice_channel_spawner";
 
 /**
@@ -62,7 +62,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
         afkhell: false,
         category: options.parent,
         temporary: true,
-    } as DatabaseVoiceChannel);
+    } as VoiceChannel);
     await guildData.save();
     return createdVC;
 };

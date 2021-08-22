@@ -1,10 +1,10 @@
-import { ColorResolvable, CommandInteraction, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, ReplyMessageOptions, UserResolvable } from "discord.js";
+import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, ReplyMessageOptions, TextBasedChannels, TextChannel, ThreadChannel, UserResolvable, PartialDMChannel } from "discord.js";
 import { APIMessage } from 'discord-api-types/v9';
 import * as utils from './utils';
 import { SimpleEmbedOptions } from "../../typings";
 
-export async function SimpleEmbed(interaction: Message | CommandInteraction, title: string, description: string): Promise<Message | null>;
-export async function SimpleEmbed(interaction: Message | CommandInteraction, options: SimpleEmbedOptions): Promise<Message | null>;
+export async function SimpleEmbed(interaction: Message | CommandInteraction | DMChannel | TextChannel | NewsChannel | ThreadChannel, title: string, description: string): Promise<Message | null>;
+export async function SimpleEmbed(interaction: Message | CommandInteraction | DMChannel | TextChannel | NewsChannel | ThreadChannel, options: SimpleEmbedOptions): Promise<Message | null>;
 
 /**
  *Creates a message Embed and sends it in the Channel of the given Message
@@ -16,16 +16,22 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction, opt
  * @param deleteinterval Automatically delete message after x seconds
  * @returns embedObject
  */
-export async function SimpleEmbed(interaction: Message | CommandInteraction, optionsortitle: SimpleEmbedOptions | string, description?: string) {//TODO Constructor for no repetitive embed creating
-    if (!interaction.channel) {
+export async function SimpleEmbed(interaction: Message | CommandInteraction | DMChannel | TextChannel | NewsChannel | ThreadChannel, optionsortitle: SimpleEmbedOptions | string, description?: string) {//TODO Constructor for no repetitive embed creating
+    if (!(
+        interaction instanceof DMChannel ||
+        interaction instanceof TextChannel ||
+        interaction instanceof NewsChannel ||
+        interaction instanceof ThreadChannel
+    ) && !interaction.channel) {
         throw new Error("Embed Requires a Channel");
     }
     let embed = new MessageEmbed();
-    if (interaction && interaction.guild && interaction.guild.me) {
-        embed.setColor(interaction.guild.me.roles.highest.color);
+    if (!(interaction instanceof DMChannel)) {
+        embed.setColor(interaction.guild?.me?.roles.highest.color ?? 0x7289da);
     } else {
-        embed.setColor(0x7289da)
+        embed.setColor(0x7289da);
     }
+
 
     let options: SimpleEmbedOptions;
     if (typeof optionsortitle === "string") {
@@ -45,8 +51,10 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction, opt
     let res: void | Message;
     if (interaction instanceof CommandInteraction) {
         res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
-    } else {
+    } else if (interaction instanceof Message) {
         res = await interaction.reply({ embeds: [embed] });
+    } else {
+        res = await interaction.send({ embeds: [embed] });
     }
     if (res instanceof Message) {
         let m = res;
