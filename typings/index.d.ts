@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionData, ButtonInteraction as bi, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
+import mongoose from "mongoose";
 
 /**
  * The Bot Configuration File
@@ -286,7 +287,7 @@ export type SimpleEmbedOptions = {
     /**
      * the title of the embed
      */
-    title:string,
+    title: string,
     /**
      * The text for the Description of the embed
      */
@@ -307,4 +308,22 @@ export type SimpleEmbedOptions = {
      * If the Message should only be visible for the reciever (only works for CommandInteractions)
      */
     empheral?: boolean,
+}
+
+/**
+ * Simple Type To Export Event Dates
+ */
+export type EventDate = {
+    /**
+     * The Event ID
+     */
+    event_id?: mongoose.Types.ObjectId,
+    /**
+     * The Target ID
+     */
+    target_id: string,
+    /**
+     * The Timestamp
+     */
+    timestamp: string,
 }

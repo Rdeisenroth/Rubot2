@@ -112,7 +112,7 @@ export class Bot extends Client {
         // Connect to db
         mongoose.connect(
             config.mongodb_connection_url,
-            { useNewUrlParser: true, useUnifiedTopology: true },
+            { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, },
             (err) => {
                 if (err) {
                     throw err;

@@ -51,17 +51,19 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction, opt
     if (res instanceof Message) {
         let m = res;
         if (deleteinterval) {
-            setTimeout(async () => {if (m.deletable) await m.delete()}, deleteinterval);
+            setTimeout(async () => { if (m.deletable) await m.delete() }, deleteinterval);
         }
         return m;
     } else if (interaction instanceof CommandInteraction) {
-        let m = await interaction.fetchReply();
-        if (deleteinterval && !(empheral)) {
-            setTimeout(() => interaction.deleteReply(), deleteinterval);
+        if (!empheral) {
+            let m = await interaction.fetchReply();
+            if (deleteinterval) {
+                setTimeout(() => interaction.deleteReply(), deleteinterval);
+            }
+            return m;
         }
-        return m;
     }
-    // No Message was sent
+    // No Message was sent or empheral
     return null;
 }
 

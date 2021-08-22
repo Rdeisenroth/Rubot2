@@ -71,23 +71,29 @@ export const getRandomEntryWithWeights: <T>(array: [T, number][]) => T = (array)
     return array[0][0];
 }
 
-
+/**
+ * Creates a clean User object from an Interaction
+ * @param interaction the Interaction to get the User from
+ * @returns the User
+ */
+export function getUser(interaction: Message | Interaction): ChannelType.User;
 /**
  * Creates a clean User object from an Interaction
  * @param interaction  the Interaction to get the User from
  * @returns the User or null
  */
-export const getUser = (interaction: Message | Interaction | undefined) => {
+export function getUser(interaction: Message | Interaction | undefined): ChannelType.User | null;
+
+export function getUser(interaction: Message | Interaction | undefined) {
     // Check if user is in VC
     if (!interaction) {
         return null;
     }
     if (interaction instanceof Message) {
         return interaction.author;
-    } else if (interaction instanceof Interaction) {
+    } else {
         return interaction.user;
     }
-    return null;
 }
 /**
  * Creates a clean Member object from an Interaction
