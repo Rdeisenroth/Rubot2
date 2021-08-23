@@ -87,7 +87,25 @@ const SessionSchema = new mongoose.Schema<SessionDocument, SessionModel, Session
         required: true,
         default: [],
     }],
-})
+});
+
+export interface SessionDocument extends Session, mongoose.Document {
+    rooms: mongoose.Types.Array<string>,
+    /**
+     * Gets The Number of Rooms that were Visited in the Session
+     */
+    getRoomAmount(): number,
+    /**
+     * Gets The Number of Participants met in the Session (assuming the Chanels Lifetime is within the Session)
+     */
+    getParticipantAmount(): Promise<number>,
+}
+
+export interface SessionModel extends mongoose.Model<SessionDocument> {
+
+}
+
+// --Methods--
 
 SessionSchema.method('getRoomAmount', function () {
     return this.rooms.length;
@@ -106,21 +124,6 @@ SessionSchema.method('getParticipantAmount', async function () {
 // SessionSchema.method('getParticipants', function () {
 //     return RoomSchema.f;
 // });
-
-export interface SessionDocument extends Session, mongoose.Document {
-    /**
-     * Gets The Number of Rooms that were Visited in the Session
-     */
-    getRoomAmount(): number,
-    /**
-     * Gets The Number of Participants met in the Session (assuming the Chanels Lifetime is within the Session)
-     */
-    getParticipantAmount(): Promise<number>,
-}
-
-export interface SessionModel extends mongoose.Model<SessionDocument> {
-
-}
 
 // Default export
 export default mongoose.model<SessionDocument, SessionModel>("Sessions", SessionSchema);

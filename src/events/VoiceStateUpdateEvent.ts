@@ -13,7 +13,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
     const newUserChannel = newState.channel;
 
     // New Channel/switch Channel
-    if (newState.channel && newState.channel.guild) {
+    if (newState.channel && newState.channel.guild && newUserChannel?.id != oldUserChannel?.id) {
 
         var guild = newState.channel.guild;
 
@@ -71,7 +71,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         "eta": "null",
                         "pos": queue.getPosition(queueEntry.discord_id) + 1,
                         "total": queue.entries.length,
-                        "time_spent": moment.duration(Date.now() - (+queueEntry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
+                        "time_spent": "0s",
                     }
                     // Interpolate String
                     let join_message = client.utils.general.interpolateString(queue.join_message, replacements);

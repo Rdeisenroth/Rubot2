@@ -1,6 +1,6 @@
 import mongoose, { ObjectId } from "mongoose";
 import { Channel } from "./text_channels";
-import VoiceChannelSpawnerSchema, { VoiceChannelSpawner } from "./voice_channel_spawner";
+import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
 
 export interface VoiceChannel extends Channel {
     /**
@@ -55,14 +55,6 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         enum: [0, 1, 2, 3, 4, 5, 6, 7],
         required: true
     },
-    // whitelist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
-    // blacklist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
     managed: {
         type: Boolean,
         required: true,
@@ -92,11 +84,11 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         required: true,
         default: false,
     },
-    permitted: {
-        type: [String],
+    permitted: [{
+        type: String,
         required: true,
         default: [],
-    },
+    }],
     spawner: {
         type: VoiceChannelSpawnerSchema,
         required: false,
@@ -110,15 +102,17 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
         required: false,
         default: false,
     },
-    supervisors: {
-        type: [String],
+    supervisors: [{
+        type: String,
         required: false,
         default: [],
-    },
+    }],
 });
 
 export interface VoiceChannelDocument extends VoiceChannel, Omit<mongoose.Document, "_id"> {
-
+    permitted: mongoose.Types.Array<string>,
+    spawner?: VoiceChannelSpawnerDocument,
+    supervisors?: mongoose.Types.Array<string>,
 }
 
 export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> {

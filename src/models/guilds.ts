@@ -1,5 +1,5 @@
 // import mongoose from 'mongoose';
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { Bot } from "../bot";
 import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
 import QueueSchema, { Queue, QueueDocument } from "./queues";
@@ -9,34 +9,56 @@ import * as djs from 'discord.js';
 import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
 
 /**
- * A Schema For storing and Managing Guilds
+ * A Guild from the Database
  */
-const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel>({
+export interface Guild {
     /**
      * The Guild ID provided by Discord
      */
+    _id: string,
+    /**
+     * The Name of the Guild
+     */
+    name: string,
+    /**
+     * The Member Count (Makes it easier to sort Guilds by member counts)
+     */
+    member_count: number,
+    /**
+     * The Settings for the Guild
+     */
+    guild_settings: GuildSettings,
+    /**
+     * The Relevant Text Channels of the Guild
+     */
+    text_channels: TextChannel[],
+    /**
+     * The Relevant Voice Channels of the Guild
+     */
+    voice_channels: VoiceChannel[],
+    /**
+     * The Queues of the Guild
+     */
+    queues: Queue[],
+}
+
+/**
+ * A Schema For storing and Managing Guilds
+ */
+const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel, Guild>({
     _id: {
         type: String,
         required: true
     },
-    /**
-     * The Name of the Guild
-     */
     name: {
         type: String,
         required: true
     },
-    /**
-     * The Member Count (Makes it easier to sort Guilds by member counts)
-     */
     member_count: {
         type: Number,
         required: true,
         default: 0
     },
-    /**
-     * The Settings for the Guild
-     */
     guild_settings: {
         type: GuildSettingsSchema,
         required: true,
@@ -57,6 +79,32 @@ const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel>({
         default: [],
     }]
 });
+
+/**
+ * A Guild Document as stored in the Database
+ */
+export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
+    // List getters or non model methods here
+    text_channels: mongoose.Types.DocumentArray<TextChannelDocument>,
+    voice_channels: mongoose.Types.DocumentArray<VoiceChannelDocument>,
+    guild_settings: GuildSettingsDocument,
+    queues: mongoose.Types.DocumentArray<QueueDocument>,
+}
+
+/**
+ * A Guild Model
+ */
+export interface GuildModel extends mongoose.Model<GuildDocument> {
+    // List Model methods here
+    /**
+     * Processes A Guild by updating the database and posting Slash Commands
+     * @param client The Bot Client
+     * @param g the guild Object
+     */
+    prepareGuild(client: Bot, g: djs.Guild): Promise<void>,
+}
+
+// --Methods--
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
 
@@ -119,36 +167,6 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
     }
     // console.log(command);
 })
-
-/**
- * A Guild from the Database
- */
-export interface Guild {
-    name: String,
-    member_count: number,
-    guild_settings: GuildSettings,
-    text_channels: TextChannel[],
-    voice_channels: VoiceChannel[],
-    queues: Queue[],
-}
-
-export interface GuildDocument extends Guild, mongoose.Document {
-    // List getters or non model methods here
-    text_channels: TextChannelDocument[],
-    voice_channels: VoiceChannel[],
-    guild_settings: GuildSettingsDocument,
-    // queues: QueueDocument[],
-}
-
-export interface GuildModel extends mongoose.Model<GuildDocument> {
-    // List Model methods here
-    /**
-     * Processes A Guild by updating the database and posting Slash Commands
-     * @param client The Bot Client
-     * @param g the guild Object
-     */
-    prepareGuild(client: Bot, g: djs.Guild): Promise<void>,
-}
 
 // Default export
 export default mongoose.model<GuildDocument, GuildModel>("Guilds", GuildSchema);

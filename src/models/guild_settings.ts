@@ -1,6 +1,24 @@
 import mongoose from "mongoose";
 
-const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSettingsModel>({
+export enum CommandListenMode {
+    WHITELIST = 0,
+    BLACKLIST = 1
+}
+
+export interface GuildSettings {
+    /**
+     * @deprecated
+     * The Bot Prefix for the Guild
+     */
+    prefix: string,
+    /**
+     * @deprecated
+     * The Command Listen Mode for The Guild
+     */
+    command_listen_mode: CommandListenMode,
+}
+
+const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSettingsModel, GuildSettings>({
     command_listen_mode: {
         type: Number,
         enum: [0, 1],
@@ -12,17 +30,7 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
         required: true,
         default: "!"
     }
-})
-
-export enum CommandListenMode {
-    WHITELIST = 0,
-    BLACKLIST = 1
-}
-
-export interface GuildSettings {
-    prefix: string,
-    command_listen_mode: CommandListenMode,
-}
+});
 
 export interface GuildSettingsDocument extends GuildSettings, mongoose.Document {
 

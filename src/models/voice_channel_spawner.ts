@@ -1,27 +1,5 @@
-import { OverwriteData, OverwriteResolvable, PermissionOverwriteOptions, PermissionOverwrites } from "discord.js";
 import mongoose from "mongoose";
-
-const OverwriteDataSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true,
-    },
-    allow: {
-        type: [String],
-        enum: ['CREATE_INSTANT_INVITE', 'KICK_MEMBERS', 'BAN_MEMBERS', 'ADMINISTRATOR', 'MANAGE_CHANNELS', 'MANAGE_GUILD', 'ADD_REACTIONS', 'VIEW_AUDIT_LOG', 'PRIORITY_SPEAKER', 'STREAM', 'VIEW_CHANNEL', 'SEND_MESSAGES', 'SEND_TTS_MESSAGES', 'MANAGE_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'READ_MESSAGE_HISTORY', 'MENTION_EVERYONE', 'USE_EXTERNAL_EMOJIS', 'VIEW_GUILD_INSIGHTS', 'CONNECT', 'SPEAK', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'USE_VAD', 'CHANGE_NICKNAME', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_WEBHOOKS', 'MANAGE_EMOJIS',],
-        required: false,
-    },
-    deny: {
-        type: [String],
-        enum: ['CREATE_INSTANT_INVITE', 'KICK_MEMBERS', 'BAN_MEMBERS', 'ADMINISTRATOR', 'MANAGE_CHANNELS', 'MANAGE_GUILD', 'ADD_REACTIONS', 'VIEW_AUDIT_LOG', 'PRIORITY_SPEAKER', 'STREAM', 'VIEW_CHANNEL', 'SEND_MESSAGES', 'SEND_TTS_MESSAGES', 'MANAGE_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'READ_MESSAGE_HISTORY', 'MENTION_EVERYONE', 'USE_EXTERNAL_EMOJIS', 'VIEW_GUILD_INSIGHTS', 'CONNECT', 'SPEAK', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'USE_VAD', 'CHANGE_NICKNAME', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_WEBHOOKS', 'MANAGE_EMOJIS',],
-        required: false,
-    },
-    type: {
-        type: String,
-        enum: ['member', 'role'],
-        required: false,
-    },
-})
+import PermissionOverwriteDataSchema, { PermissionOverwriteData, PermissionOverwriteDataDocument } from "./permission_overwrite_data";
 
 export interface VoiceChannelSpawner {
     /**
@@ -35,7 +13,7 @@ export interface VoiceChannelSpawner {
     /**
      * The Channel Permissions
      */
-    permission_overwrites: OverwriteData[],
+    permission_overwrites: PermissionOverwriteData[],
     /**
      * Limit the amount of Users that can join the channel
      */
@@ -59,15 +37,15 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
         type: String,
         required: false,
     },
-    supervisor_roles: {
-        type: [String],
+    supervisor_roles: [{
+        type: String,
         required: true,
-        default: []
-    },
-    permission_overwrites: {
-        type: [OverwriteDataSchema],
+        default: [],
+    }],
+    permission_overwrites: [{
+        type: PermissionOverwriteDataSchema,
         required: true
-    },
+    }],
     max_users: {
         type: Number,
         required: false,
@@ -96,7 +74,8 @@ export interface VoiceChannelCreateOptions extends VoiceChannelSpawner {
 }
 
 export interface VoiceChannelSpawnerDocument extends VoiceChannelSpawner, mongoose.Document {
-
+    supervisor_roles: mongoose.Types.Array<string>,
+    permission_overwrites: mongoose.Types.DocumentArray<PermissionOverwriteDataDocument>,
 }
 
 export interface VoiceChannelSpawnerModel extends mongoose.Model<VoiceChannelSpawnerDocument> {

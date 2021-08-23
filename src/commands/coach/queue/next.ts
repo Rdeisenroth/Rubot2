@@ -9,10 +9,11 @@ import UserSchema, { User } from "../../../models/users";
 import RoomSchema, { Room } from "../../../models/rooms";
 import { VoiceChannel, VoiceChannelDocument } from "../../../models/voice_channels";
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
+import { QueueEntryDocument } from "../../../models/queue_entry";
 
 const command: Command = {
     name: 'next',
-    description: 'Create A Private Room for coaching the first Person in the queue, or marks you as ready if noone is in the queue',
+    description: 'Accept X Persions from The Queue',
     aliases: ['n'],
     options: [{
         name: "amount",
@@ -29,9 +30,17 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, 'Slash Only Command', 'This Command is Slash only but you Called it with The Prefix. use the slash Command instead.');
             return;
         }
+        try {
+            await interaction.deferReply({ ephemeral: true });
+        } catch (error) {
+            return console.log(error);
+        }
 
         const g = interaction.guild!;
-        let guildData = (await GuildSchema.findById(g.id))!;
+        let guildData = (await GuildSchema.findById(g.id));
+        if (!guildData) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
+        }
 
         let user = client.utils.general.getUser(interaction);
         let userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
@@ -47,23 +56,22 @@ const command: Command = {
         }
 
         let queue = coachingSession.queue;
-        let queueData = await (guildData.queues as QueueDocument[]).find(x => x._id === queue);
+        let queueData = guildData.queues.id(queue);
         if (!queueData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
         }
+        if (queueData.isEmpty()) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Queue is Empty", empheral: true });
+        }
         let entries = queueData.getSortedEntries(interaction.options.getInteger("amount") ?? 1);
 
-        // Notify Match(es)
-        for (let e of entries) {
-            try {
-                let user = await client.users.fetch(e.discord_id);
-                client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", "Your Match was Found.");
-            } catch (error) {
-                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: error, empheral: true });
-            }
+        if (entries.length < (interaction.options.getInteger("amount") ?? 1)) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: `There are less participants in the queue than requested.\n\\> Requested: ${interaction.options.getInteger("amount") ?? 1}\n\\> Available: ${entries.length}`, empheral: true });
         }
 
-        let spawner = queueData.room_spawner;
+        // Get Room Spawner
+
+        let spawner:VoiceChannelSpawner | undefined = queueData.room_spawner;
         let queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue === queue);
         let queue_channel = g.channels.cache.get(queue_channel_data?._id ?? "");
         let member = client.utils.general.getMember(interaction)!;
@@ -79,6 +87,8 @@ const command: Command = {
             } as VoiceChannelSpawner;
         }
 
+        // Spawn Room
+
         let room: ChannelType.VoiceChannel
         try {
             room = await client.utils.voice.createTempVC(member, spawner);
@@ -87,17 +97,44 @@ const command: Command = {
         }
 
         let roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id, events: [] });
+        // Update Coach Session
+        coachingSession.rooms.push(roomData._id);
+        await coachingSession.save();
+
+        // Notify Match(es)
+        for (let e of entries) {
+            try {
+                let user = await client.users.fetch(e.discord_id);
+                console.log("coach queue next: Matches: Notify User");
+                // Notify user
+                await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
+                console.log("coach queue next: Matches: Remove User from Queue");
+                // remove from queue
+                queueData.entries.remove({ _id: e._id });
+                await guildData.save();
+                // Try to move
+                try {
+                    let member = g.members.resolve(user)!;
+                    await member.voice.setChannel(room);
+                } catch (error) {
+                    // Ignore Errors
+                }
+                // TODO: User Sessions
+            } catch (error) {
+                console.log(error)
+                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: error, empheral: true });
+            }
+        }
 
 
-        // client.utils.embeds.SimpleEmbed(interaction, {
-        //     title: "Coaching System", text: `
-        // \\> Total Time Spent: ${moment.duration(Date.now() - (+coachingSession.started_at)).format("d[d ]h[h ]m[m ]s.S[s]")}
-        // \n\\> Channels visited: ${coachingSession.getRoomAmount()}
-        // \n\\> Participants: ${(await coachingSession.getParticipantAmount())}
-        // `, empheral: true
-        // })
+        // Try to move Coach
+        try {
+            await member.voice.setChannel(room);
+        } catch (error) {
+            // Ignore Errors
+        }
 
-        // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
+        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `Done. Please Join ${room} if you are not automatically moved.`, empheral: true });
     }
 }
 

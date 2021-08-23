@@ -64,13 +64,17 @@ export class Bot extends Client {
             console.log(`-${JSON.stringify(command.name)} (./commands/${file})`);
             // Check Command Name
             if (command.name !== command.name.toLowerCase() || !command.name.match("^[\\w-]{1,32}$")) {
-                throw new Error(`Invalid Command Name: ${command.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                throw new Error(`Invalid Command Name at ./commands/${file}: ${command.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+            }
+            // Check Command Description
+            if (command.description.length < 1 || command.description.length > 100){
+                throw new Error(`Invalid Command Description for ${command.name} at ./commands/${file}\nDescription Must be 1-100 Characters Long`);
             }
             if (command.options) {
                 // Check Command Options
                 for (let opt of command.options) {
                     if (opt.name !== opt.name.toLowerCase() || !opt.name.match("^[\\w-]{1,32}$")) {
-                        throw new Error(`Invalid Option Name: ${opt.name}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                        throw new Error(`Invalid Option Name: ${opt.name} at ./commands/${file}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
                     }
                 }
             }

@@ -1,52 +1,18 @@
 import { ChannelTypes } from "discord.js/typings/enums";
 import mongoose from "mongoose";
 
-const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelModel>({
-    channel_type: {
-        type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13],
-        required: true
-    },
-    // whitelist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
-    // blacklist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
-    managed: {
-        type: Boolean,
-        required: true,
-    },
-    owner: {
-        type: String,
-        required: false,
-    },
-    prefix: {
-        type: String,
-        required: false,
-    },
-    listen_for_commands: {
-        type: String,
-        required: true,
-    },
-    rage_channel: {
-        type: String,
-        required: false,
-    },
-})
-
 /**
  * Database Representation of a Discord Channel
  */
 export interface Channel {
     /**
+     * The Channel ID
+     */
+    _id: string,
+    /**
      * The Channel Type
      */
     channel_type: ChannelTypes,
-    // whitelist_user_groups: string[],
-    // blacklist_user_groups: string[],
     /**
      * Whether the Channel is being managed by or relevant to the bot
      */
@@ -76,17 +42,43 @@ export interface TextChannel extends Channel {
     rage_channel?: boolean,
 }
 
-// export interface VoiceChannel extends Channel {
-//     channel_type: ChannelType,
-//     whitelist_user_groups: string[],
-//     blacklist_user_groups: string[],
-//     managed: boolean,
-//     owner?: String,
-//     afkhell?: boolean,
-//     song_link?: String,
-// }
+const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelModel, TextChannel>({
+    channel_type: {
+        type: Number,
+        enum: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13],
+        required: true
+    },
+    // whitelist_user_groups: [{
+    //     type: String,
+    //     required: true
+    // }],
+    // blacklist_user_groups: [{
+    //     type: String,
+    //     required: true
+    // }],
+    managed: {
+        type: Boolean,
+        required: true,
+    },
+    owner: {
+        type: String,
+        required: false,
+    },
+    prefix: {
+        type: String,
+        required: false,
+    },
+    listen_for_commands: {
+        type: Boolean,
+        required: true,
+    },
+    rage_channel: {
+        type: String,
+        required: false,
+    },
+});
 
-export interface TextChannelDocument extends TextChannel, mongoose.Document {
+export interface TextChannelDocument extends TextChannel, Omit<mongoose.Document, "_id"> {
 
 }
 

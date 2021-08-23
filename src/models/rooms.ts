@@ -59,7 +59,36 @@ const RoomSchema = new mongoose.Schema<RoomDocument, RoomModel, Room>({
         required: true,
         default: [],
     }],
-})
+});
+
+export interface RoomDocument extends Room, Omit<mongoose.Document, "_id"> {
+    events: mongoose.Types.DocumentArray<EventDocument>,
+    /**
+     * Collects All User IDs that joined The Channel at least Once
+     */
+    getUsers(): string[],
+    /**
+     * Gets The First Time someone Joins and Their Discord ID
+     */
+    getFirstJoinTimes(): EventDate[],
+    /**
+     * Gets The Users with Their Roles at Join Date
+     */
+    getUserRoles(): Promise<{
+        userID: string;
+        role: sessionRole | null;
+    }[]>,
+    /**
+     * Gets The Participants Of the Channel
+     */
+    getParticipants(): Promise<string[]>
+}
+
+export interface RoomModel extends mongoose.Model<RoomDocument> {
+
+}
+
+// --Methods--
 
 RoomSchema.method('getUsers', function () {
     return [... new Set(this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => x.type === eventType.user_join ? x.emitted_by : x.target!))];
@@ -110,32 +139,6 @@ RoomSchema.method('getFirstJoinTimes', function () {
     let eventDates = this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => { return { timestamp: x.timestamp, target_id: (x.type === eventType.user_join ? x.emitted_by : x.target!), event_id: (x as EventDocument)._id } as EventDate });
     return eventDates.filter((x, pos) => eventDates.findIndex(y => y.target_id === x.target_id) === pos);
 });
-
-export interface RoomDocument extends Room, Omit<mongoose.Document, "_id"> {
-    /**
-     * Collects All User IDs that joined The Channel at least Once
-     */
-    getUsers(): string[],
-    /**
-     * Gets The First Time someone Joins and Their Discord ID
-     */
-    getFirstJoinTimes(): EventDate[],
-    /**
-     * Gets The Users with Their Roles at Join Date
-     */
-    getUserRoles(): Promise<{
-        userID: string;
-        role: sessionRole | null;
-    }[]>,
-    /**
-     * Gets The Participants Of the Channel
-     */
-    getParticipants(): Promise<string[]>
-}
-
-export interface RoomModel extends mongoose.Model<RoomDocument> {
-
-}
 
 // Default export
 export default mongoose.model<RoomDocument, RoomModel>("Rooms", RoomSchema);

@@ -5,6 +5,7 @@ import { Command, RunCommand, SubcommandHandler } from "../../../typings";
 import GuildSchema, { Guild } from "../../models/guilds";
 import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
 import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
+import path from "path";
 
 var command: SubcommandHandler = {
     name: 'room',
@@ -18,16 +19,20 @@ var command: SubcommandHandler = {
         let scopts: ChannelType.ApplicationCommandOptionData[] = []
         for (const file of commandFiles) {
             const c: Command = await import(`${__dirname}/${command.name}/${file}`);
-            console.log(`\t\t∘${JSON.stringify(c.name)} (./commands/${command.name}/${file})`);
+            console.log(`\t\t∘${JSON.stringify(c.name)} (./${path.relative(process.cwd(), __dirname)}/${command.name}/${file})`);
             // Check Command Name
             if (c.name !== c.name.toLowerCase() || !c.name.match("^[\\w-]{1,32}$")) {
-                throw new Error(`Invalid Command Name: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                throw new Error(`Invalid Command Namefor ${c.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+            }
+            // Check Command Description
+            if (c.description.length < 1 || c.description.length > 100) {
+                throw new Error(`Invalid Command Description for ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}\nDescription Must be 1-100 Characters Long`);
             }
             if (c.options) {
                 // Check Command Options
                 for (let opt of c.options) {
                     if (opt.name !== opt.name.toLowerCase() || !opt.name.match("^[\\w-]{1,32}$")) {
-                        throw new Error(`Invalid Option Name: ${opt.name}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                        throw new Error(`Invalid Option Name: ${opt.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
                     }
                 }
             }

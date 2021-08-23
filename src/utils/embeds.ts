@@ -50,7 +50,12 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     }
     let res: void | Message;
     if (interaction instanceof CommandInteraction) {
-        res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
+        if (interaction.replied || interaction.deferred) {
+            await interaction.editReply({ embeds: [embed] });
+            res = void 0;
+        } else {
+            res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
+        }
     } else if (interaction instanceof Message) {
         res = await interaction.reply({ embeds: [embed] });
     } else {
