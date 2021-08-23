@@ -41,6 +41,10 @@ export interface UserDocument extends User, Omit<mongoose.Document, "_id"> {
      */
     hasActiveSessions(): Promise<boolean>,
     /**
+     * Gets all Sessions from a User
+     */
+    getSessions(): Promise<SessionDocument[]>,
+    /**
      * Gets all Active Sessions from a User
      */
     getActiveSessions(): Promise<SessionDocument[]>,
@@ -64,6 +68,10 @@ UserSchema.method('hasActiveSessions', async function () {
     } else {
         return false;
     }
+});
+
+UserSchema.method('getSessions', async function () {
+    return await SessionSchema.find({ user: (this._id as string) });
 });
 
 UserSchema.method('getActiveSessions', async function () {

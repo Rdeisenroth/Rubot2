@@ -1,8 +1,10 @@
 import ChannelType, { EmojiIdentifierResolvable, GuildMember, Message, MessageEmbed, StageChannel } from "discord.js";
 import { OverwriteData } from "discord.js";
+import moment from "moment";
 import path from "path";
 import { Command, RunCommand } from "../../../typings";
 import GuildSchema, { Guild } from "../../models/guilds";
+import UserSchema, { User } from "../../models/users";
 import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
 import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
 
@@ -24,8 +26,38 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
+        let guildData = (await GuildSchema.findById(g.id))!;
 
-        client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
+        let user = client.utils.general.getUser(interaction);
+        let userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
+        // Check if User has any Sessions
+        let sessions = await (await userEntry.getSessions()).filter(x => x.guild && x.guild == g.id);
+        if (!sessions.length) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You Have no Past or active Coaching Sessions.", empheral: true });
+        }
+
+        let total_time_spent: number = 0;
+        let channel_count: number = 0;
+        let participants: number = 0;
+
+        for (let session of sessions) {
+            if (session.active || session.end_certain) {
+                total_time_spent += (session.active ? Date.now() : (+session.ended_at!)) - (+session.started_at);
+            }
+            channel_count += session.getRoomAmount();
+            participants += await session.getParticipantAmount();
+        }
+
+        await client.utils.embeds.SimpleEmbed(interaction, {
+            title: "Coaching System", text: `
+        \\> Sessions: ${sessions.length}
+        \n\\> Total Time Spent: ${moment.duration(total_time_spent).format("d[d ]h[h ]m[m ]s.S[s]")}
+        \n\\> Channels visited: ${channel_count}
+        \n\\> Participants: ${participants}
+        `, empheral: true
+        });
+
+        // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
     }
 }
 
