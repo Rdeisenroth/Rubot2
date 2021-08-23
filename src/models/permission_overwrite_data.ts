@@ -2,8 +2,8 @@ import { OverwriteData, OverwriteResolvable, PermissionOverwriteOptions, Permiss
 import mongoose from "mongoose";
 
 export interface PermissionOverwriteData extends OverwriteData {
-    allow: PermissionString[],
-    deny: PermissionString[],
+    allow?: PermissionString[],
+    deny?: PermissionString[],
     id: Snowflake,
 }
 
@@ -30,8 +30,8 @@ const PermissionOverwriteDataSchema = new mongoose.Schema<PermissionOverwriteDat
 });
 
 export interface PermissionOverwriteDataDocument extends PermissionOverwriteData, Omit<mongoose.Document, "id"> {
-    allow: mongoose.Types.Array<PermissionString>,
-    deny: mongoose.Types.Array<PermissionString>,
+    allow?: mongoose.Types.Array<PermissionString>,
+    deny?: mongoose.Types.Array<PermissionString>,
 }
 
 export interface PermissionOverwriteDataModel extends mongoose.Model<PermissionOverwriteDataDocument> {

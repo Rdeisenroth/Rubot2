@@ -9,7 +9,7 @@ export enum sessionRole {
     "supervisor" = "supervisor",
 }
 
-export interface Session extends Channel {
+export interface Session extends Omit<Channel, "_id"> {
     /**
      * Whether the Session is currently active
      */
