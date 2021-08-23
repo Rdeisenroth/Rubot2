@@ -38,7 +38,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You Have no Active Coaching Session.", empheral: true });
         }
 
-        client.utils.embeds.SimpleEmbed(interaction, {
+        await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System", text: `
         \\> Total Time Spent: ${moment.duration(Date.now() - (+coachingSession.started_at)).format("d[d ]h[h ]m[m ]s.S[s]")}
         \n\\> Channels visited: ${coachingSession.getRoomAmount()}

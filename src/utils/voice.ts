@@ -16,7 +16,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     permoverrides.push(
         {
             id: guild.me!.id,
-            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', 'MANAGE_CHANNELS'], // Fix a bug where i cannot move Members without admin Access
+            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM', 'MOVE_MEMBERS', 'MANAGE_CHANNELS', "DEAFEN_MEMBERS", "MUTE_MEMBERS"], // Fix a bug where i cannot move Members without admin Access
         },
     );
 
@@ -24,7 +24,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     for (const i of options.supervisor_roles) {
         permoverrides.push({
             id: i,
-            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', "MANAGE_CHANNELS"],
+            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM', 'MOVE_MEMBERS', 'MANAGE_CHANNELS', "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
         });
     }
 
@@ -92,7 +92,7 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
     // }
     spawner.permission_overwrites.push({
         id: member.id,
-        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK'],
+        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM'],
     })
 
     spawner.name = name;

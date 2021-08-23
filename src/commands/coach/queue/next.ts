@@ -72,7 +72,7 @@ const command: Command = {
         // Get Room Spawner
 
         let spawner:VoiceChannelSpawner | undefined = queueData.room_spawner;
-        let queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue === queue);
+        let queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue == queue);
         let queue_channel = g.channels.cache.get(queue_channel_data?._id ?? "");
         let member = client.utils.general.getMember(interaction)!;
         if (!spawner) {
@@ -85,6 +85,9 @@ const command: Command = {
                 lock_initially: true,
                 name: `${member.displayName}'s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`
             } as VoiceChannelSpawner;
+            console.log(spawner.parent);
+            // queueData.set("room_spawner", spawner);
+            // await guildData.save();
         }
 
         // Spawn Room
@@ -93,6 +96,7 @@ const command: Command = {
         try {
             room = await client.utils.voice.createTempVC(member, spawner);
         } catch (error) {
+            console.log(error);
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Channel could not be created.", empheral: true });
         }
 
