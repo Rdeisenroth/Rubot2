@@ -11,12 +11,12 @@ import { VoiceChannelCreateOptions, VoiceChannelSpawner } from "../models/voice_
  */
 export async function createManagedVC(guild: Guild, options: VoiceChannelCreateOptions) {
     // Channel Permissions
-    let permoverrides: OverwriteData[] = options.permission_overwrites;
+    const permoverrides: OverwriteData[] = options.permission_overwrites;
 
     permoverrides.push(
         {
             id: guild.me!.id,
-            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM', 'MOVE_MEMBERS', 'MANAGE_CHANNELS', "DEAFEN_MEMBERS", "MUTE_MEMBERS"], // Fix a bug where i cannot move Members without admin Access
+            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"], // Fix a bug where i cannot move Members without admin Access
         },
     );
 
@@ -24,24 +24,24 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     for (const i of options.supervisor_roles) {
         permoverrides.push({
             id: i,
-            allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM', 'MOVE_MEMBERS', 'MANAGE_CHANNELS', "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
+            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
         });
     }
 
     // TODO: Error Handling
 
 
-    var bitrates: { [name in PremiumTier]: number } = {
+    const bitrates: { [name in PremiumTier]: number } = {
         "NONE": 96000,     // Unboosted
         "TIER_1": 128000,  // Boost Level 1
         "TIER_2": 256000,  // Boost Level 2
-        "TIER_3": 384000   // Boost Level 3
-    }
+        "TIER_3": 384000,   // Boost Level 3
+    };
 
 
     // Create new Voice Channel
     const createdVC = await guild.channels.create(options.name, {
-        type: 'GUILD_VOICE',
+        type: "GUILD_VOICE",
         permissionOverwrites: permoverrides,
         parent: options.parent,
         userLimit: options.max_users,
@@ -65,7 +65,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     } as VoiceChannel);
     await guildData.save();
     return createdVC;
-};
+}
 
 /**
  * Creates a managed Voice Channel Based on a Voice Channel Spawner
@@ -74,7 +74,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
  */
 export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpawner) {
     let options: VoiceChannelCreateOptions;
-    let client = member.client as Bot;
+    const client = member.client as Bot;
     // Figure out Name
     let name = `${member.displayName}'s VC`;
     const shortname = name;
@@ -92,8 +92,8 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
     // }
     spawner.permission_overwrites.push({
         id: member.id,
-        allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'STREAM'],
-    })
+        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+    });
 
     spawner.name = name;
     return await createManagedVC(member.guild, spawner as VoiceChannelCreateOptions);

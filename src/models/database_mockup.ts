@@ -1,4 +1,4 @@
-let users =
+const users =
     [
         {
             /**
@@ -11,7 +11,7 @@ let users =
         },
     ];
 
-let sessions =
+const sessions =
     [
         {
             _id: "ObjectID(61128913cf3fefbc62e7cd7e)",
@@ -25,9 +25,9 @@ let sessions =
             end_certain: false, // Only set to true if session had a clean exit
             rooms: ["626065226986553343", "626065222936553347"],
         },
-    ]
+    ];
 
-let rooms =
+const rooms =
     [
         {
             /**

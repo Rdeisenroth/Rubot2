@@ -1,5 +1,5 @@
-import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection } from "discord.js";
+import { ExecuteEvent } from "../../typings";
+import { Collection } from "discord.js";
 export const name = "messageCreate";
 
 export const execute: ExecuteEvent<"messageCreate"> = async (client, message) => {
@@ -7,13 +7,13 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
     /**
      * The cooldowns will be stored on a per User level
      */
-    let cooldowns = client.cooldowns;
+    const cooldowns = client.cooldowns;
 
-    var prefix = client.prefix;
+    const prefix = client.prefix;
 
     if (message.content.toLowerCase() == `<@!${client.user!.id}> prefix`) {
         // message.reply(`The Bot Prefix is:\n\`${client.prefix}\``);
-        client.utils.embeds.SimpleEmbed(message, `The Prefix for this Channel is:`, client.prefix);
+        client.utils.embeds.SimpleEmbed(message, "The Prefix for this Channel is:", client.prefix);
     }
 
     // no need to continue if message does not start with a Prefix
@@ -30,7 +30,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
     if (!command) return;
 
     if (command.guildOnly && !message.guild) {
-        await client.utils.errors.errorMessage(message, 'I can\'t execute that command inside DMs!');
+        await client.utils.errors.errorMessage(message, "I can't execute that command inside DMs!");
         return;
     }
 
@@ -83,4 +83,4 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
     // }
 
     return;
-}
+};

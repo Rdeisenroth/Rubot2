@@ -1,6 +1,6 @@
-import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, ReplyMessageOptions, TextBasedChannels, TextChannel, ThreadChannel, UserResolvable, PartialDMChannel } from "discord.js";
-import { APIMessage } from 'discord-api-types/v9';
-import * as utils from './utils';
+import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, PartialDMChannel, ReplyMessageOptions, TextBasedChannels, TextChannel, ThreadChannel, UserResolvable } from "discord.js";
+import { APIMessage } from "discord-api-types/v9";
+import * as utils from "./utils";
 import { SimpleEmbedOptions } from "../../typings";
 
 export async function SimpleEmbed(interaction: Message | CommandInteraction | DMChannel | TextChannel | NewsChannel | ThreadChannel, title: string, description: string): Promise<Message | null>;
@@ -25,7 +25,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     ) && !interaction.channel) {
         throw new Error("Embed Requires a Channel");
     }
-    let embed = new MessageEmbed();
+    const embed = new MessageEmbed();
     if (!(interaction instanceof DMChannel)) {
         embed.setColor(interaction.guild?.me?.roles.highest.color ?? 0x7289da);
     } else {
@@ -44,7 +44,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     embed.setTitle(title);
     embed.setDescription(`${text}`);
     if (fields) {
-        for (let field of fields) {
+        for (const field of fields) {
             embed.addField(field.name, field.value, field.inline);
         }
     }
@@ -62,14 +62,14 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
         res = await interaction.send({ embeds: [embed] });
     }
     if (res instanceof Message) {
-        let m = res;
+        const m = res;
         if (deleteinterval) {
-            setTimeout(async () => { if (m.deletable) await m.delete() }, deleteinterval);
+            setTimeout(async () => { if (m.deletable) await m.delete(); }, deleteinterval);
         }
         return m;
     } else if (interaction instanceof CommandInteraction) {
         if (!empheral) {
-            let m = await interaction.fetchReply();
+            const m = await interaction.fetchReply();
             if (deleteinterval) {
                 setTimeout(() => interaction.deleteReply(), deleteinterval);
             }
@@ -80,30 +80,30 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     return null;
 }
 
-/**
- * creates a nice looking embed in the color of the current bot role
- *
- * @param {import ('./functions').UserRetrievable} [owner] the Owner of the Bot
- * @param {import ("discord.js").ColorResolvable | import ("discord.js").Guild} [guild] (optional) the guild to get the color from or A color Resolvable
- * @returns {import ("discord.js").RichEmbed} the RichEmbed
- */
-export const EmbedTemplateWithAuthor = (owner: UserResolvable, guild: Guild | ColorResolvable) => {
-    let embed = new MessageEmbed()
-    let OwnerUser;
-    let utils = require('./utils')
-    try {
-        if (owner) {
-            OwnerUser = utils.functions.RetrieveUser(owner);
-        }
-    } catch (error) {
-        //do nothing
-        console.error(error)
-    }
-    embed.setColor((guild ? ((guild instanceof Guild) ? (guild.me!.roles.highest.color || 0x7289da) : guild) : 0x7289da))
-        .setFooter(owner ? (OwnerUser instanceof require('discord.js').User) ? (`© 2020 ${OwnerUser.tag}`) : (`© 2020 ${owner}`) : `© 2020 Rubosplay#0815`, (owner && OwnerUser instanceof require('discord.js').User) ? OwnerUser.displayAvatarURL : null)
-        .setTimestamp((Date.now()))
-    return embed;
-}
+// /**
+//  * creates a nice looking embed in the color of the current bot role
+//  *
+//  * @param {import ('./functions').UserRetrievable} [owner] the Owner of the Bot
+//  * @param {import ("discord.js").ColorResolvable | import ("discord.js").Guild} [guild] (optional) the guild to get the color from or A color Resolvable
+//  * @returns {import ("discord.js").RichEmbed} the RichEmbed
+//  */
+// export const EmbedTemplateWithAuthor = (owner: UserResolvable, guild: Guild | ColorResolvable) => {
+//     const embed = new MessageEmbed();
+//     let OwnerUser;
+//     const utils = require("./utils");
+//     try {
+//         if (owner) {
+//             OwnerUser = utils.functions.RetrieveUser(owner);
+//         }
+//     } catch (error) {
+//         //do nothing
+//         console.error(error);
+//     }
+//     embed.setColor((guild ? ((guild instanceof Guild) ? (guild.me!.roles.highest.color || 0x7289da) : guild) : 0x7289da))
+//         .setFooter(owner ? (OwnerUser instanceof require("discord.js").User) ? (`© 2020 ${OwnerUser.tag}`) : (`© 2020 ${owner}`) : "© 2020 Rubosplay#0815", (owner && OwnerUser instanceof require("discord.js").User) ? OwnerUser.displayAvatarURL : null)
+//         .setTimestamp((Date.now()));
+//     return embed;
+// };
 
 // /**
 //  *Creates a setup Embed and sends it to the channel of the given Message

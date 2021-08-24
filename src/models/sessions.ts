@@ -1,7 +1,6 @@
-import mongoose, { ObjectId } from "mongoose";
-import RoomSchema, { Room } from "./rooms";
+import mongoose from "mongoose";
+import RoomSchema from "./rooms";
 import { Channel } from "./text_channels";
-import VoiceChannelSpawnerSchema, { VoiceChannelSpawner } from "./voice_channel_spawner";
 
 export enum sessionRole {
     "participant" = "participant",
@@ -51,19 +50,19 @@ export interface Session extends Omit<Channel, "_id"> {
 const SessionSchema = new mongoose.Schema<SessionDocument, SessionModel, Session>({
     active: {
         type: Boolean,
-        required: true
+        required: true,
     },
     user: {
         type: String,
-        required: true
+        required: true,
     },
     guild: {
         type: String,
-        required: false
+        required: false,
     },
     queue: {
         type: String,
-        required: false
+        required: false,
     },
     role: {
         type: String,
@@ -72,11 +71,11 @@ const SessionSchema = new mongoose.Schema<SessionDocument, SessionModel, Session
     },
     started_at: {
         type: String,
-        required: false
+        required: false,
     },
     ended_at: {
         type: String,
-        required: false
+        required: false,
     },
     end_certain: {
         type: Boolean,
@@ -101,20 +100,21 @@ export interface SessionDocument extends Session, mongoose.Document {
     getParticipantAmount(): Promise<number>,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionModel extends mongoose.Model<SessionDocument> {
 
 }
 
 // --Methods--
 
-SessionSchema.method('getRoomAmount', function () {
+SessionSchema.method("getRoomAmount", function () {
     return this.rooms.length;
 });
 
-SessionSchema.method('getParticipantAmount', async function () {
+SessionSchema.method("getParticipantAmount", async function () {
     let amount = 0;
-    for (let r of this.rooms) {
-        let roomData = await RoomSchema.findById(r);
+    for (const r of this.rooms) {
+        const roomData = await RoomSchema.findById(r);
         if (roomData) {
             amount += (await roomData.getParticipants()).length;
         }

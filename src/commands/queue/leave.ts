@@ -1,19 +1,13 @@
 import { Message } from "discord.js";
 import path from "path";
-import { Command } from "../../../../typings";
+import { Command } from "../../../typings";
 
 const command: Command = {
-    name: "notify_all",
-    description: "Broadcasts a Message to all Users in the Current Room",
+    name: "leave",
+    description: "Leave the current Queue",
     aliases: ["broadcast"],
     cooldown: 3000,
     guildOnly: true,
-    options: [{
-        name: "message",
-        description: "The Message to brodcast",
-        type: "STRING",
-        required: true,
-    }],
     execute: async (client, interaction, args) => {
         if (!interaction) {
             return;

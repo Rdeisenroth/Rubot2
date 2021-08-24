@@ -1,12 +1,12 @@
-import { Client, Collection, Message } from "discord.js";
-import consola, { Consola } from 'consola';
+import { Client, Collection } from "discord.js";
+import consola, { Consola } from "consola";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
-import glob from 'glob';
+import glob from "glob";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
-import parser from 'yargs-parser';
-import mongoose from 'mongoose';
+import parser from "yargs-parser";
+import mongoose from "mongoose";
 import path from "path/posix";
 const globPromise = promisify(glob);
 export class Bot extends Client {
@@ -16,8 +16,8 @@ export class Bot extends Client {
     // public aliases: Collection<string,string> = new Collection();
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
     public ownerID?: string;
-    public prefix: string = "!";
-    public version: string = "0.0";
+    public prefix = "!";
+    public version = "0.0";
     public utils = utils;
     public parser = parser;
     public database = mongoose;
@@ -56,7 +56,7 @@ export class Bot extends Client {
 
         // Commands
         this.logger.info("Loading Commands...");
-        const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
         // console.log("Command Files:" + JSON.stringify(commandFiles));
         //iterate over all the commands to store them in a collection
         for (const file of commandFiles) {
@@ -67,14 +67,14 @@ export class Bot extends Client {
                 throw new Error(`Invalid Command Name at ./commands/${file}: ${command.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
             }
             // Check Command Description
-            if (command.description.length < 1 || command.description.length > 100){
+            if (command.description.length < 1 || command.description.length > 100) {
                 throw new Error(`Invalid Command Description for ${command.name} at ./commands/${file}\nDescription Must be 1-100 Characters Long`);
             }
             if (command.options) {
                 // Check Command Options
-                for (let opt of command.options) {
+                for (const opt of command.options) {
                     if (opt.name !== opt.name.toLowerCase() || !opt.name.match("^[\\w-]{1,32}$")) {
-                        throw new Error(`Invalid Option Name: ${opt.name} at ./commands/${file}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                        throw new Error(`Invalid Option Name: ${opt.name} at ./commands/${file}\nOption Names must be all lowercase and must match ^[\\w-]{1,32}$`);
                     }
                 }
             }
@@ -93,8 +93,8 @@ export class Bot extends Client {
         // Interactions
         this.logger.info("Loading Interactions...");
         // TODO: Slect Menus
-        let dirstring = `${__dirname}/componentInteractions/buttons`
-        let files = (await globPromise(dirstring + "/**/*.{js,ts}"));
+        const dirstring = `${__dirname}/componentInteractions/buttons`;
+        const files = (await globPromise(dirstring + "/**/*.{js,ts}"));
         // console.log("Files:" + JSON.stringify(files));
         //iterate over all the Interactions to store them in a collection
         for (const file of files) {
@@ -116,19 +116,19 @@ export class Bot extends Client {
         // Connect to db
         mongoose.connect(
             config.mongodb_connection_url,
-            { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, },
+            { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false },
             (err) => {
                 if (err) {
                     throw err;
                 } else {
-                    this.logger.info('connected to DB!!');
+                    this.logger.info("connected to DB!!");
                 }
-            }
+            },
         );
 
         // Event Files
         this.logger.info("Loading Events...");
-        const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
         await eventFiles.map(async (eventFile: string) => {
             const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
             console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);

@@ -1,15 +1,13 @@
-import ChannelType, { EmojiIdentifierResolvable, GuildMember, Message, MessageEmbed, StageChannel } from "discord.js";
-import { OverwriteData } from "discord.js";
-import { Command, RunCommand } from "../../../typings";
-import GuildSchema, { Guild } from "../../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
-import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
+import { Message } from "discord.js";
+import { Command } from "../../../typings";
+import GuildSchema from "../../models/guilds";
+import { VoiceChannelDocument } from "../../models/voice_channels";
 
 const command: Command = {
-    name: 'close',
-    description: 'closes the Temporary Channel and kicks all members',
-    aliases: ['c', 'terminate', 'cancel'],
-    usage: '[channel resolvable]',
+    name: "close",
+    description: "closes the Temporary Channel and kicks all members",
+    aliases: ["c", "terminate", "cancel"],
+    usage: "[channel resolvable]",
     cooldown: 5,
     category: "Miscellaneous",
     guildOnly: true,
@@ -23,17 +21,17 @@ const command: Command = {
             return;
         }
         if (interaction instanceof Message) {
-            client.utils.embeds.SimpleEmbed(interaction, 'Slash Only Command', 'This Command is Slash only but you Called it with The Prefix. use the slash Command instead.')
+            client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
 
         const g = interaction.guild!;
 
         // Check if user is in VC
-        let channelOwner = client.utils.general.getMember(interaction);
-        var channel = channelOwner?.voice.channel;
+        const channelOwner = client.utils.general.getMember(interaction);
+        const channel = channelOwner?.voice.channel;
         if (!channelOwner || !channel) {
-            await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You are currently not in a Voice Channel on this Server.`);
+            await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You are currently not in a Voice Channel on this Server.");
             return;
         }
 
@@ -42,23 +40,23 @@ const command: Command = {
         const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == channel!.id);
 
         if (!channelData?.temporary) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The Voice Channel you are in is not a Temporary Voice Channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Voice Channel you are in is not a Temporary Voice Channel.");
         }
 
         // Check if User has Permission to lock/Unlock Channel
         if (!(channelData.owner === channelOwner.id || (channelData.supervisors && channelData.supervisors.includes(channelOwner.id)))) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You have no Permission to Close the Channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to Close the Channel.");
         }
 
         try {
-            for(let m of [...channel.members.values()]) {
+            for(const m of [...channel.members.values()]) {
                 m.voice.setChannel(null);
             }
         } catch (error) {
-            await client.utils.errors.errorMessage(interaction!, `could not kick all Users from the Voice Channel.`);
+            await client.utils.errors.errorMessage(interaction!, "could not kick all Users from the Voice Channel.");
         }
 
-        return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `All Users were Kicked, the Channel should Close automatically.`);
+        return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "All Users were Kicked, the Channel should Close automatically.");
 
         // // Remove special Priviledges of the User
         // if(!channel.deletable){
@@ -83,8 +81,8 @@ const command: Command = {
         // } catch (error) {
         //     await client.utils.errors.errorMessage(interaction!, error);
         // }
-    }
-}
+    },
+};
 
 async function sleep(msec: number) {
     return new Promise(resolve => setTimeout(resolve, msec));

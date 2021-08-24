@@ -1,11 +1,11 @@
 // import mongoose from 'mongoose';
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { Bot } from "../bot";
 import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
 import QueueSchema, { Queue, QueueDocument } from "./queues";
 import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_channels";
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
-import * as djs from 'discord.js';
+import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
 
 /**
@@ -48,16 +48,16 @@ export interface Guild {
 const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel, Guild>({
     _id: {
         type: String,
-        required: true
+        required: true,
     },
     name: {
         type: String,
-        required: true
+        required: true,
     },
     member_count: {
         type: Number,
         required: true,
-        default: 0
+        default: 0,
     },
     guild_settings: {
         type: GuildSettingsSchema,
@@ -77,7 +77,7 @@ const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel, Guild>({
         type: QueueSchema,
         required: true,
         default: [],
-    }]
+    }],
 });
 
 /**
@@ -108,7 +108,7 @@ export interface GuildModel extends mongoose.Model<GuildDocument> {
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
 
-GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
+GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     console.log(`Processing guild "${g.name}" (${g.id})`);
     const updated = await this.updateOne(
         { _id: g.id },
@@ -117,9 +117,9 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
                 _id: g.id,
                 name: g.name,
                 member_count: g.memberCount,
-            }
+            },
         },
-        { upsert: true, setDefaultsOnInsert: true }
+        { upsert: true, setDefaultsOnInsert: true },
     );
     if (updated.ok) {
         if (updated.upserted) {
@@ -137,22 +137,23 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
     // console.log([...client.commands.values()])
     for (const c of [...client.commands.values()]) {
         // console.log("a"+ c);
-        let commandData: ApplicationCommandData = {
+        const commandData: ApplicationCommandData = {
             name: c.name,
             description: c.description,
             options: c.options,
             defaultPermission: c.defaultPermission,
-        }
+        };
         // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
         if (c.name === "help") {
-            let cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
-                return { name: key, value: key }
+            const cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
+                return { name: key, value: key };
             });
             (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
         }
-        data.push(commandData)
+        data.push(commandData);
     }
     try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const commands = await g.commands.set(data);
         // permissions
         // for(const c of [...commands.values()]){
@@ -166,7 +167,7 @@ GuildSchema.static('prepareGuild', async function (client: Bot, g: djs.Guild) {
         console.log(error);
     }
     // console.log(command);
-})
+});
 
 // Default export
 export default mongoose.model<GuildDocument, GuildModel>("Guilds", GuildSchema);

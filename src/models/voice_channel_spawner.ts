@@ -44,7 +44,7 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
     }],
     permission_overwrites: [{
         type: PermissionOverwriteDataSchema,
-        required: true
+        required: true,
     }],
     max_users: {
         type: Number,
@@ -53,7 +53,7 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
     name: {
         type: String,
         required: true,
-        default: "${owner_name}'s VC"
+        default: "${owner_name}'s VC",
     },
     lock_initially: {
         type: Boolean,
@@ -64,7 +64,7 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
         type: String,
         required: false,
     },
-})
+});
 
 /**
  * Used for creating Voice Channels
@@ -78,6 +78,7 @@ export interface VoiceChannelSpawnerDocument extends VoiceChannelSpawner, mongoo
     permission_overwrites: mongoose.Types.DocumentArray<PermissionOverwriteDataDocument>,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VoiceChannelSpawnerModel extends mongoose.Model<VoiceChannelSpawnerDocument> {
 
 }

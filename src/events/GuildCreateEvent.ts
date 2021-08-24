@@ -7,4 +7,4 @@ export const name = "guildCreate";
 
 export const execute: ExecuteEvent<"guildCreate"> = async (client, guild) => {
     await GuildSchema.prepareGuild(client, guild);
-}
+};

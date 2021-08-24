@@ -1,21 +1,23 @@
 import ChannelType, { Collection, CommandInteraction, Message } from "discord.js";
 import * as fs from "fs";
-import { Command, SubcommandHandler } from "../../../typings";
+import { Command, SubcommandHandler } from "../../typings";
 import path from "path";
 
 const command: SubcommandHandler = {
-    name: "session",
-    description: "Session Command Handler",
-    aliases: ["s"],
+    name: "queue",
+    description: "Queue Command Handler",
+    aliases: ["c", "tutor", "t"],
+    category: "Coaching",
+    guildOnly: true,
     subcommands: new Collection(),
     options: [],
     init: async (client) => {
         const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
-        //iterate over all the commands to store them in a collection
+        // iterate over all the commands to store them in a collection
         const scopts: ChannelType.ApplicationCommandOptionData[] = [];
         for (const file of commandFiles) {
             const c: Command = await import(`${__dirname}/${command.name}/${file}`);
-            console.log(`\t\t∘${JSON.stringify(c.name)} (./${path.relative(process.cwd(), __dirname)}/${command.name}/${file})`);
+            console.log(`\t∘${JSON.stringify(c.name)} (./${path.relative(process.cwd(), __dirname)}/${command.name}/${file})`);
             // Check Command Name
             if (c.name !== c.name.toLowerCase() || !c.name.match("^[\\w-]{1,32}$")) {
                 throw new Error(`Invalid Command Namefor ${c.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);

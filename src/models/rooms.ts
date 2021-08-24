@@ -1,10 +1,9 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { EventDate } from "../../typings";
 import EventSchema, { Event, EventDocument, eventType } from "./events";
-import UserSchema, { User, UserDocument } from "./users";
+import UserSchema from "./users";
 import { sessionRole } from "./sessions";
 import { Channel } from "./text_channels";
-import VoiceChannelSpawnerSchema, { VoiceChannelSpawner } from "./voice_channel_spawner";
 
 export interface Room extends Channel {
     /**
@@ -84,32 +83,33 @@ export interface RoomDocument extends Room, Omit<mongoose.Document, "_id"> {
     getParticipants(): Promise<string[]>
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RoomModel extends mongoose.Model<RoomDocument> {
 
 }
 
 // --Methods--
 
-RoomSchema.method('getUsers', function () {
+RoomSchema.method("getUsers", function () {
     return [... new Set(this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => x.type === eventType.user_join ? x.emitted_by : x.target!))];
 });
-RoomSchema.method('getUserRoles', async function () {
-    let users = this.getFirstJoinTimes();
-    let userRoles: {
+RoomSchema.method("getUserRoles", async function () {
+    const users = this.getFirstJoinTimes();
+    const userRoles: {
         userID: string;
         role: sessionRole | null;
     }[] = [];
-    for(let user of users){
-        let userSchema = await UserSchema.findById(user.target_id);
+    for(const user of users){
+        const userSchema = await UserSchema.findById(user.target_id);
         if (!userSchema) {
             userRoles.push( { userID: user.target_id, role: null });
             continue;
         }
-        let role = await userSchema.getRole(this.guild, (+user.timestamp));
-        let b = {
+        const role = await userSchema.getRole(this.guild, (+user.timestamp));
+        const b = {
             userID: user.target_id,
             role: role,
-        }
+        };
         userRoles.push(b);
     }
     return userRoles;
@@ -129,14 +129,14 @@ RoomSchema.method('getUserRoles', async function () {
     // let a = await userRoles;
 });
 
-RoomSchema.method('getParticipants', async function () {
-    let roles = await this.getUserRoles();
+RoomSchema.method("getParticipants", async function () {
+    const roles = await this.getUserRoles();
     return roles.filter(x => x.role == sessionRole.participant || x.role == null).map(x=> x.userID);
 });
 
-RoomSchema.method('getFirstJoinTimes', function () {
+RoomSchema.method("getFirstJoinTimes", function () {
     // We Assume that the Role Does not change During the Rooms Lifetime
-    let eventDates = this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => { return { timestamp: x.timestamp, target_id: (x.type === eventType.user_join ? x.emitted_by : x.target!), event_id: (x as EventDocument)._id } as EventDate });
+    const eventDates = this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => { return { timestamp: x.timestamp, target_id: (x.type === eventType.user_join ? x.emitted_by : x.target!), event_id: (x as EventDocument)._id } as EventDate; });
     return eventDates.filter((x, pos) => eventDates.findIndex(y => y.target_id === x.target_id) === pos);
 });
 

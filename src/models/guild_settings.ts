@@ -23,18 +23,20 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
         type: Number,
         enum: [0, 1],
         default: 1,
-        required: true
+        required: true,
     },
     prefix: {
         type: String,
         required: true,
-        default: "!"
-    }
+        default: "!",
+    },
 });
 
 export interface GuildSettingsDocument extends GuildSettings, mongoose.Document {
 
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuildSettingsModel extends mongoose.Model<GuildSettingsDocument> {
 
 }

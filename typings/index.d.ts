@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, ButtonInteraction as bi, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction } from "discord.js";
+import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 import mongoose from "mongoose";
@@ -67,7 +67,7 @@ export type BotConfig = {
 
 export abstract class ClientEventListener<K extends keyof ClientEvents> {
     public eventName: K = K;
-    static execute: ExecuteEvent<K> = async () => { console.log("unimplemented Event!") };
+    static execute: ExecuteEvent<K> = async () => { console.log("unimplemented Event!"); };
 }
 
 export interface BotEvent<K extends keyof ClientEvents> {

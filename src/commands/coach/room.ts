@@ -1,22 +1,18 @@
-import ChannelType, { Collection, CommandInteraction, EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
+import ChannelType, { Collection, CommandInteraction, Message } from "discord.js";
 import * as fs from "fs";
-import { OverwriteData } from "discord.js";
-import { Command, RunCommand, SubcommandHandler } from "../../../typings";
-import GuildSchema, { Guild } from "../../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
-import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
+import { Command, SubcommandHandler } from "../../../typings";
 import path from "path";
 
-var command: SubcommandHandler = {
-    name: 'room',
-    description: 'Room Command Handler',
-    aliases: ['r'],
+const command: SubcommandHandler = {
+    name: "room",
+    description: "Room Command Handler",
+    aliases: ["r"],
     subcommands: new Collection(),
     options: [],
     init: async (client) => {
-        const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith('.js') || file.endsWith('ts'));
+        const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
         //iterate over all the commands to store them in a collection
-        let scopts: ChannelType.ApplicationCommandOptionData[] = []
+        const scopts: ChannelType.ApplicationCommandOptionData[] = [];
         for (const file of commandFiles) {
             const c: Command = await import(`${__dirname}/${command.name}/${file}`);
             console.log(`\t\t∘${JSON.stringify(c.name)} (./${path.relative(process.cwd(), __dirname)}/${command.name}/${file})`);
@@ -30,9 +26,9 @@ var command: SubcommandHandler = {
             }
             if (c.options) {
                 // Check Command Options
-                for (let opt of c.options) {
+                for (const opt of c.options) {
                     if (opt.name !== opt.name.toLowerCase() || !opt.name.match("^[\\w-]{1,32}$")) {
-                        throw new Error(`Invalid Option Name: ${opt.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}\Option Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                        throw new Error(`Invalid Option Name: ${opt.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}\nOption Names must be all lowercase and must match ^[\\w-]{1,32}$`);
                     }
                 }
             }
@@ -62,7 +58,7 @@ var command: SubcommandHandler = {
             }
             subcommand = args.shift()!.toLowerCase();
         } else if (interaction instanceof CommandInteraction) {
-            let scInteraction = (interaction as CommandInteraction & { resolved_subcommand?: ChannelType.CommandInteractionOption });
+            const scInteraction = (interaction as CommandInteraction & { resolved_subcommand?: ChannelType.CommandInteractionOption });
             if (!scInteraction.resolved_subcommand) {
                 scInteraction.resolved_subcommand = scInteraction.options.data[0];
             } else {
@@ -72,13 +68,13 @@ var command: SubcommandHandler = {
         } else {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
         }
-        let sc = command.subcommands.find(x => x.name == subcommand || (x.aliases != null && x.aliases.includes(subcommand)));
+        const sc = command.subcommands.find(x => x.name == subcommand || (x.aliases != null && x.aliases.includes(subcommand)));
         if (!sc) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Invalid Subcommand`, `\`${subcommand}\` is not a valid subcommand.\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Invalid Subcommand", `\`${subcommand}\` is not a valid subcommand.\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
         }
         sc.execute(client, interaction, args);
-    }
-}
+    },
+};
 
 /**
  * Exporting the Command using CommonJS

@@ -46,7 +46,7 @@ const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelMo
     channel_type: {
         type: Number,
         enum: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13],
-        required: true
+        required: true,
     },
     // whitelist_user_groups: [{
     //     type: String,
@@ -82,6 +82,7 @@ export interface TextChannelDocument extends TextChannel, Omit<mongoose.Document
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TextChannelModel extends mongoose.Model<TextChannelDocument> {
 
 }

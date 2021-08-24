@@ -1,15 +1,13 @@
-import ChannelType, { EmojiIdentifierResolvable, GuildMember, Message, MessageEmbed, StageChannel } from "discord.js";
-import { OverwriteData } from "discord.js";
-import { Command, RunCommand } from "../../../typings";
-import GuildSchema, { Guild } from "../../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
-import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
+import { GuildMember, Message } from "discord.js";
+import { Command } from "../../../typings";
+import GuildSchema from "../../models/guilds";
+import { VoiceChannelDocument } from "../../models/voice_channels";
 
 const command: Command = {
-    name: 'permit',
-    description: 'permits a User to join and view the channel even if it\'s locked or hidden',
-    aliases: ['p', 'pm', 'allow', 'invite', 'inv'],
-    usage: '[channel resolvable]',
+    name: "permit",
+    description: "permits a User to join and view the channel even if it's locked or hidden",
+    aliases: ["p", "pm", "allow", "invite", "inv"],
+    usage: "[channel resolvable]",
     cooldown: 5,
     options: [{
         name: "member",
@@ -29,17 +27,17 @@ const command: Command = {
             return;
         }
         if (interaction instanceof Message) {
-            client.utils.embeds.SimpleEmbed(interaction, 'Slash Only Command', 'This Command is Slash only but you Called it with The Prefix. use the slash Command instead.')
+            client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
 
         const g = interaction.guild!;
 
         // Check if user is in VC
-        let channelOwner = client.utils.general.getMember(interaction);
-        var channel = channelOwner?.voice.channel;
+        const channelOwner = client.utils.general.getMember(interaction);
+        const channel = channelOwner?.voice.channel;
         if (!channelOwner || !channel) {
-            await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You are currently not in a Voice Channel on this Server.`);
+            await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You are currently not in a Voice Channel on this Server.");
             return;
         }
 
@@ -48,31 +46,31 @@ const command: Command = {
         const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == channel!.id);
 
         if (!channelData?.temporary) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The Voice Channel you are in is not a Temporary Voice Channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Voice Channel you are in is not a Temporary Voice Channel.");
         }
 
         // Check if User has Permission to lock/Unlock Channel
         if (!(channelData.owner === channelOwner.id || (channelData.supervisors && channelData.supervisors.includes(channelOwner.id)))) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You have no Permission to Permit a Member.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to Permit a Member.");
         }
 
-        let permitMember = interaction.options.getMember("member", true);
+        const permitMember = interaction.options.getMember("member", true);
 
         if (!(permitMember instanceof GuildMember)) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You have to specify a valid Member.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have to specify a valid Member.");
         }
 
         if (permitMember.id === channelData.owner) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The Channel Owner can always join a channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Channel Owner can always join a channel.");
         }
 
         if (channelData.permitted.includes(permitMember.id)) {
-            let memberperms = channel.permissionOverwrites.cache.get(permitMember.id);
+            const memberperms = channel.permissionOverwrites.cache.get(permitMember.id);
             if (!memberperms || !memberperms.allow.has("VIEW_CHANNEL") || !memberperms.allow.has("CONNECT") || !memberperms.allow.has("SPEAK")) {
                 await channel.permissionOverwrites.edit(permitMember.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
-                return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `Someone messed with My permissions... :angry: Should be fixed now. :thumbsup: `);
+                return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "Someone messed with My permissions... :angry: Should be fixed now. :thumbsup: ");
             } else {
-                return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The member already has Permission to join your channel.`);
+                return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The member already has Permission to join your channel.");
             }
         }
 
@@ -82,9 +80,9 @@ const command: Command = {
 
         await channel.permissionOverwrites.edit(permitMember.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
 
-        await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `${permitMember} was permitted to join your channel.`);
-    }
-}
+        await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", `${permitMember} was permitted to join your channel.`);
+    },
+};
 
 async function sleep(msec: number) {
     return new Promise(resolve => setTimeout(resolve, msec));

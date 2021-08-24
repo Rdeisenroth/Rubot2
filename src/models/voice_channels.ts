@@ -1,4 +1,5 @@
-import mongoose, { ObjectId } from "mongoose";
+/* eslint-disable @typescript-eslint/no-empty-interface */
+import mongoose from "mongoose";
 import { Channel } from "./text_channels";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
 
@@ -48,12 +49,12 @@ export interface VoiceChannel extends Channel {
 const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChannelModel, VoiceChannel>({
     _id: {
         type: String,
-        required: true
+        required: true,
     },
     channel_type: {
         type: Number,
         enum: [0, 1, 2, 3, 4, 5, 6, 7],
-        required: true
+        required: true,
     },
     managed: {
         type: Boolean,
@@ -69,15 +70,15 @@ const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChanne
     },
     category: {
         type: String,
-        required: false
+        required: false,
     },
     afkhell: {
         type: Boolean,
-        required: false
+        required: false,
     },
     song_link: {
         type: String,
-        required: false
+        required: false,
     },
     locked: {
         type: Boolean,

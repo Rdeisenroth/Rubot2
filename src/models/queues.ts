@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { GuildDocument } from "./guilds";
 import QueueEntrySchema, { QueueEntry, QueueEntryDocument } from "./queue_entry";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
 
@@ -101,7 +100,7 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         type: QueueEntrySchema,
         required: true,
         default: [],
-    }]
+    }],
 });
 
 export interface QueueDocument extends Queue, mongoose.Document {
@@ -139,32 +138,33 @@ export interface QueueDocument extends Queue, mongoose.Document {
     isEmpty(): boolean,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueueModel extends mongoose.Model<QueueDocument> {
     // List Model methods here
 }
 
 // --Methods--
 
-QueueSchema.method('join', async function (entry: QueueEntry) {
+QueueSchema.method("join", async function (entry: QueueEntry) {
     if (this.entries.find(x => x.discord_id === entry.discord_id)) {
-        throw new Error('Dublicate Entry');
+        throw new Error("Dublicate Entry");
     }
     this.entries.push(entry);
     await this.$parent()?.save();
     return entry;
 });
 
-QueueSchema.method('leave', async function (discord_id: string) {
-    let entry = this.entries.find(x => x.discord_id === discord_id);
+QueueSchema.method("leave", async function (discord_id: string) {
+    const entry = this.entries.find(x => x.discord_id === discord_id);
     if (!entry) {
-        throw new Error('Not Found');
+        throw new Error("Not Found");
     }
     this.entries.splice(this.entries.indexOf(entry), 1);
     await this.$parent()?.save();
     return entry;
 });
 
-QueueSchema.method('getSortedEntries', function (limit?: number) {
+QueueSchema.method("getSortedEntries", function (limit?: number) {
     const entries = this.entries.toObject<Array<QueueEntryDocument>>().sort((x, y) => {
         const x_importance = (Date.now() - (+x.joinedAt)) * (x.importance || 1);
         const y_importance = (Date.now() - (+y.joinedAt)) * (y.importance || 1);
@@ -173,14 +173,14 @@ QueueSchema.method('getSortedEntries', function (limit?: number) {
     return entries.slice(0, limit);
 });
 
-QueueSchema.method('isEmpty', function (): boolean {
+QueueSchema.method("isEmpty", function (): boolean {
     return this.entries.length < 1;
 });
-QueueSchema.method('contains', function (discord_id: string): boolean {
+QueueSchema.method("contains", function (discord_id: string): boolean {
     return (this.entries.find(x => x.discord_id === discord_id)) ? true : false;
 });
 
-QueueSchema.method('getPosition', function (discord_id: string): number {
+QueueSchema.method("getPosition", function (discord_id: string): number {
     return this.getSortedEntries().findIndex(x => x.discord_id === discord_id);
 });
 

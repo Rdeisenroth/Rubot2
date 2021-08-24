@@ -1,12 +1,8 @@
-import ChannelType, { GuildMember, Interaction, Message } from "discord.js";
+import ChannelType, { Interaction, Message } from "discord.js";
 import moment from "moment";
 import { StringReplacements } from "../../typings";
-import { APIInteractionDataResolvedGuildMember } from 'discord-api-types/v9';
-import * as fs from "fs";
-import { readdir } from "fs/promises";
-import { resolve } from 'path';
 import { promisify } from "util";
-import glob from 'glob';
+import glob from "glob";
 const globPromise = promisify(glob);
 
 /**
@@ -28,14 +24,14 @@ export const getRandomInt = (min: number, max: number) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+};
 
 /**
  * Counts the Amount of Digits after the Comma of a Number
  *
  * @param {Number} number
  */
-export const countDigits = (number: number) => (Math.floor(number) === number) ? 0 : number.toString().split('.')[1].length;
+export const countDigits = (number: number) => (Math.floor(number) === number) ? 0 : number.toString().split(".")[1].length;
 
 /**
  * Chooses Random Element off an Array
@@ -44,10 +40,10 @@ export const countDigits = (number: number) => (Math.floor(number) === number) ?
  */
 export const getRandomEntry: <T>(array: T[]) => T = (array) => {
     if (!isArraywithContent(array)) {
-        throw new TypeError("The given Argument is not an array or is empty")
+        throw new TypeError("The given Argument is not an array or is empty");
     }
     return array[getRandomInt(0, array.length - 1)];
-}
+};
 
 /**
  * Chooses Random Element off an Array and considers weights
@@ -59,17 +55,17 @@ export const getRandomEntryWithWeights: <T>(array: [T, number][]) => T = (array)
         throw new TypeError("The given Argument is not a weighted array or is empty");
     }
     //Gewichte Abspeichern, und dabei
-    let maxdigits = Math.max(...array.map(x => countDigits(x[1])));
-    let weights = array.map(x => x[1] * Math.pow(10, maxdigits));
+    const maxdigits = Math.max(...array.map(x => countDigits(x[1])));
+    const weights = array.map(x => x[1] * Math.pow(10, maxdigits));
     //Maximalgewicht
-    let chosenNumber = getRandomInt(1, weights.reduce((x, y) => x + y))
+    const chosenNumber = getRandomInt(1, weights.reduce((x, y) => x + y));
     for (let i = 0, currentWeight = 0; i < weights.length; currentWeight += weights[i], i++) {
         if (chosenNumber > currentWeight && chosenNumber <= currentWeight + weights[i]) {
             return array[i][0];
         }
     }
     return array[0][0];
-}
+};
 
 /**
  * Creates a clean User object from an Interaction
@@ -108,14 +104,14 @@ export const getMember = (interaction: Message | Interaction | undefined) => {
     if (interaction instanceof Message) {
         return interaction.member;
     } else if (interaction instanceof Interaction) {
-        let memberId = interaction.user.id;
-        let member = interaction.guild.members.cache.find(x => x.id === memberId);
+        const memberId = interaction.user.id;
+        const member = interaction.guild.members.cache.find(x => x.id === memberId);
         if (member) {
             return member;
         }
     }
     return null;
-}
+};
 
 /**
  * Replaces placeholders in a String with dynamic values
@@ -129,15 +125,15 @@ export const getMember = (interaction: Message | Interaction | undefined) => {
  */
 export const interpolateString = (str: string, replacements?: StringReplacements) => {
     // Interpolate String
-    let default_replacements: StringReplacements = {
-        "now": moment().format(`DD.MMMM YYYY hh:mm:ss`),
+    const default_replacements: StringReplacements = {
+        "now": moment().format("DD.MMMM YYYY hh:mm:ss"),
         "mem_usage": `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
-    }
+    };
     for (const [key, value] of Object.entries({ ...default_replacements, ...replacements })) {
         str = str.replace(`\${${key}}`, value as string);
     }
     return str;
-}
+};
 
 /**
  * Sleeps for given amount of Time
@@ -146,4 +142,4 @@ export const interpolateString = (str: string, replacements?: StringReplacements
  */
 export const sleep = async (msec: number) => {
     return new Promise(resolve => setTimeout(resolve, msec));
-}
+};

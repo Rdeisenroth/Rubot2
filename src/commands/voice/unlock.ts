@@ -1,15 +1,12 @@
-import ChannelType, { EmojiIdentifierResolvable, MessageEmbed } from "discord.js";
-import { OverwriteData } from "discord.js";
-import { Command, RunCommand } from "../../../typings";
-import GuildSchema, { Guild } from "../../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../../models/voice_channels";
-import { VoiceChannelSpawner } from "../../models/voice_channel_spawner";
+import { Command } from "../../../typings";
+import GuildSchema from "../../models/guilds";
+import { VoiceChannelDocument } from "../../models/voice_channels";
 
 const command: Command = {
-    name: 'unlock',
-    description: 'unlocks the current voice Channel',
-    aliases: ['u', 'ulock', 'ul', 'unlockchannel', 'ulc'],
-    usage: '[channel resolvable]',
+    name: "unlock",
+    description: "unlocks the current voice Channel",
+    aliases: ["u", "ulock", "ul", "unlockchannel", "ulc"],
+    usage: "[channel resolvable]",
     cooldown: 5,
     category: "Miscellaneous",
     guildOnly: true,
@@ -22,10 +19,10 @@ const command: Command = {
         const g = interaction!.guild!;
 
         // Check if user is in VC
-        let member = client.utils.general.getMember(interaction);
-        var channel = member?.voice.channel;
+        const member = client.utils.general.getMember(interaction);
+        const channel = member?.voice.channel;
         if (!member || !channel) {
-            await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You are currently not in a Voice Channel on this Server.`);
+            await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You are currently not in a Voice Channel on this Server.");
             return;
         }
 
@@ -34,20 +31,20 @@ const command: Command = {
         const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == channel!.id);
 
         if (!channelData?.temporary) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The Voice Channel you are in is not a Temporary Voice Channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Voice Channel you are in is not a Temporary Voice Channel.");
         }
 
         // Check if User has Permission to lock/Unlock Channel
         if (!(channelData.owner === member.id || (channelData.supervisors && channelData.supervisors.includes(member.id)))) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `You have no Permission to Unlock the current Voice Channel.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to Unlock the current Voice Channel.");
         }
 
         if (!channelData.locked) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `The Channel is already unlocked.`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Channel is already unlocked.");
         }
 
         // Cange Locked State in DB
-        channelData.set('locked', false);
+        channelData.set("locked", false);
         await guildData!.save();
 
         await channel.permissionOverwrites.edit(g.roles.everyone.id, { "CONNECT": true, "SPEAK": true, "VIEW_CHANNEL": true });
@@ -60,9 +57,9 @@ const command: Command = {
         // }
         //await channel.setName(newName);
 
-        await client.utils.embeds.SimpleEmbed(interaction!, `Temporary Voice Channel System`, `Your Channel was **unlocked**.`);
-    }
-}
+        await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "Your Channel was **unlocked**.");
+    },
+};
 
 async function sleep(msec: number) {
     return new Promise(resolve => setTimeout(resolve, msec));

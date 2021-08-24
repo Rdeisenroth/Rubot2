@@ -1,5 +1,5 @@
-import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection, Message } from "discord.js";
+import { ExecuteEvent } from "../../typings";
+import { Collection } from "discord.js";
 export const name = "interactionCreate";
 
 export const execute: ExecuteEvent<"interactionCreate"> = async (client, interaction) => {
@@ -11,14 +11,14 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
         /**
          * The cooldowns will be stored on a per User level
          */
-        let cooldowns = client.cooldowns;
+        const cooldowns = client.cooldowns;
         const commandName = interaction.commandName;
         const command = client.commands.get(commandName) || client.commands.find(cmd => (cmd.aliases != undefined) && cmd.aliases.includes(commandName));
         // if command was not found, just return to not interfere with other bots
         if (!command) return;
 
         if (command.guildOnly && !interaction.guild) {
-            await interaction.reply({ content: 'I can\'t execute that command inside DMs!' });
+            await interaction.reply({ content: "I can't execute that command inside DMs!" });
             return;
         }
 
@@ -70,4 +70,4 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
             interaction.reply({ content: `Oh no, Button ${customID} had an error while executing :(\nI will look into this as soon as possible!` });
         }
     }
-}
+};

@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
 // import {ReadyEvent} from "../events/ready";
 
-const reqEvent = (event: string) => require(`../events/${event}`)
+const reqEvent = (event: string) => require(`../events/${event}`);
 
 module.exports = (client: Client) => {
     // client.on("ready", () => { ReadyEvent.execute(client) });
@@ -21,4 +21,4 @@ module.exports = (client: Client) => {
     // client.on('serverRoleUpdated', (oldRole, newRoles) => { })
 
 
-}
+};

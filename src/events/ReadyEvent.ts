@@ -1,7 +1,6 @@
-import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { ApplicationCommandData, ApplicationCommandOptionChoice, Client, ClientEvents } from "discord.js";
-import * as colors from "colors";
-import GuildSchema, { Guild } from "../models/guilds";
+import { ExecuteEvent } from "../../typings";
+import { ApplicationCommandData } from "discord.js";
+import GuildSchema from "../models/guilds";
 
 export const execute: ExecuteEvent<"ready"> = async (client) => {
     // -- Setup Databases -- //
@@ -26,24 +25,24 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
     // console.log(command);
 
     // Guilds
-    client.logger.info(`Processing Guilds`);
+    client.logger.info("Processing Guilds");
     for (const g of [...client.guilds.cache.values()]) {
         await GuildSchema.prepareGuild(client,g);
     }
 
-    await client.user?.setPresence({ status: 'online', activities: [{ name: 'The name is Bot, Rubot.', type: "PLAYING" }], afk: false });
+    await client.user?.setPresence({ status: "online", activities: [{ name: "The name is Bot, Rubot.", type: "PLAYING" }], afk: false });
     // Bot is ready
     client.logger.ready({
         message: `"${client.user?.username}" is Ready! (${(Date.now() - client.initTimestamp) / 1000}s)`,
-        badge: true
-    })
+        badge: true,
+    });
     console.log("-".repeat(26));
-    console.log(`Bot Stats:`);
+    console.log("Bot Stats:");
     console.log(`${client.users.cache.size} user(s)`);
     console.log(`${client.channels.cache.size} channel(s)`);
     console.log(`${client.guilds.cache.size} guild(s)`);
     console.log("=".repeat(26));
     return;
-}
+};
 
 export const name = "ready";

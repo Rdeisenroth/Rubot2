@@ -1,6 +1,6 @@
 // import mongoose from 'mongoose';
 import mongoose from "mongoose";
-import SessionSchema, { Session, SessionDocument, sessionRole } from "./sessions";
+import SessionSchema, { SessionDocument, sessionRole } from "./sessions";
 
 // TODO: User Settings, Other User Stuff
 
@@ -24,12 +24,12 @@ export interface User {
 const UserSchema = new mongoose.Schema<UserDocument, UserModel, User>({
     _id: {
         type: String,
-        required: true
+        required: true,
     },
     sessions: [{
         type: mongoose.Types.ObjectId,
         required: true,
-        default: []
+        default: [],
     }],
 });
 
@@ -56,13 +56,14 @@ export interface UserDocument extends User, Omit<mongoose.Document, "_id"> {
     getRole(guildID: string, timestamp?: number | undefined): Promise<sessionRole | null>,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserModel extends mongoose.Model<UserDocument> {
     // List Model methods here
 }
 
 // --Methods--
 
-UserSchema.method('hasActiveSessions', async function () {
+UserSchema.method("hasActiveSessions", async function () {
     if (await SessionSchema.findOne({ user: (this._id as string), active: true })) {
         return true;
     } else {
@@ -70,21 +71,21 @@ UserSchema.method('hasActiveSessions', async function () {
     }
 });
 
-UserSchema.method('getSessions', async function () {
+UserSchema.method("getSessions", async function () {
     return await SessionSchema.find({ user: (this._id as string) });
 });
 
-UserSchema.method('getActiveSessions', async function () {
+UserSchema.method("getActiveSessions", async function () {
     return await SessionSchema.find({ user: (this._id as string), active: true });
 });
 
 
-UserSchema.method('getRole', async function (guildID: string, timestamp?: number) {
+UserSchema.method("getRole", async function (guildID: string, timestamp?: number) {
     if (!timestamp) {
         timestamp = Date.now();
     }
     // Get Session(s) at Timestamp
-    let sessions = await SessionSchema.find({ guild: guildID, user: (this._id as string), started_at: { $lte: timestamp.toString() }, $or: [{ ended_at: { $exists: false } }, { ended_at: { $gte: timestamp.toString() } }] });
+    const sessions = await SessionSchema.find({ guild: guildID, user: (this._id as string), started_at: { $lte: timestamp.toString() }, $or: [{ ended_at: { $exists: false } }, { ended_at: { $gte: timestamp.toString() } }] });
     // We assume that there is at most One Session per guild at a time
     if (!sessions.length) {
         return null;

@@ -1,11 +1,10 @@
 import { Message } from "discord.js";
-import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
+import { Command } from "../../../typings";
+import GuildSchema from "../../models/guilds";
 
 const command: Command = {
     name: "info",
-    description: "displays Information about the current Coaching Queue",
+    description: "displays Information about the current Queue",
     aliases: ["i", "details", "d"],
     cooldown: 3000,
     category: "Miscellaneous",
@@ -26,20 +25,7 @@ const command: Command = {
         }
 
         const user = client.utils.general.getUser(interaction);
-        const userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
-        // Check if User has Active Sessions
-        const activeSessions = await userEntry.getActiveSessions();
-        // We expect at most 1 active session per guild
-        const coachingSession = activeSessions.find(x => x.guild && x.guild === g.id);
-        if (!coachingSession) {
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You Have no Active Coaching Session.", empheral: true });
-        }
-        if (!coachingSession.queue) {
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "There is no Queue Linked to your Session.", empheral: true });
-        }
-
-        const queue = coachingSession.queue;
-        const queueData = guildData.queues.id(queue);
+        const queueData = guildData.queues.find(x => x.entries.find(y => y.discord_id == user.id));
         if (!queueData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
         }

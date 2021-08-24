@@ -1,16 +1,16 @@
 import { Message } from "discord.js";
 import path from "path";
-import { Command } from "../../../../typings";
+import { Command } from "../../../typings";
 
 const command: Command = {
-    name: "notify_all",
-    description: "Broadcasts a Message to all Users in the Current Room",
+    name: "join",
+    description: "Join a queue",
     aliases: ["broadcast"],
     cooldown: 3000,
     guildOnly: true,
     options: [{
-        name: "message",
-        description: "The Message to brodcast",
+        name: "queue",
+        description: "The Queue to join",
         type: "STRING",
         required: true,
     }],

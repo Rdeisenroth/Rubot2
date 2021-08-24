@@ -2,7 +2,7 @@
 process.chdir(__dirname);
 import { BotConfig } from "../typings/index";
 import { Bot } from "./bot";
-const config: BotConfig = require('../config.json');
+const config: BotConfig = require("../config.json");
 // Start Bot
 const botInstance = new Bot();
 botInstance.start(config);

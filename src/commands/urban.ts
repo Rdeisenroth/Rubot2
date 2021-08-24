@@ -1,5 +1,5 @@
 import { stripIndents } from "common-tags";
-import * as urban from 'urban-dictionary';
+import * as urban from "urban-dictionary";
 import { Interaction, Message, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 
@@ -14,9 +14,9 @@ const command: Command = {
     usage: "<search|random> (query)",
     options: [
         {
-            name: 'mode',
-            description: 'Select the Mode',
-            type: 'STRING',
+            name: "mode",
+            description: "Select the Mode",
+            type: "STRING",
             required: true,
             choices: [
                 {
@@ -27,14 +27,14 @@ const command: Command = {
                     name: "random",
                     value: "random",
                 },
-            ]
+            ],
         },
         {
-            name: 'query',
-            description: 'The Search Query',
+            name: "query",
+            description: "The Search Query",
             type: "STRING",
             required: false,
-        }
+        },
     ],
     args: true,
     cooldown: 0,
@@ -47,7 +47,7 @@ const command: Command = {
             mode = interaction.options.getString("mode", true);
             query = interaction.options.getString("query", false);
         } else {
-            let tempMode = args.shift();
+            const tempMode = args.shift();
             if (!tempMode || !["search", "random"].includes(args.shift()!)) {
                 return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix}urban <search|random> (query)\``);
             }
@@ -57,27 +57,27 @@ const command: Command = {
         if (mode == "search" && !query) {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix}urban <search|random> (query)\``);
         }
-        let image = "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg";
-        let search = mode == "search" ? await urban.define(query!) : await urban.random();
+        const image = "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg";
+        const search = mode == "search" ? await urban.define(query!) : await urban.random();
         try {
             if (!search || !search.length) return interaction!.reply("No results found for this topic, sorry!");
-            let { word, definition, example, thumbs_up, thumbs_down, permalink, author } = search[0];
+            const { word, definition, example, thumbs_up, thumbs_down, permalink, author } = search[0];
             // if (interaction instanceof Message) {
-                let embed = new MessageEmbed()
-                    .setColor(3447003)
-                    .setAuthor(`Urban Dictionary | ${word}`, image)
-                    //.setThumbnail(image)
-                    .setDescription(stripIndents(`**Defintion:** ${definition || "No definition"}
+            const embed = new MessageEmbed()
+                .setColor(3447003)
+                .setAuthor(`Urban Dictionary | ${word}`, image)
+            //.setThumbnail(image)
+                .setDescription(stripIndents(`**Defintion:** ${definition || "No definition"}
                                 **Example:** ${example || "No Example"}
                                 **Upvote:** ${thumbs_up || 0}
                                 **Downvote:** ${thumbs_down || 0}
                                 **Link:** [link to ${word}](${permalink || "https://www.urbandictionary.com/"})`))
-                    .setTimestamp()
-                    .setFooter(`Written by ${author || "unknown"}`);
-                await interaction!.reply({ embeds: [embed] });
+                .setTimestamp()
+                .setFooter(`Written by ${author || "unknown"}`);
+            await interaction!.reply({ embeds: [embed] });
         } catch (e) {
-            console.log(e)
-            return interaction!.channel!.send("looks like i've broken! Try again")
+            console.log(e);
+            return interaction!.channel!.send("looks like i've broken! Try again");
         }
     },
 };

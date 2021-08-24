@@ -49,6 +49,7 @@ export interface QueueEntryDocument extends QueueEntry, mongoose.Document {
     // List getters or non model methods here
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueueEntryModel extends mongoose.Model<QueueEntryDocument> {
     // List Model methods here
 }

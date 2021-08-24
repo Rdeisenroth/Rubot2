@@ -1,8 +1,7 @@
-import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { Client, ClientEvents, Collection, MessageActionRow, MessageButton, MessageEmbed, OverwriteData, PremiumTier } from "discord.js";
-import GuildSchema, { Guild } from "../models/guilds";
-import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
-import { spawn } from "child_process";
+import { ExecuteEvent } from "../../typings";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import GuildSchema from "../models/guilds";
+import { VoiceChannelDocument } from "../models/voice_channels";
 import { QueueDocument } from "../models/queues";
 import { QueueEntry } from "../models/queue_entry";
 import moment from "moment";
@@ -15,7 +14,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
     // New Channel/switch Channel
     if (newState.channel && newState.channel.guild && newUserChannel?.id != oldUserChannel?.id) {
 
-        var guild = newState.channel.guild;
+        const guild = newState.channel.guild;
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
@@ -54,7 +53,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     });
                 } catch (error) {
                     try {
-                        await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: `An error occured: ${error}`, color: guild.me?.roles.highest.color || 0x7289da })] });
+                        await newState.member?.send({ embeds: [new MessageEmbed({ title: "Queue System", description: `An error occured: ${error}`, color: guild.me?.roles.highest.color || 0x7289da })] });
                         return;
                     } catch (error2) {
                         console.log(error);
@@ -62,7 +61,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     }
                 }
                 if (queue.join_message) {
-                    let replacements = {
+                    const replacements = {
                         "limit": queue.limit,
                         "member_id": newState.member!.id,
                         "user": newState.member!.user,
@@ -72,12 +71,12 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         "pos": queue.getPosition(queueEntry.discord_id) + 1,
                         "total": queue.entries.length,
                         "time_spent": "0s",
-                    }
+                    };
                     // Interpolate String
-                    let join_message = client.utils.general.interpolateString(queue.join_message, replacements);
+                    const join_message = client.utils.general.interpolateString(queue.join_message, replacements);
                     try {
                         await newState.member?.send({
-                            embeds: [new MessageEmbed({ title: `Queue System`, description: join_message, color: guild.me?.roles.highest.color || 0x7289da })],
+                            embeds: [new MessageEmbed({ title: "Queue System", description: join_message, color: guild.me?.roles.highest.color || 0x7289da })],
                             components: [
                                 new MessageActionRow(
                                     {
@@ -85,8 +84,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                                             [
                                                 new MessageButton({ customId: "queue_refresh", label: "Refresh", style: "PRIMARY" }),
                                                 new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
-                                            ]
-                                    })
+                                            ],
+                                    }),
                             ],
                         });
                     } catch (error) {
@@ -99,7 +98,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
     }
     if (oldUserChannel && newUserChannel?.id != oldUserChannel?.id) {
 
-        var guild = oldUserChannel.guild;
+        const guild = oldUserChannel.guild;
 
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
@@ -116,7 +115,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 }
 
                 // get name for logging
-                var cName = oldUserChannel.name;
+                const cName = oldUserChannel.name;
 
                 // if(!channelData.locked) {
                 //     cName = cName.substring("🔓".length);
@@ -127,8 +126,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     { _id: guild.id },
                     {
                         $pull: {
-                            "voice_channels": { _id: oldUserChannel.id }
-                        }
+                            "voice_channels": { _id: oldUserChannel.id },
+                        },
                     },
                     { upsert: true, setDefaultsOnInsert: true },
                 );
@@ -141,13 +140,13 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
                     return;
                 }
-                let member_id = oldState.member!.id;
+                const member_id = oldState.member!.id;
                 // Leave queue
                 if (queue.contains(member_id)) {
-                    let entry = await queue.leave(member_id);
+                    const entry = await queue.leave(member_id);
                     if (queue.leave_message) {
                         try {
-                            let replacements = {
+                            const replacements = {
                                 "limit": queue.limit,
                                 "member_id": newState.member!.id,
                                 "user": newState.member!.user,
@@ -158,10 +157,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                                 "pos": queue.getPosition(entry.discord_id) + 1,
                                 "total": queue.entries.length,
                                 "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
-                            }
+                            };
                             // Interpolate String
-                            let leave_message = client.utils.general.interpolateString(queue.leave_message, replacements);
-                            await newState.member?.send({ embeds: [new MessageEmbed({ title: `Queue System`, description: leave_message, color: guild.me?.roles.highest.color || 0x7289da })] });
+                            const leave_message = client.utils.general.interpolateString(queue.leave_message, replacements);
+                            await newState.member?.send({ embeds: [new MessageEmbed({ title: "Queue System", description: leave_message, color: guild.me?.roles.highest.color || 0x7289da })] });
                         } catch (error) {
                             console.log(error);
                         }
@@ -175,4 +174,4 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
     }
 
     return;
-}
+};

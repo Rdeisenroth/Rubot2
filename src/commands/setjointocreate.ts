@@ -1,14 +1,13 @@
-import ChannelType, { CategoryChannel, EmojiIdentifierResolvable, GuildChannel, Message, MessageEmbed, VoiceChannel as dvc } from "discord.js";
-import { Command, RunCommand } from "../../typings";
-import GuildSchema, { Guild } from "../models/guilds";
-import { VoiceChannel, VoiceChannelDocument } from "../models/voice_channels";
-import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
+import { CategoryChannel, GuildChannel, Message, VoiceChannel as dvc } from "discord.js";
+import { Command } from "../../typings";
+import GuildSchema from "../models/guilds";
+import { VoiceChannel } from "../models/voice_channels";
 
 const command: Command = {
-    name: 'setjointocreate',
-    description: 'sets the given channel as join to create',
-    aliases: ['sj2c', 'setj2c'],
-    usage: '[channel resolvable]',
+    name: "setjointocreate",
+    description: "sets the given channel as join to create",
+    aliases: ["sj2c", "setj2c"],
+    usage: "[channel resolvable]",
     cooldown: 5,
     category: "Miscellaneous",
     guildOnly: true,
@@ -30,14 +29,14 @@ const command: Command = {
             return;
         }
         if (interaction instanceof Message) {
-            await client.utils.embeds.SimpleEmbed(interaction, { title: 'Slash Only Command', text: 'This Command is Slash only but you Called it with The Prefix. use the slash Command instead.', deleteinterval: 3000 })
+            await client.utils.embeds.SimpleEmbed(interaction, { title: "Slash Only Command", text: "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.", deleteinterval: 3000 });
             if (interaction.deletable) await interaction.delete();
             return;
         }
-        let owner = client.users.cache.find(m => m.id == client.ownerID);
-        let member = client.utils.general.getMember(interaction);
-        if (!member || member.id !== client.ownerID as String) {
-            await interaction?.reply(`You do not have permission to execute this command.`);
+        const owner = client.users.cache.find(m => m.id == client.ownerID);
+        const member = client.utils.general.getMember(interaction);
+        if (!member || member.id !== client.ownerID as string) {
+            await interaction?.reply("You do not have permission to execute this command.");
             return;
         }
 
@@ -47,19 +46,19 @@ const command: Command = {
         // const channel = g!.channels.cache.find(x => x.id == args[0]);
         const channel = interaction.options.getChannel("spawner", true);
         if (!channel || !(channel instanceof GuildChannel)) {
-            return await interaction?.reply(`Channel could not be found.`);
+            return await interaction?.reply("Channel could not be found.");
         }
         if (!(channel instanceof dvc)) {
-            return await interaction?.reply(`Spawner channel must be a voice Channel.`);
+            return await interaction?.reply("Spawner channel must be a voice Channel.");
         }
 
         let parent_id = channel.parentId;
 
-        let parent = interaction.options.getChannel("parent", false);
+        const parent = interaction.options.getChannel("parent", false);
 
         if (parent) {
             if (!(parent instanceof CategoryChannel)) {
-                return await interaction?.reply(`Parent must be a Category Channel.`);
+                return await interaction?.reply("Parent must be a Category Channel.");
             }
             parent_id = parent.id;
         }
@@ -82,20 +81,20 @@ const command: Command = {
                         spawner: {
                             owner: member.id,
                             supervisor_roles: [],
-                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'MOVE_MEMBERS', "MANAGE_CHANNELS"] }],
+                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "MOVE_MEMBERS", "MANAGE_CHANNELS"] }],
                             max_users: 5,
                             parent: parent_id,
                         },
-                    } as VoiceChannel
-                }
+                    } as VoiceChannel,
+                },
             },
             { upsert: true, setDefaultsOnInsert: true },
         );
         console.log(updated);
-        interaction!.reply({ content: "Done." })
+        interaction!.reply({ content: "Done." });
         // message.guild?.channels.create("", {})
-    }
-}
+    },
+};
 
 /**
  * Exporting the Command using CommonJS
