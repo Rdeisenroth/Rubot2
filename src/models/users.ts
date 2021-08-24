@@ -12,6 +12,7 @@ export interface User {
      * The User ID provided by Discord
      */
     _id: string,
+    // TODO: Some Link to Moodle Account
     /**
      * The Sessions
      */

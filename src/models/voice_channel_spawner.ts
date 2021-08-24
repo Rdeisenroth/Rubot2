@@ -27,6 +27,10 @@ export interface VoiceChannelSpawner {
      */
     lock_initially?: boolean,
     /**
+     * Whether the Channel should initially be hidden or not
+     */
+    hide_initially?: boolean,
+    /**
      * The Category Channel ID
      */
     parent?: string,
@@ -56,6 +60,11 @@ const VoiceChannelSpawnerSchema = new mongoose.Schema<VoiceChannelSpawnerDocumen
         default: "${owner_name}'s VC",
     },
     lock_initially: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    hide_initially: {
         type: Boolean,
         required: false,
         default: false,

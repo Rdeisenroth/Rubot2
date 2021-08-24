@@ -28,6 +28,20 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
         });
     }
 
+    // Lock?
+    if (options.lock_initially) {
+        permoverrides.push({
+            id: guild.roles.everyone.id, deny: ["CONNECT", "SPEAK"],
+        });
+    }
+
+    // Hide?
+    if (options.hide_initially) {
+        permoverrides.push({
+            id: guild.roles.everyone.id, deny: ["VIEW_CHANNEL"],
+        });
+    }
+
     // TODO: Error Handling
 
 
@@ -73,11 +87,9 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
  * @param spawner The Options from the Voice Channel Spawner
  */
 export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpawner) {
-    let options: VoiceChannelCreateOptions;
     const client = member.client as Bot;
     // Figure out Name
     let name = `${member.displayName}'s VC`;
-    const shortname = name;
     if (spawner.name) {
         name = spawner.name;
         // Interpolate String

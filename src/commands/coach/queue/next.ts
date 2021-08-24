@@ -1,3 +1,4 @@
+import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
 import ChannelType, { Message } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -7,7 +8,7 @@ import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 
 const command: Command = {
     name: "next",
-    description: "Accept X Persions from The Queue",
+    description: "Accept X Persons from The Queue",
     aliases: ["n"],
     options: [{
         name: "amount",
@@ -65,7 +66,7 @@ const command: Command = {
 
         // Get Room Spawner
 
-        let spawner:VoiceChannelSpawner | undefined = queueData.room_spawner;
+        let spawner: VoiceChannelSpawner | undefined = queueData.room_spawner;
         const queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue == queue);
         const queue_channel = g.channels.cache.get(queue_channel_data?._id ?? "");
         const member = client.utils.general.getMember(interaction)!;
@@ -73,7 +74,14 @@ const command: Command = {
             spawner = {
                 owner: user.id,
                 supervisor_roles: [], // TODO
-                permission_overwrites: [],
+                permission_overwrites: [
+                    ...entries.map(x => {
+                        return {
+                            id: x.discord_id,
+                            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                        } as PermissionOverwriteData;
+                    }),
+                ],
                 max_users: 5,
                 parent: queue_channel?.parentId ?? undefined,
                 lock_initially: true,
