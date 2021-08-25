@@ -42,7 +42,9 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     const { title, text, style, deleteinterval, empheral, fields } = options!;
     //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
     embed.setTitle(title);
-    embed.setDescription(`${text}`);
+    if (text) {
+        embed.setDescription(`${text}`);
+    }
     if (fields) {
         for (const field of fields) {
             embed.addField(field.name, field.value, field.inline);

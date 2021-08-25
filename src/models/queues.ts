@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import QueueEntrySchema, { QueueEntry, QueueEntryDocument } from "./queue_entry";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
+import * as utils from "../utils/utils";
+import { StringReplacements } from "../../typings";
+import moment from "moment";
 
 /**
  * A Queue from the Database
@@ -42,6 +45,10 @@ export interface Queue {
      *  A Custom Leave Message. Use ${pos} ${total} ${eta} ${user} ${timeout} and so on to create Dynamic Messages.
      */
     leave_message?: string,
+    /**
+     * A Custom Message that is Displayed when the Room is Left (like Please confirm ur stay)
+     */
+    leave_room_message?: string,
     /**
      * A Template for spawning in Rooms (if empty default template is used)
      */
@@ -88,6 +95,10 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         type: String,
         required: false,
     },
+    leave_room_message: {
+        type: String,
+        required: false,
+    },
     leave_message: {
         type: String,
         required: false,
@@ -111,7 +122,7 @@ export interface QueueDocument extends Queue, mongoose.Document {
      * Put an Entry into the Queue
      * @param entry The Queue Entry
      */
-    join(entry: QueueEntry): Promise<QueueEntry>,
+    join(entry: QueueEntry): Promise<QueueEntryDocument>,
     /**
      * Gets the Sorted Entries with the First ones being the ones with the highest Importance
      * @param limit How many entries should we get at most?
@@ -123,6 +134,11 @@ export interface QueueDocument extends Queue, mongoose.Document {
      */
     contains(discord_id: string): boolean,
     /**
+     * Gets The Entry that has the given Discord ID
+     * @param discord_id The Discord ID of the Entry
+     */
+    getEntry(discord_id: string): QueueEntryDocument | null,
+    /**
      * Gets the Position in the Current Queue
      * @param discord_id the Discord ID of the entry
      */
@@ -132,6 +148,86 @@ export interface QueueDocument extends Queue, mongoose.Document {
      * @param discord_id The Discord ID of the entry
      */
     leave(discord_id: string): Promise<QueueEntry>,
+    /**
+     * Interpolates the Queue String
+     * @param string The String to Interpolate
+     */
+    interpolateQueueString(string: string): string | null,
+    /**
+     * Interpolates the Queue String
+     * @param string The String to Interpolate
+     * @param discord_id The Discord ID of the Entry
+     */
+    interpolateQueueString(string: string, discord_id: string): string | null,
+    /**
+     * Interpolates the Queue String
+     * @param string The String to Interpolate
+     * @param entry The Queue Entry
+     */
+    interpolateQueueString(string: string, entry: QueueEntry): string | null,
+    /**
+     * Interpolates the Queue String
+     * @param string The String to Interpolate
+     * @param entry_resolvable The Entry Resolvable
+     */
+    interpolateQueueString(string: string, entry_resolvable?: string | QueueEntry | undefined): string | null,
+    /**
+     * Gets the leave Message of the Queue
+     */
+    getLeaveMessage(): string,
+    /**
+     * Gets the leave Message of the Queue
+     * @param discord_id The Discord ID of the Leaver
+     */
+    getLeaveMessage(discord_id: string): string,
+    /**
+     * Gets the leave Message of the Queue
+     * @param entry The Entry that wants to leave the queue
+     */
+    getLeaveMessage(entry: QueueEntry): string,
+    /**
+     * Gets the leave Message of the Queue
+     * @param entry_resolvable The Entry Resolvable
+     */
+    getLeaveMessage(entry_resolvable?: string | QueueEntry | undefined): string,
+    /**
+     * Gets the leave Room Message of the Queue
+     */
+    getLeaveRoomMessage(): string,
+    /**
+     * Gets the leave Room Message of the Queue
+     * @param discord_id The Discord ID of the Leaver
+     */
+    getLeaveRoomMessage(discord_id: string): string,
+    /**
+     * Gets the leave Room Message of the Queue
+     * @param entry The Entry that wants to leave the queue
+     */
+    getLeaveRoomMessage(entry: QueueEntry): string,
+    /**
+     * Gets the leave Room Message of the Queue
+     * @param entry_resolvable The Entry Resolvable
+     */
+    getLeaveRoomMessage(entry_resolvable?: string | QueueEntry | undefined): string,
+    /**
+     * Gets the join Message of the Queue
+     */
+    getJoinMessage(): string,
+    /**
+     * Gets the join Message of the Queue
+     * @param discord_id The Discord ID of the Joiner
+     */
+    getJoinMessage(discord_id: string): string,
+    /**
+     * Gets the join Message of the Queue
+     * @param entry The Entry that wants to join the queue
+     */
+    getJoinMessage(entry: QueueEntry): string,
+    /**
+     * Gets the leave Message of the Queue
+     * @param entry_resolvable The Entry Resolvable
+     */
+    getJoinMessage(entry_resolvable?: string | QueueEntry | undefined): string,
     /**
      * Returns `true` if the Queue is Empty
      */
@@ -151,7 +247,7 @@ QueueSchema.method("join", async function (entry: QueueEntry) {
     }
     this.entries.push(entry);
     await this.$parent()?.save();
-    return entry;
+    return this.getEntry(entry.discord_id)!;
 });
 
 QueueSchema.method("leave", async function (discord_id: string) {
@@ -179,9 +275,84 @@ QueueSchema.method("isEmpty", function (): boolean {
 QueueSchema.method("contains", function (discord_id: string): boolean {
     return (this.entries.find(x => x.discord_id === discord_id)) ? true : false;
 });
+QueueSchema.method("getEntry", function (discord_id: string) {
+    return this.entries.find(x => x.discord_id === discord_id) ?? null;
+});
 
 QueueSchema.method("getPosition", function (discord_id: string): number {
     return this.getSortedEntries().findIndex(x => x.discord_id === discord_id);
+});
+
+QueueSchema.method("interpolateQueueString", function (string: string, entry_resolvable?: string | QueueEntry): string | null {
+    try {
+        const replacements: StringReplacements = {
+            "limit": this.limit,
+            "name": this.name,
+            "description": this.description,
+            "eta": "null",
+            "timeout": this.disconnect_timeout,
+            "total": this.entries.length,
+        };
+
+        if (entry_resolvable) {
+            let entry: QueueEntry | null;
+            if (typeof entry_resolvable === "string") {
+                entry = this.getEntry(entry_resolvable);
+            } else {
+                entry = entry_resolvable;
+            }
+            if (entry && this.contains(entry.discord_id)) {
+                const entryReplacements: StringReplacements = {
+                    "member_id": entry.discord_id,
+                    "user": `<@${entry.discord_id}>`,
+                    "pos": this.getPosition(entry.discord_id) + 1,
+                    "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
+                };
+                for (const [key, value] of Object.entries(entryReplacements)) {
+                    replacements[key] = value;
+                }
+            }
+        }
+        // Interpolate String
+        return utils.general.interpolateString(string, replacements);
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+});
+
+
+QueueSchema.method("getJoinMessage", function (entry_resolvable?: string | QueueEntry) {
+    const default_join_message = "You left the Queue.";
+    if (this.join_message) {
+        const join_msg = this.interpolateQueueString(this.join_message, entry_resolvable);
+        return join_msg ?? default_join_message;
+    }
+    else {
+        return default_join_message;
+    }
+});
+
+QueueSchema.method("getLeaveMessage", function (entry_resolvable?: string | QueueEntry) {
+    const default_leave_message = "You left the Queue.";
+    if (this.leave_message) {
+        const leave_msg = this.interpolateQueueString(this.leave_message, entry_resolvable);
+        return leave_msg ?? default_leave_message;
+    }
+    else {
+        return default_leave_message;
+    }
+});
+
+QueueSchema.method("getLeaveRoomMessage", function (entry_resolvable?: string | QueueEntry) {
+    const default_leave_message = `You left the Room. Please confirm your stay or you will be removed from the queue after the Timeout of ${(this.disconnect_timeout ?? 0) / 1000}s.`;
+    if (this.leave_room_message) {
+        const leave_msg = this.interpolateQueueString(this.leave_room_message, entry_resolvable);
+        return leave_msg ?? default_leave_message;
+    }
+    else {
+        return default_leave_message;
+    }
 });
 
 // Default export

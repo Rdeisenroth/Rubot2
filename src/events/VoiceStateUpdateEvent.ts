@@ -46,6 +46,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 }
                 let queueEntry: QueueEntry;
                 try {
+                    if (queue.contains(newState.member!.id)) {
+                        return;
+                    }
                     queueEntry = await queue.join({
                         discord_id: newState.member!.id,
                         joinedAt: Date.now().toString(),
@@ -53,7 +56,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     });
                 } catch (error) {
                     try {
-                        await newState.member?.send({ embeds: [new MessageEmbed({ title: "Queue System", description: `An error occured: ${error}`, color: guild.me?.roles.highest.color || 0x7289da })] });
+                        await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), { title: "Queue System", text: `An error occurred: ${error}` });
                         return;
                     } catch (error2) {
                         console.log(error);
@@ -135,43 +138,36 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 console.log(`deleted TEMP VC: ${cName} on ${guild.name}`);
             } else if (channelData.queue) {
                 const queueId = channelData.queue;
-                const queue = (guildData?.queues as QueueDocument[]).find(x => x._id == queueId.toHexString());
+                const queue = guildData?.queues.id(queueId);
                 if (!queue) {
                     client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
                     return;
                 }
-                const member_id = oldState.member!.id;
-                // Leave queue
+                const member = oldState.member!;
+                const member_id = member.id;
+                // Set Timeout
                 if (queue.contains(member_id)) {
-                    const entry = await queue.leave(member_id);
-                    if (queue.leave_message) {
-                        try {
-                            const replacements = {
-                                "limit": queue.limit,
-                                "member_id": newState.member!.id,
-                                "user": newState.member!.user,
-                                "name": queue.name,
-                                "description": queue.description,
-                                "eta": "null",
-                                "timeout": queue.disconnect_timeout,
-                                "pos": queue.getPosition(entry.discord_id) + 1,
-                                "total": queue.entries.length,
-                                "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
-                            };
-                            // Interpolate String
-                            const leave_message = client.utils.general.interpolateString(queue.leave_message, replacements);
-                            await newState.member?.send({ embeds: [new MessageEmbed({ title: "Queue System", description: leave_message, color: guild.me?.roles.highest.color || 0x7289da })] });
-                        } catch (error) {
-                            console.log(error);
-                        }
-
+                    const dm = await member.createDM();
+                    if (queue.disconnect_timeout) {
+                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: queue.getLeaveRoomMessage(member_id) });
+                        // Create Timer
+                        setTimeout(async () => {
+                            const leave_msg = queue.getLeaveMessage(member_id);
+                            await queue.leave(member_id);
+                            await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
+                        }, queue.disconnect_timeout);
+                    } else {
+                        const leave_msg = queue.getLeaveMessage(member_id);
+                        await queue.leave(member_id);
+                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }
-
                 }
-            }
 
+            }
         }
+
     }
+
 
     return;
 };

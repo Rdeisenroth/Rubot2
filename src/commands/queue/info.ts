@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message, EmbedFieldData } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 
@@ -25,17 +25,22 @@ const command: Command = {
         }
 
         const user = client.utils.general.getUser(interaction);
-        const queueData = guildData.queues.find(x => x.entries.find(y => y.discord_id == user.id));
+        const queueData = guildData.queues.find(x => x.contains(user.id));
         if (!queueData) {
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You are currently not in a queue.", empheral: true });
         }
 
+        const queuePosition = queueData.getPosition(user.id);
         await client.utils.embeds.SimpleEmbed(interaction, {
-            title: "Queue Information", text: `
-        \\> Name: ${queueData.name}
-        \n\\> Description: ${queueData.description}
-        \n\\> Active Entries: ${queueData.entries.length}
-        `, empheral: true,
+            title: "Queue Information",
+            fields:
+                [
+                    { name: "❯ Name", value: `${queueData.name}` },
+                    { name: "❯ Description", value: `${queueData.description}` },
+                    { name: "❯ Active Entries", value: `${queueData.entries.length}` },
+                    { name: "❯ Your Position", value: queuePosition < 0 ? "You are not in the Queue" : `${queuePosition + 1}/${queueData.entries.length}` },
+                ] as EmbedFieldData[],
+            empheral: true,
         });
 
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)

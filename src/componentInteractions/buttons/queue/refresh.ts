@@ -11,7 +11,7 @@ const command: ButtonInteraction = {
     execute: async (client, interaction) => {
         const guilds = await GuildSchema.find();
         let g: GuildDocument | undefined;
-        let queue: Queue | undefined;
+        let queue: QueueDocument | undefined;
         for (g of guilds) {
             if (!g.queues) {
                 continue;
@@ -38,7 +38,7 @@ const command: ButtonInteraction = {
                     "description": queue.description,
                     "eta": "null",
                     "timeout": queue.disconnect_timeout,
-                    "pos": (queue as QueueDocument).getPosition(entry.discord_id) + 1,
+                    "pos": queue.getPosition(entry.discord_id) + 1,
                     "total": queue.entries.length,
                     "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
                 };
