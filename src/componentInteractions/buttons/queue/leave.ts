@@ -15,7 +15,7 @@ const command: ButtonInteraction = {
             if (!g.queues) {
                 continue;
             }
-            queue = g.queues.find(x => x.entries.some(x => x.discord_id === interaction.user.id));
+            queue = g.queues.find(x => x.contains(interaction.user.id));
             if (!queue) {
                 continue;
             }
@@ -26,15 +26,18 @@ const command: ButtonInteraction = {
             return;
         }
         // Leave the Queue
-        const entry = queue.entries.splice(queue.entries.findIndex(x => x.discord_id === interaction.user.id), 1)[0];
-        await g.save();
+        const leave_msg = queue.getLeaveMessage(interaction.user.id);
+        await queue.leave(interaction.user.id);
+        let color = 0x7289da;
         try {
-            const member = client.guilds.cache.get(g._id)?.members.cache.get(interaction.user.id);
+            const guild = client.guilds.cache.get(g._id);
+            color = guild?.me?.roles.highest.color ?? 0x7289da;
+            const member = guild?.members.cache.get(interaction.user.id);
             await member?.voice.disconnect();
         } catch (error) {
             console.log(error);
         }
-        await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: queue.getLeaveMessage(entry), color: interaction.guild?.me?.roles.highest.color || 0x7289da })], components: [] });
+        await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: leave_msg, color: color })], components: [] });
     },
 };
 
