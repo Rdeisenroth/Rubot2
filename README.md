@@ -5,6 +5,8 @@
 
 a general Purpose Discord Bot
 # Setup
+- Install Mongodb and add a new user and give it acess to the schema you want to use
+    - Hint: A strong password can be generated with `openssl rand -base64 <length>` and converted for the coonnection string with `php -r "echo urlencode(\"<password>\");"`
 - install the Dependencies with `npm install`
 - Create a config.json File and Fill it according to the Json Schema
 - run `npm start` to compile and run the Bot
