@@ -128,7 +128,7 @@ const command: Command = {
                 // TODO: User Sessions
             } catch (error) {
                 console.log(error);
-                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: error, empheral: true });
+                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: `${error}`, empheral: true });
             }
         }
 

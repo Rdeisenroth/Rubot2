@@ -7,6 +7,7 @@ import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_chan
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
+import assert from "assert";
 
 /**
  * A Guild from the Database
@@ -121,11 +122,11 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
         },
         { upsert: true, setDefaultsOnInsert: true },
     );
-    if (updated.ok) {
-        if (updated.upserted) {
+    if (updated.acknowledged) {
+        if (updated.upsertedCount) {
             client.logger.info(`Joined new Guild: "${g.name}" (${g.id})`);
         }
-        if (updated.nModified > 0) {
+        if (updated.modifiedCount > 0) {
             client.logger.info(`Updated Guild: "${g.name}" (${g.id})`);
         }
     } else {
