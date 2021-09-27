@@ -177,7 +177,6 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     } catch (error) {
         console.log(error);
     }
-    // console.log(command);
 });
 
 // Default export
