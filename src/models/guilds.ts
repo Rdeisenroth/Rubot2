@@ -154,16 +154,26 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
         data.push(commandData);
     }
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const commands = await g.commands.set(data);
+        const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
         // permissions
-        // for(const c of [...commands.values()]){
-        //     await c.permissions.add({permissions: [{
-        //         id: client.ownerID!,
-        //         type: "USER",
-        //         permission: true,
-        //     }]})
-        // }
+        for (const c of [...commands.values()]) {
+            fullPermissions.push({
+                id: c.id,
+                permissions: [
+                    // Bot owner
+                    {
+                        id: client.ownerID!,
+                        type: "USER",
+                        permission: true,
+                    },
+                ],
+            });
+        }
+        await g.commands.permissions.set({
+            fullPermissions: fullPermissions,
+        });
+
     } catch (error) {
         console.log(error);
     }
