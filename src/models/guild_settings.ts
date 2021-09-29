@@ -1,4 +1,4 @@
-import SlashCommandSettingsSchema, { SlashCommandSettings } from "./slash_command_settings";
+import SlashCommandSettingsSchema, { SlashCommandSettings, SlashCommandSettingsDocument } from "./slash_command_settings";
 import { ApplicationCommandPermissionData } from "discord.js";
 import mongoose from "mongoose";
 
@@ -44,13 +44,46 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
 });
 
 export interface GuildSettingsDocument extends GuildSettings, mongoose.Document {
-
+    slashCommands: mongoose.Types.DocumentArray<SlashCommandSettingsDocument>,
+    /**
+    * Checks whether command Settings exist
+    * @param name The internal Command Name
+    */
+    hasCommandSettings(name: string): boolean,
+    /**
+    * Gets the Settings for a specified command
+    * @param name The internal Command Name
+    */
+    getCommandByName(name: string): SlashCommandSettingsDocument | null,
+    getOrCreateCommandByName(name: string): Promise<SlashCommandSettingsDocument>,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuildSettingsModel extends mongoose.Model<GuildSettingsDocument> {
 
 }
+
+GuildSettingsSchema.method("hasCommandSettings", function (name: string) {
+    return this.slashCommands.some(x => x.internal_name === name);
+});
+
+GuildSettingsSchema.method("getCommandByName", function (name: string) {
+    return this.slashCommands.find(x => x.internal_name === name) ?? null;
+});
+
+GuildSettingsSchema.method("getOrCreateCommandByName", async function (name: string) {
+    if (!this.hasCommandSettings(name)) {
+        this.slashCommands.push(
+            {
+                internal_name: name,
+                aliases: [],
+                permissions: [],
+            } as SlashCommandSettings,
+        );
+        await this.$parent()?.save();
+    }
+    return this.getCommandByName(name)!;
+});
 
 // Default export
 export default GuildSettingsSchema;

@@ -90,6 +90,27 @@ export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
     voice_channels: mongoose.Types.DocumentArray<VoiceChannelDocument>,
     guild_settings: GuildSettingsDocument,
     queues: mongoose.Types.DocumentArray<QueueDocument>,
+    /**
+     * Gets the actual guild object represented by this document from discord
+     * @param client The Bot Client
+     */
+    resolve(client: Bot): Promise<djs.Guild | null>,
+    /**
+     * Posts the Slash Commands to the Guild (using set)
+     * @param client The Bot Client
+     */
+    postSlashCommands(client: Bot): Promise<void>,
+    /**
+     * Posts the Slash Commands to the Guild (using set)
+     * @param client The Bot Client
+     * @param g The resolved guild (for speed improvement)
+     */
+    postSlashCommands(client: Bot, g: djs.Guild): Promise<void>,
+    /**
+     * Posts the Slash Commands to the Guild (using set)
+     * @param g The resolved guild (for speed improvement)
+     */
+    postSlashCommands(client: Bot, g?: djs.Guild | null): Promise<void>,
 }
 
 /**
@@ -108,6 +129,70 @@ export interface GuildModel extends mongoose.Model<GuildDocument> {
 // --Methods--
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
+
+GuildSchema.method("resolve", async function (client: Bot) {
+    return await client.guilds.resolve(this._id);
+});
+
+GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
+    g = g ?? await this.resolve(client);
+    if (!g) {
+        throw new Error("Guild could not be resolved!");
+    }
+    // TODO: Per Guild Slash Command Config
+    const data: ApplicationCommandData[] = [];
+    // console.log([...client.commands.values()])
+    for (const c of [...client.commands.values()]) {
+        // console.log("a"+ c);
+        // Check Database entry
+        const cmdSettings = this.guild_settings.getCommandByName(c.name);
+        if (cmdSettings?.disabled) {
+            continue;
+        }
+        const commandData: ApplicationCommandData = {
+            name: cmdSettings?.name ?? c.name,
+            description: cmdSettings?.description ?? c.description,
+            options: c.options,
+            defaultPermission: cmdSettings?.defaultPermission ?? c.defaultPermission,
+        };
+        // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
+        if (c.name === "help") {
+            const cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
+                return { name: key, value: key };
+            });
+            (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
+        }
+        data.push(commandData);
+        // TODO: Aliases
+    }
+    try {
+        const commands = await g.commands.set(data);
+        const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
+        // permissions
+        for (const c of [...commands.values()]) {
+            const cmdSettings = this.guild_settings.getCommandByName(c.name);
+            fullPermissions.push({
+                id: c.id,
+                permissions: [
+                    // Overwrites von Settings
+                    ...cmdSettings?.getPostablePermissions() ?? [],
+                    // Bot owner
+                    {
+                        id: client.ownerID!,
+                        type: "USER",
+                        permission: true,
+                    },
+                ],
+            });
+        }
+        await g.commands.permissions.set({
+            fullPermissions: fullPermissions,
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+});
 
 GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     console.log(`Processing guild "${g.name}" (${g.id})`);
@@ -133,50 +218,8 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
         client.logger.error(JSON.stringify(updated));
     }
     // Post slash Commands
-    // TODO: Per Guild Slash Command Config
-    const data: ApplicationCommandData[] = [];
-    // console.log([...client.commands.values()])
-    for (const c of [...client.commands.values()]) {
-        // console.log("a"+ c);
-        const commandData: ApplicationCommandData = {
-            name: c.name,
-            description: c.description,
-            options: c.options,
-            defaultPermission: c.defaultPermission,
-        };
-        // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
-        if (c.name === "help") {
-            const cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
-                return { name: key, value: key };
-            });
-            (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
-        }
-        data.push(commandData);
-    }
-    try {
-        const commands = await g.commands.set(data);
-        const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
-        // permissions
-        for (const c of [...commands.values()]) {
-            fullPermissions.push({
-                id: c.id,
-                permissions: [
-                    // Bot owner
-                    {
-                        id: client.ownerID!,
-                        type: "USER",
-                        permission: true,
-                    },
-                ],
-            });
-        }
-        await g.commands.permissions.set({
-            fullPermissions: fullPermissions,
-        });
-
-    } catch (error) {
-        console.log(error);
-    }
+    const gDoc = (await this.findById(g.id))!;
+    gDoc.postSlashCommands(client, g);
 });
 
 // Default export
