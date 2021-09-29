@@ -145,7 +145,7 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
     for (const c of [...client.commands.values()]) {
         // console.log("a"+ c);
         // Check Database entry
-        const cmdSettings = this.guild_settings.getCommandByName(c.name);
+        const cmdSettings = this.guild_settings.getCommandByInternalName(c.name);
         if (cmdSettings?.disabled) {
             continue;
         }
@@ -170,7 +170,7 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
         const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
         // permissions
         for (const c of [...commands.values()]) {
-            const cmdSettings = this.guild_settings.getCommandByName(c.name);
+            const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
             fullPermissions.push({
                 id: c.id,
                 permissions: [
@@ -219,7 +219,7 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     }
     // Post slash Commands
     const gDoc = (await this.findById(g.id))!;
-    gDoc.postSlashCommands(client, g);
+    await gDoc.postSlashCommands(client, g);
 });
 
 // Default export

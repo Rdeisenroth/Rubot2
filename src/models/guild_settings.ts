@@ -54,8 +54,13 @@ export interface GuildSettingsDocument extends GuildSettings, mongoose.Document 
     * Gets the Settings for a specified command
     * @param name The internal Command Name
     */
-    getCommandByName(name: string): SlashCommandSettingsDocument | null,
-    getOrCreateCommandByName(name: string): Promise<SlashCommandSettingsDocument>,
+    getCommandByInternalName(name: string): SlashCommandSettingsDocument | null,
+    /**
+    * Gets the Settings for a specified command
+    * @param name The guild Command Name
+    */
+    getCommandByGuildName(name: string): SlashCommandSettingsDocument | null,
+    getOrCreateCommandByInternalName(name: string): Promise<SlashCommandSettingsDocument>,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -67,11 +72,14 @@ GuildSettingsSchema.method("hasCommandSettings", function (name: string) {
     return this.slashCommands.some(x => x.internal_name === name);
 });
 
-GuildSettingsSchema.method("getCommandByName", function (name: string) {
+GuildSettingsSchema.method("getCommandByInternalName", function (name: string) {
     return this.slashCommands.find(x => x.internal_name === name) ?? null;
 });
+GuildSettingsSchema.method("getCommandByGuildName", function (name: string) {
+    return this.slashCommands.find(x => x.name === name) ?? this.getCommandByInternalName(name);
+});
 
-GuildSettingsSchema.method("getOrCreateCommandByName", async function (name: string) {
+GuildSettingsSchema.method("getOrCreateCommandByInternalName", async function (name: string) {
     if (!this.hasCommandSettings(name)) {
         this.slashCommands.push(
             {
@@ -82,7 +90,7 @@ GuildSettingsSchema.method("getOrCreateCommandByName", async function (name: str
         );
         await this.$parent()?.save();
     }
-    return this.getCommandByName(name)!;
+    return this.getCommandByInternalName(name)!;
 });
 
 // Default export

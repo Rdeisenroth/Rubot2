@@ -1,6 +1,7 @@
-import { ExecuteEvent } from "../../typings";
+import { Command, ExecuteEvent } from "../../typings";
 import { Collection } from "discord.js";
 export const name = "interactionCreate";
+import GuildSchema from "../models/guilds";
 
 export const execute: ExecuteEvent<"interactionCreate"> = async (client, interaction) => {
 
@@ -13,9 +14,15 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
          */
         const cooldowns = client.cooldowns;
         const commandName = interaction.commandName;
-        const command = client.commands.get(commandName) || client.commands.find(cmd => (cmd.aliases != undefined) && cmd.aliases.includes(commandName));
+        let actualCommandName = commandName;
+        if (interaction.guild) {
+            const g = interaction.guild;
+            const guildData = (await GuildSchema.findById(g.id))!;
+            actualCommandName = guildData.guild_settings.getCommandByGuildName(commandName)?.internal_name ?? commandName;
+        }
+        const command = client.commands.get(actualCommandName) || client.commands.find(cmd => (cmd.aliases != undefined) && cmd.aliases.includes(actualCommandName));
         // if command was not found, just return to not interfere with other bots
-        if (!command) return;
+        if (!command) return await interaction.reply({ content: "Command was not Found." });
 
         if (command.guildOnly && !interaction.guild) {
             await interaction.reply({ content: "I can't execute that command inside DMs!" });

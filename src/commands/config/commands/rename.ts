@@ -42,11 +42,11 @@ const command: Command = {
         if (!client.commands.has(originalCommandName)) {
             return await client.utils.errors.errorMessage(interaction, `No Command named ${originalCommandName} is known.\nPlease use the **original** command name, not one after renaming.`);
         }
-        const commandSettings = await guildData.guild_settings.getOrCreateCommandByName(originalCommandName);
+        const commandSettings = await guildData.guild_settings.getOrCreateCommandByInternalName(originalCommandName);
         commandSettings.name = newCommandName;
         await guildData.save();
         await guildData.postSlashCommands(client, g);
-        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Server Config", text: `Sucessfully renamed command ${originalCommandName} to ${newCommandName}` })
+        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Server Config", text: `Successfully renamed command ${originalCommandName} to ${newCommandName}` });
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
     },
 };
