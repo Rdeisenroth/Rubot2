@@ -1,3 +1,5 @@
+import SlashCommandSettingsSchema, { SlashCommandSettings } from "./slash_command_settings";
+import { ApplicationCommandPermissionData } from "discord.js";
 import mongoose from "mongoose";
 
 export enum CommandListenMode {
@@ -16,6 +18,10 @@ export interface GuildSettings {
      * The Command Listen Mode for The Guild
      */
     command_listen_mode: CommandListenMode,
+    /**
+     * The Guild Specific command Settings
+     */
+    slashCommands: SlashCommandSettings[]
 }
 
 const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSettingsModel, GuildSettings>({
@@ -30,6 +36,11 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
         required: true,
         default: "!",
     },
+    slashCommands: [{
+        type: SlashCommandSettingsSchema,
+        required: true,
+        default: [],
+    }],
 });
 
 export interface GuildSettingsDocument extends GuildSettings, mongoose.Document {
