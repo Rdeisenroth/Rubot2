@@ -45,10 +45,10 @@ const command: Command = {
         if (!member) {
             return;
         }
-        if (!member.permissions.has("ADMINISTRATOR")) {
-            await interaction.reply(`**Error**, you don't have permission to execute this command, ${member}!`);
-            return;
-        }
+        // if (!member.permissions.has("ADMINISTRATOR")) {
+        //     await interaction.reply(`**Error**, you don't have permission to execute this command, ${member}!`);
+        //     return;
+        // }
 
         if (amount <= 0 || amount > 100) {
             return interaction.reply(`${amount} is not a valid Amount. Please use a Number between 1 and 100.`);
@@ -58,9 +58,12 @@ const command: Command = {
             await interaction.reply("I Cannot execute This command in this Channel.");
             return;
         }
-        const fetched = await (interaction.channel! as TextChannel).bulkDelete(amount)
-            .catch(async error => { await interaction.reply(`**Error:** ${error}`); });
-        await client.utils.embeds.SimpleEmbed(interaction, { title: "Bulk Delete", text: `Deleted ${amount} Messages.`, deleteinterval: 3000 });
+        try {
+            await (interaction.channel! as TextChannel).bulkDelete(amount);
+            await client.utils.embeds.SimpleEmbed(interaction, { title: "Bulk Delete", text: `Deleted ${amount} Messages.`, deleteinterval: 3000 });
+        } catch (error) {
+            await interaction.reply(`**Error:** ${error}`);
+        }
     },
 };
 

@@ -59,7 +59,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
             res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
         }
     } else if (interaction instanceof Message) {
-        res = await interaction.reply({ embeds: [embed] });
+        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed] })) : (await interaction.reply({ embeds: [embed] }));
     } else {
         res = await interaction.send({ embeds: [embed] });
     }

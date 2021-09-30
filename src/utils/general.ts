@@ -1,8 +1,11 @@
-import ChannelType, { Interaction, Message } from "discord.js";
+import ChannelType, { GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, Role, RoleResolvable, User, UserResolvable } from "discord.js";
 import moment from "moment";
-import { StringReplacements } from "../../typings";
+import { Command, StringReplacements } from "../../typings";
 import { promisify } from "util";
+import GuildSchema from "../models/guilds";
 import glob from "glob";
+import guilds from "../models/guilds";
+import { Bot } from "../bot";
 const globPromise = promisify(glob);
 
 /**
@@ -143,3 +146,21 @@ export const interpolateString = (str: string, replacements?: StringReplacements
 export const sleep = async (msec: number) => {
     return new Promise(resolve => setTimeout(resolve, msec));
 };
+
+
+export async function hasPermission(client: Bot, mentionable: UserResolvable, command: Command): Promise<boolean>;
+export async function hasPermission(client: Bot, mentionable: GuildMemberResolvable | RoleResolvable, command: Command, guild: GuildResolvable): Promise<boolean>;
+export async function hasPermission(client: Bot, mentionable: UserResolvable | RoleResolvable, command: Command, guild?: GuildResolvable | null): Promise<boolean>;
+export async function hasPermission(client: Bot, mentionable: UserResolvable | RoleResolvable, command: Command, guild?: GuildResolvable | null): Promise<boolean> {
+    const g = guild ? client.guilds.resolve(guild) : null;
+    const roleoruser = g?.roles.resolve(mentionable as RoleResolvable) ?? g?.members.resolve(mentionable as GuildMemberResolvable) ?? client.users.resolve(mentionable as UserResolvable);
+    if (!g) {
+        // TODO: Permissions for Global Commands
+        return command.defaultPermission || roleoruser?.id === client.ownerID;
+    }
+    const guildData = (await GuildSchema.findById(g.id))!;
+    const commandSettings = await guildData.guild_settings.getCommandByInternalName(command.name);
+    const permission_overwrite = commandSettings?.permissions.some(x => x.id === roleoruser?.id && x.permission) ?? false;
+    const role_permission_overwrite = (roleoruser instanceof GuildMember) && [...roleoruser.roles.cache.values()].some(r => commandSettings?.permissions.some(x => x.id === r.id && x.permission));
+    return (commandSettings?.defaultPermission ?? command.defaultPermission ?? true) || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
+}

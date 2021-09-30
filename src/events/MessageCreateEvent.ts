@@ -29,6 +29,11 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
     // if command was not found, just return to not interfere with other bots
     if (!command) return;
 
+    if (!(await client.utils.general.hasPermission(client, message.author, command, message.guild))) {
+        await client.utils.errors.errorMessage(message, `You don't have permission to execute this command, ${message.author}!`);
+        return;
+    }
+
     if (command.guildOnly && !message.guild) {
         await client.utils.errors.errorMessage(message, "I can't execute that command inside DMs!");
         return;
