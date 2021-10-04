@@ -37,7 +37,7 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-
+        await interaction.deferReply();
         const g = interaction.guild!;
 
         const guildData = (await GuildSchema.findById(g.id))!;

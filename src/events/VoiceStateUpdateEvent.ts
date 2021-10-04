@@ -6,6 +6,8 @@ import { QueueDocument } from "../models/queues";
 import { QueueEntry } from "../models/queue_entry";
 import moment from "moment";
 export const name = "voiceStateUpdate";
+import RoomSchema from "../models/rooms";
+import EventSchema, { Event as EVT, eventType } from "../models/events";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;
@@ -19,6 +21,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
         const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == newState.channelId!);
+        const roomData = (await RoomSchema.findById(newState.channelId));
         if (channelData) {
 
             // Check if Channel is Spawner
@@ -95,6 +98,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         console.log(error);
                     }
                 }
+            } else if (roomData) {
+                roomData.events.push({ emitted_by: newState.member!.id, type: eventType.user_join, timestamp: Date.now().toString() } as EVT);
+                await roomData.save();
             }
         }
 
@@ -106,7 +112,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
         // Get Channel from DB
         const guildData = (await GuildSchema.findById(guild.id));
         const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == oldState.channelId!);
-
+        const roomData = (await RoomSchema.findById(oldState.channelId));
         if (channelData) {
             if (channelData.temporary && oldUserChannel.members.size == 0) {
 
@@ -115,6 +121,11 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     await oldUserChannel.delete();
                 } else {
                     client.logger.error("Temp VC Not deletable: " + oldUserChannel.id);
+                }
+
+                if (roomData) {
+                    roomData.events.push({ emitted_by: "me", type: eventType.destroy_channel, timestamp: Date.now().toString(), reason: "Queue System: Room destroyed last user left, clean exit" } as EVT);
+                    await roomData.save();
                 }
 
                 // get name for logging
@@ -163,6 +174,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     }
                 }
 
+            }
+            if (roomData) {
+                roomData.events.push({ emitted_by: newState.member!.id, type: eventType.user_leave, timestamp: Date.now().toString() } as EVT);
+                await roomData.save();
             }
         }
 

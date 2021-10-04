@@ -1,3 +1,4 @@
+import EventSchema, { Event as EVT, eventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
 import ChannelType, { Message } from "discord.js";
 import { Command } from "../../../../typings";
@@ -103,6 +104,7 @@ const command: Command = {
         }
 
         const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id, events: [] });
+        roomData.events.push({ emitted_by: "me", type: eventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
         // Update Coach Session
         coachingSession.rooms.push(roomData._id);
         await coachingSession.save();
@@ -121,6 +123,7 @@ const command: Command = {
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
+                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}` } as EVT);
                     await member.voice.setChannel(room);
                 } catch (error) {
                     // Ignore Errors
@@ -136,10 +139,11 @@ const command: Command = {
         // Try to move Coach
         try {
             await member.voice.setChannel(room);
+            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)` } as EVT);
         } catch (error) {
             // Ignore Errors
         }
-
+        await roomData.save();
         return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `Done. Please Join ${room} if you are not automatically moved.`, empheral: true });
     },
 };
