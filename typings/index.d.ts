@@ -63,6 +63,10 @@ export type BotConfig = {
      * the Mongo DB Connection URL
      */
     mongodb_connection_url: string;
+    /**
+     * The Client secret for verifying Users
+     */
+    verify_secret: string;
 };
 
 export abstract class ClientEventListener<K extends keyof ClientEvents> {

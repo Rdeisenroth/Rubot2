@@ -17,6 +17,14 @@ export interface User {
      * The Sessions
      */
     sessions: mongoose.Types.ObjectId[],
+    /**
+     * Die TU-ID
+     */
+    tu_id: string,
+    /**
+     * Die Moodle-ID
+     */
+    moodle_id: string,
 }
 
 /**
@@ -32,6 +40,16 @@ const UserSchema = new mongoose.Schema<UserDocument, UserModel, User>({
         required: true,
         default: [],
     }],
+    tu_id: {
+        type: String,
+        required: false,
+        unique: true,
+    },
+    moodle_id: {
+        type: String,
+        required: false,
+        unique: true,
+    },
 });
 
 export interface UserDocument extends User, Omit<mongoose.Document, "_id"> {

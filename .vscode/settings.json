@@ -51,6 +51,10 @@
                         "description": "the Mongo DB Connection URL",
                         "default": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>"
                     },
+                    "verify_secret":{
+                        "type": "string",
+                        "description": "The Client secret for verifying Users"
+                    }
                 },
                 "required": ["prefix","token","ownerID","version","mongodb_connection_url"]
             }
