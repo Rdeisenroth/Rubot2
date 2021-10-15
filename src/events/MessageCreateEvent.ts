@@ -61,7 +61,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         try {
             await databaseUser.save();
         } catch (error) {
-            if (error.message?.includes("duplicate key")) {
+            if ((error as any).message?.includes("duplicate key")) {
                 console.log(`User ${member.displayName} tried to valid but already used token with TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
                 return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
             } else {
