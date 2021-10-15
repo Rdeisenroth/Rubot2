@@ -39,6 +39,9 @@ export class Bot extends Client {
                 "GUILD_MESSAGE_TYPING",
                 // "GUILD_PRESENCES",
                 "GUILD_VOICE_STATES"],
+            partials: [
+                "CHANNEL",
+            ],
         });
     }
 

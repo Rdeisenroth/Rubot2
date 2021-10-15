@@ -3,10 +3,15 @@ import { Collection, Guild, GuildMember, Message } from "discord.js";
 export const name = "messageCreate";
 import { dm_only_verify, dm_verify_guild, verify_secret } from "../../config.json";
 import * as crypto from "crypto";
-import UserSchema, { User } from "../models/users";
+import UserSchema from "../models/users";
 
 export const execute: ExecuteEvent<"messageCreate"> = async (client, message) => {
-
+    if (message.partial) {
+        message = await message.fetch();
+    }
+    if (message.author.id === client.user?.id) {
+        return;
+    }
     if (!message.guild && dm_only_verify) {
         console.log("Verifying User...");
         if (!(message instanceof Message)) {
