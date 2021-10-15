@@ -51,6 +51,17 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         // Token-Format: "FOP-DiscordV1|tu-id|moodle-id#hmac"
         const [version_string, tu_id, moodle_id] = other_infos.split("|");
 
+        if (version_string === "FOP-DiscordV1-Tutor") {
+            const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
+            if (!coachRole) {
+                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
+            }
+            if (member.roles.cache.has(coachRole.id)) {
+                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
+            }
+            await member.roles.add(coachRole);
+        }
+
         let databaseUser = await UserSchema.findById(member.id);
         if (!databaseUser) {
             databaseUser = new UserSchema({ _id: member.id });
