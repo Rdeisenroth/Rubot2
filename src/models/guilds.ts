@@ -203,6 +203,11 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
                 _id: g.id,
                 name: g.name,
                 member_count: g.memberCount,
+                guild_settings: {
+                    command_listen_mode: 1,
+                    prefix: "!",
+                    slashCommands: [],
+                },
             },
         },
         { upsert: true, setDefaultsOnInsert: true },
