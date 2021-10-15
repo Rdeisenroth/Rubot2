@@ -25,6 +25,10 @@ export interface User {
      * Die Moodle-ID
      */
     moodle_id: string,
+    /**
+     * Log all the Server Roles when a Member leaves
+     */
+    server_roles: string[],
 }
 
 /**
@@ -50,10 +54,16 @@ const UserSchema = new mongoose.Schema<UserDocument, UserModel, User>({
         required: false,
         unique: true,
     },
+    server_roles: [{
+        type: String,
+        required: true,
+        default: [],
+    }],
 });
 
 export interface UserDocument extends User, Omit<mongoose.Document, "_id"> {
     sessions: mongoose.Types.Array<mongoose.Types.ObjectId>,
+    server_roles: mongoose.Types.Array<string>,
     // List getters or non model methods here
     /**
      * Checks if the User has Active Sessions

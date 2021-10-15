@@ -7,7 +7,6 @@ import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_chan
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
-import assert from "assert";
 
 /**
  * A Guild from the Database
@@ -41,6 +40,14 @@ export interface Guild {
      * The Queues of the Guild
      */
     queues: Queue[],
+    /**
+     * The Welcome Message Text
+     */
+    welcome_text?: string,
+    /**
+     * The Welcome Message Title
+     */
+    welcome_title?: string,
 }
 
 /**
@@ -79,6 +86,14 @@ const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel, Guild>({
         required: true,
         default: [],
     }],
+    welcome_text: {
+        type: String,
+        required: false,
+    },
+    welcome_title: {
+        type: String,
+        required: false,
+    },
 });
 
 /**

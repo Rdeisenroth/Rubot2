@@ -68,6 +68,7 @@ const command: Command = {
         let databaseUser = await UserSchema.findById(member.id);
         if (!databaseUser) {
             databaseUser = new UserSchema({ _id: member.id });
+            await databaseUser.save();
         }
         databaseUser.tu_id = tu_id;
         databaseUser.moodle_id = moodle_id;

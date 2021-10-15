@@ -59,6 +59,10 @@ const SlashCommandSettingsSchema = new mongoose.Schema<SlashCommandSettingsDocum
         default: [],
     }],
     permissions: [SlashCommandPermissionSchema],
+    defaultPermission: {
+        type: Boolean,
+        required: false,
+    },
 });
 
 export interface SlashCommandSettingsDocument extends SlashCommandSettings, mongoose.Document<mongoose.Types.ObjectId> {
