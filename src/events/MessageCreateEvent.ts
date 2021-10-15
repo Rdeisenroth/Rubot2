@@ -8,6 +8,7 @@ import UserSchema, { User } from "../models/users";
 export const execute: ExecuteEvent<"messageCreate"> = async (client, message) => {
 
     if (!message.guild && dm_only_verify) {
+        console.log("Verifying User...");
         if (!(message instanceof Message)) {
             return;
         }
@@ -47,12 +48,13 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
         }
         await member.roles.add(verifiedRole);
+        console.log("User verified.");
 
         // Token-Format: "FOP-DiscordV1|tu-id|moodle-id#hmac"
         const [version_string, tu_id, moodle_id] = other_infos.split("|");
 
         if (version_string === "FOP-DiscordV1-Tutor") {
-            const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
+            const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "tutor");
             if (!coachRole) {
                 return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
             }
@@ -60,6 +62,8 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
                 return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
             }
             await member.roles.add(coachRole);
+            console.log("User is Coach.");
+
         }
 
         let databaseUser = await UserSchema.findById(member.id);

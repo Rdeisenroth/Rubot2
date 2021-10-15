@@ -66,7 +66,7 @@ const command: Command = {
         const [version_string, tu_id, moodle_id] = other_infos.split("|");
 
         if (version_string === "FOP-DiscordV1-Tutor") {
-            const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
+            const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "tutor");
             if (!coachRole) {
                 return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
             }
