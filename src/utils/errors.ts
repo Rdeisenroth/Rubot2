@@ -11,7 +11,7 @@ export const errorMessage = async (interaction: Message | discord.CommandInterac
     embed.setTitle(":x: __An Error Occured:__");
     embed.setDescription((error instanceof Error) ? `${error.message}` : `${error}`);
     const res = await interaction.reply({ embeds: [embed] });
-    let m: Message | APIMessage | null = null;
+    let m: any = null;
     if (res instanceof Message) {
         m = res;
     } else if (interaction instanceof discord.CommandInteraction) {

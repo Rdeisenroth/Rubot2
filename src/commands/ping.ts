@@ -18,7 +18,7 @@ const command: Command = {
         // let choices = ["Is this really my ping, it's so high...", "Is it okay? I cant look", "I hope it isnt bad"]
         // let response = choices[Math.floor(Math.random() * choices.length)];
         const res = await interaction.reply({ content: "Pinging..." });
-        let m: Message | APIMessage;
+        let m: any;
         if (interaction instanceof Interaction) {
             m = await interaction.fetchReply();
         } else {
