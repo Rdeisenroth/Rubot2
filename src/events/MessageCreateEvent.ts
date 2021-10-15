@@ -30,7 +30,11 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
             .update(other_infos)
             .digest("hex");
 
-        if (!crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected_hmac))) {
+        const buffer1 = Buffer.from(hmac);
+        const buffer2 = Buffer.from(expected_hmac);
+
+
+        if (buffer1.length != buffer2.length || !crypto.timingSafeEqual(buffer1, buffer2)) {
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Invalid Token String.", empheral: true });
         }
 
