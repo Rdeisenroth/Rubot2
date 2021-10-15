@@ -51,12 +51,28 @@
                         "description": "the Mongo DB Connection URL",
                         "default": "mongodb://<user>:<password>@<ip>:<port>/<schema>?<options>"
                     },
-                    "verify_secret":{
+                    "verify_secret": {
                         "type": "string",
                         "description": "The Client secret for verifying Users"
+                    },
+                    "dm_only_verify": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether to only listen for verification Messages in DM Channels (globally)"
+                    },
+                    "dm_verify_guild": {
+                        "type": "string",
+                        "default": "<guild-id>",
+                        "description": "The Guild To Verify"
                     }
                 },
-                "required": ["prefix","token","ownerID","version","mongodb_connection_url"]
+                "required": [
+                    "prefix",
+                    "token",
+                    "ownerID",
+                    "version",
+                    "mongodb_connection_url"
+                ]
             }
         }
     ],

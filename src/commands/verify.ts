@@ -79,7 +79,7 @@ const command: Command = {
             await databaseUser.save();
         } catch (error) {
             console.log(error);
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "You can only Link one Discrd Account.", empheral: true });
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
         }
 
         return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System", text: "Your Discord-Account has been verified.", empheral: true });

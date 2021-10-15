@@ -83,7 +83,7 @@ export interface BotEvent<K extends keyof ClientEvents> {
 //     (client: Client, ...args: any[]): Promise<void>
 // }
 export interface ExecuteEvent<K extends keyof ClientEvents> {
-    (client: Bot, ...args: ClientEvents[K]): Promise<void>
+    (client: Bot, ...args: ClientEvents[K]): Promise<any>
 }
 
 /**
