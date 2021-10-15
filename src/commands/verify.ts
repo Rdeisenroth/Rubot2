@@ -71,7 +71,7 @@ const command: Command = {
                 return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
             }
             if (member.roles.cache.has(coachRole.id)) {
-                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
+                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Your already have the coach Role.", empheral: true });
             }
             await member.roles.add(coachRole);
         }
