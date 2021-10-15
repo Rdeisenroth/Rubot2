@@ -135,6 +135,7 @@ GuildSchema.method("resolve", async function (client: Bot) {
 });
 
 GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
+    console.log("posting slash commands");
     g = g ?? await this.resolve(client);
     if (!g) {
         throw new Error("Guild could not be resolved!");
@@ -142,6 +143,7 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
     // TODO: Per Guild Slash Command Config
     const data: ApplicationCommandData[] = [];
     // console.log([...client.commands.values()])
+    // console.log("posting slash commands");
     for (const c of [...client.commands.values()]) {
         // console.log("a"+ c);
         // Check Database entry
@@ -196,35 +198,22 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
 
 GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     console.log(`Processing guild "${g.name}" (${g.id})`);
-    const updated = await this.updateOne(
-        { _id: g.id },
-        {
-            $set: {
-                _id: g.id,
-                name: g.name,
-                member_count: g.memberCount,
-                guild_settings: {
-                    command_listen_mode: 1,
-                    prefix: "!",
-                    slashCommands: [],
-                },
-            },
-        },
-        { upsert: true, setDefaultsOnInsert: true },
-    );
-    if (updated.acknowledged) {
-        if (updated.upsertedCount) {
-            client.logger.info(`Joined new Guild: "${g.name}" (${g.id})`);
-        }
-        if (updated.modifiedCount > 0) {
-            client.logger.info(`Updated Guild: "${g.name}" (${g.id})`);
-        }
-    } else {
-        client.logger.error(JSON.stringify(updated));
+    let guildData = await this.findById(g.id);
+    if (!guildData) {
+        guildData = new this({
+            _id: g.id,
+            name: g.name,
+            member_count: g.memberCount,
+            guild_settings: {
+                command_listen_mode: 1,
+                prefix: "!",
+                slashCommands: [],
+            } as GuildSettings,
+        });
+        await guildData.save();
     }
     // Post slash Commands
-    const gDoc = (await this.findById(g.id))!;
-    await gDoc.postSlashCommands(client, g);
+    await guildData.postSlashCommands(client, g);
 });
 
 // Default export

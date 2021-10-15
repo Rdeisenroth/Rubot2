@@ -38,6 +38,7 @@ const SlashCommandSettingsSchema = new mongoose.Schema<SlashCommandSettingsDocum
     internal_name: {
         type: String,
         required: true,
+        sparse: true,
         unique: true,
     },
     name: {
