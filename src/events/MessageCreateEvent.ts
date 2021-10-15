@@ -39,10 +39,39 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         if (!(guild instanceof Guild)) {
             return await client.utils.embeds.SimpleEmbed(message, { title: "Server Not Found", text: "This should not happen... Please Contact thw owner of the Bot.", empheral: true });
         }
+
         const member = guild?.members.resolve(user);
         if (!(member instanceof GuildMember)) {
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You are not a Member of the Guild.", empheral: true });
         }
+
+        // Token-Format: "FOP-DiscordV1|tu-id|moodle-id#hmac"
+        const [version_string, tu_id, moodle_id] = other_infos.split("|");
+
+        let databaseUser = await UserSchema.findById(member.id);
+        if (!databaseUser) {
+            databaseUser = new UserSchema({ _id: member.id });
+            await databaseUser.save();
+        }
+        databaseUser.tu_id = tu_id;
+        databaseUser.moodle_id = moodle_id;
+
+        // Check Duplicate Entry
+
+        try {
+            await databaseUser.save();
+        } catch (error) {
+            if (error instanceof Error && error.message.includes("duplicate key")) {
+                console.log(`User ${member.displayName} tried to valid but already used token with TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
+                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
+            } else {
+                console.log(error);
+                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "An Internal Error Occurred.", empheral: true });
+            }
+        }
+        console.log(`Linked ${member.displayName} to TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
+
+        // Give Roles
 
         const verifiedRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
         if (!verifiedRole) {
@@ -53,10 +82,8 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
         }
         await member.roles.add(verifiedRole);
-        console.log("User verified.");
 
-        // Token-Format: "FOP-DiscordV1|tu-id|moodle-id#hmac"
-        const [version_string, tu_id, moodle_id] = other_infos.split("|");
+
 
         if (version_string === "FOP-DiscordV1-Tutor") {
             const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "tutor");
@@ -64,28 +91,9 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
                 return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
             }
             if (member.roles.cache.has(coachRole.id)) {
-                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
+                return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Your already have the coach Role.", empheral: true });
             }
             await member.roles.add(coachRole);
-            console.log("User is Coach.");
-
-        }
-
-        let databaseUser = await UserSchema.findById(member.id);
-        if (!databaseUser) {
-            databaseUser = new UserSchema({ _id: member.id });
-            await databaseUser.save();
-        }
-        databaseUser.tu_id = tu_id;
-        databaseUser.moodle_id = moodle_id;
-
-        console.log(`Linked ${member.displayName} to TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
-
-        try {
-            await databaseUser.save();
-        } catch (error) {
-            console.log(error);
-            return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
         }
 
         return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System", text: "Your Discord-Account has been verified.", empheral: true });

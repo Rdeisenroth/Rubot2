@@ -27,7 +27,6 @@ const command: Command = {
             return;
         }
 
-
         // Check Token
         let token: string;
         if (interaction instanceof Message) {
