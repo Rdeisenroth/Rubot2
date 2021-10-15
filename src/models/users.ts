@@ -48,11 +48,13 @@ const UserSchema = new mongoose.Schema<UserDocument, UserModel, User>({
         type: String,
         required: false,
         unique: true,
+        sparse: true,
     },
     moodle_id: {
         type: String,
         required: false,
         unique: true,
+        sparse: true,
     },
     server_roles: [{
         type: String,
