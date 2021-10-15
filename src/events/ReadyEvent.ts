@@ -30,7 +30,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
         await GuildSchema.prepareGuild(client,g);
     }
 
-    await client.user?.setPresence({ status: "online", activities: [{ name: "The name is Bot, Rubot.", type: "PLAYING" }], afk: false });
+    await client.user?.setPresence({ status: "online", activities: [{ name: "Sprechstunden.", type: "WATCHING" }], afk: false });
     // Bot is ready
     client.logger.ready({
         message: `"${client.user?.username}" is Ready! (${(Date.now() - client.initTimestamp) / 1000}s)`,
