@@ -3,7 +3,6 @@ import { GuildMember, Interaction, Message, MessageEmbed } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 import { verify_secret } from "../../config.json";
 import * as crypto from "crypto";
-import { Error } from "mongoose";
 
 /**
  * The Command Definition
@@ -71,7 +70,7 @@ const command: Command = {
         try {
             await databaseUser.save();
         } catch (error) {
-            if (error instanceof Error && error.message.includes("duplicate key")) {
+            if (error.message?.includes("duplicate key")) {
                 console.log(`User ${member.displayName} tried to valid but already used token with TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
                 return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
             } else {
