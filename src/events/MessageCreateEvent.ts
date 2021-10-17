@@ -41,10 +41,9 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         const user = message.author;
         const guild = client.guilds.resolve(dm_verify_guild);
         if (!(guild instanceof Guild)) {
-            return await client.utils.embeds.SimpleEmbed(message, { title: "Server Not Found", text: "This should not happen... Please Contact thw owner of the Bot.", empheral: true });
+            return await client.utils.embeds.SimpleEmbed(message, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
         }
-
-        const member = guild?.members.resolve(user);
+        const member = guild.members.resolve(user.id);
         if (!(member instanceof GuildMember)) {
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You are not a Member of the Guild.", empheral: true });
         }
