@@ -48,7 +48,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         }
 
         console.log(`${user.id}`);
-        const member = guild.members.fetch({ user, force: true });
+        const member = await guild.members.fetch({ user, force: true });
         if (!(member instanceof GuildMember)) {
             console.log(`Failed Verifying User ${message.author.tag} with message: You are not a Member of the Guild.`);
 
