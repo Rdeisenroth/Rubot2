@@ -13,7 +13,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         return;
     }
     if (!message.guild && dm_only_verify) {
-        console.log("Verifying User...");
+        console.log(`Verifying User ${message.author.tag} with message: ${message.cleanContent}`);
         if (!(message instanceof Message)) {
             return;
         }
