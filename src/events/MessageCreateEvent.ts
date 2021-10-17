@@ -20,6 +20,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         const token = message.content.trim();
         const rauteSplit = token.split("#");
         if (rauteSplit.length != 2) {
+            console.log(`Failed Verifying User ${message.author.tag} with message: Invalid Token String.`);
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Invalid Token String.", empheral: true });
 
         }
@@ -35,16 +36,20 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
 
 
         if (buffer1.length != buffer2.length || !crypto.timingSafeEqual(buffer1, buffer2)) {
+            console.log(`Failed Verifying User ${message.author.tag} with message: Invalid Token String.`);
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "Invalid Token String.", empheral: true });
         }
 
         const user = message.author;
         const guild = client.guilds.resolve(dm_verify_guild);
         if (!(guild instanceof Guild)) {
+            console.log(`Failed Verifying User ${message.author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
             return await client.utils.embeds.SimpleEmbed(message, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
         }
         const member = guild.members.resolve(user.id);
         if (!(member instanceof GuildMember)) {
+            console.log(`Failed Verifying User ${message.author.tag} with message: You are not a Member of the Guild.`);
+
             return await client.utils.embeds.SimpleEmbed(message, { title: "Verification System Error", text: "You are not a Member of the Guild.", empheral: true });
         }
 
