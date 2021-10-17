@@ -46,8 +46,9 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
             console.log(`Failed Verifying User ${message.author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
             return await client.utils.embeds.SimpleEmbed(message, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
         }
+
         console.log(`${user.id}`);
-        const member = guild.members.fetch(user.id);
+        const member = guild.members.fetch({ user, force: true });
         if (!(member instanceof GuildMember)) {
             console.log(`Failed Verifying User ${message.author.tag} with message: You are not a Member of the Guild.`);
 
