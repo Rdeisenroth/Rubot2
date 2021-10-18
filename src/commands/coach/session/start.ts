@@ -11,6 +11,14 @@ const command: Command = {
     aliases: ["s", "begin", "b"],
     usage: "[channel resolvable]",
     category: "Miscellaneous",
+    options: [
+        {
+            name: "queue",
+            description: "The Queue linked to the session",
+            type: "STRING",
+            required: false,
+        },
+    ],
     guildOnly: true,
     execute: async (client, interaction, args) => {
         if (!interaction) {
@@ -36,9 +44,17 @@ const command: Command = {
         if (!guildData.queues || !guildData.queues.length) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Current Guild has no Coaching Support.", empheral: true });
         }
-        const queue = (guildData.queues[0] as QueueDocument);
+
+        const queueName = interaction.options.getString("queue");
+        let queueData = guildData.queues.find(x => x.name === queueName);
+        if (!queueData) {
+            // await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `${queueName} could not be Found. Available Queues: ${guildData.queues.map(x => x.name).join(", ")}`, empheral: true });
+            // return;
+            queueData = (guildData.queues[0] as QueueDocument);
+        }
+        // const queue = (guildData.queues[0] as QueueDocument);
         // Create New Session
-        const session = await SessionSchema.create({ active: true, user: user.id, guild: g.id, queue: queue._id, role: sessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
+        const session = await SessionSchema.create({ active: true, user: user.id, guild: g.id, queue: queueData._id, role: sessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
         userEntry.sessions.push(session._id);
         await userEntry.save();
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
