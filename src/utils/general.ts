@@ -250,7 +250,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Verified-Role Could not be found.", empheral: true });
     }
 
-    if (member.roles.cache.has(verifiedRole.id)) {
+    if (member.roles.cache.has(verifiedRole.id) && version_string !== "FOP-DiscordV1-Tutor") {
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
     }
     await member.roles.add(verifiedRole);
