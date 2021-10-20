@@ -118,8 +118,12 @@ const command: Command = {
                 await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
                 console.log("coach queue next: Matches: Remove User from Queue");
                 // remove from queue
-                queueData.entries.remove({ _id: e._id });
-                await guildData.save();
+                try {
+                    queueData.entries.remove({ _id: e._id });
+                    await guildData.save();
+                } catch (error) {
+                    console.log(error);
+                }
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
