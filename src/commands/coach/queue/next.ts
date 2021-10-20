@@ -93,6 +93,7 @@ const command: Command = {
             // await guildData.save();
         } else {
             spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
+            spawner.name = `${member.displayName}'s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
         }
 
         // Spawn Room

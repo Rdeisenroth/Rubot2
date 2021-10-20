@@ -50,6 +50,8 @@ const command: Command = {
                 permission_overwrites: [],
                 supervisor_roles: [],
                 parent: category.id,
+                max_users: 5,
+                lock_initially: true,
             } as VoiceChannelSpawner);
         }
         await guildData.save();
