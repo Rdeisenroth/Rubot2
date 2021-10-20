@@ -273,7 +273,7 @@ QueueSchema.method("isEmpty", function (): boolean {
     return this.entries.length < 1;
 });
 QueueSchema.method("contains", function (discord_id: string): boolean {
-    return (this.entries.find(x => x.discord_id === discord_id)) ? true : false;
+    return (this.entries.toObject<Array<QueueEntryDocument>>().find(x => x.discord_id === discord_id)) ? true : false;
 });
 QueueSchema.method("getEntry", function (discord_id: string) {
     return this.entries.find(x => x.discord_id === discord_id) ?? null;

@@ -119,10 +119,13 @@ const command: Command = {
                 console.log("coach queue next: Matches: Remove User from Queue");
                 // remove from queue
                 try {
+                    const guildData = (await GuildSchema.findById(g.id))!;
+                    const queueData = guildData.queues.id(queue)!;
                     queueData.entries.remove({ _id: e._id });
                     await guildData.save();
                 } catch (error) {
                     console.log(error);
+                    return await client.utils.embeds.SimpleEmbed(interaction, "Coaching System", ":X: An Internal Error Occured.");
                 }
                 // Try to move
                 try {
