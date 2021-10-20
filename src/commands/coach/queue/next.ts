@@ -86,6 +86,7 @@ const command: Command = {
                 max_users: 5,
                 parent: queue_channel?.parentId ?? undefined,
                 lock_initially: true,
+                hide_initially: true,
                 name: `${member.displayName}'s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`,
             } as VoiceChannelSpawner;
             console.log(spawner.parent);
