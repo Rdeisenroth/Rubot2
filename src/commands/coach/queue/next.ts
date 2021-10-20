@@ -91,6 +91,8 @@ const command: Command = {
             console.log(spawner.parent);
             // queueData.set("room_spawner", spawner);
             // await guildData.save();
+        } else {
+            spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
         }
 
         // Spawn Room
