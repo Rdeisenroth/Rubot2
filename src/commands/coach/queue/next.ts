@@ -101,7 +101,7 @@ const command: Command = {
                         allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
                     } as PermissionOverwriteData;
                 }),
-            ],
+            ];
         }
 
         // Spawn Room
