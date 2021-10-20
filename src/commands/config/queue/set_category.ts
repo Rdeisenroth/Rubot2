@@ -45,6 +45,8 @@ const command: Command = {
 
         if (queueData.room_spawner) {
             queueData.room_spawner.parent = category.id;
+            queueData.room_spawner.max_users = 5;
+            queueData.room_spawner.lock_initially = true;
         } else {
             queueData.set("room_spawner", {
                 permission_overwrites: [],
