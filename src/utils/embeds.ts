@@ -39,7 +39,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     } else {
         options = optionsortitle;
     }
-    const { title, text, style, deleteinterval, empheral, fields } = options!;
+    const { title, text, style, deleteinterval, empheral, fields, components } = options!;
     //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
     embed.setTitle(title);
     if (text) {
@@ -53,15 +53,15 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     let res: void | Message;
     if (interaction instanceof CommandInteraction) {
         if (interaction.replied || interaction.deferred) {
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed], ...(components ? [components] : []) });
             res = void 0;
         } else {
-            res = await interaction.reply({ embeds: [embed], ephemeral: empheral });
+            res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components ? [components] : []) });
         }
     } else if (interaction instanceof Message) {
-        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed] })) : (await interaction.reply({ embeds: [embed] }));
+        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components ? [components] : []) })) : (await interaction.reply({ embeds: [embed], ...(components ? [components] : []) }));
     } else {
-        res = await interaction.send({ embeds: [embed] });
+        res = await interaction.send({ embeds: [embed], ...(components ? [components] : []) });
     }
     if (res instanceof Message) {
         const m = res;

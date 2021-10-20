@@ -312,6 +312,10 @@ export type SimpleEmbedOptions = {
      * If the Message should only be visible for the reciever (only works for CommandInteractions)
      */
     empheral?: boolean,
+    /**
+     * Message Components
+     */
+    components?: (MessageActionRow | (Required<BaseMessageComponentOptions> & MessageActionRowOptions))[]
 }
 
 /**

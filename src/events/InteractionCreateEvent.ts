@@ -1,5 +1,5 @@
 import { Command, ExecuteEvent } from "../../typings";
-import { Collection } from "discord.js";
+import { Collection, CommandInteractionOption } from "discord.js";
 export const name = "interactionCreate";
 import GuildSchema from "../models/guilds";
 
@@ -8,7 +8,6 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
 
     // no need to continue if message is not a Command
     if (interaction.isCommand()) {
-
         /**
          * The cooldowns will be stored on a per User level
          */
@@ -49,6 +48,10 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
         }
 
         // Execute Command
+        console.log(`${interaction.user.tag} Executed Command ${commandName}:\n${JSON.stringify(interaction.options.data)}`);
+        // let optionString = interaction.options.data.map((x:CommandInteractionOption) => {
+        //     if(x.type === "SUB_COMMAND_GROUP")
+        // });
         timestamps.set(interaction.user.id, now);
         setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
         try {

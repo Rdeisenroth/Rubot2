@@ -2,6 +2,7 @@ import { Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
+import UserSchema from "../../models/users";
 
 const command: Command = {
     name: "join",
@@ -50,6 +51,13 @@ const command: Command = {
         const otherQueue = guildData.queues.find(x => x.contains(user.id));
         if (otherQueue) {
             await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `You are already in the ${otherQueue.name} Queue.\nAvailable Queues: ${guildData.queues.map(x => x.name).join(", ")}`, empheral: true });
+            return;
+        }
+
+        // Check if Tutor Session active
+        const userData = await UserSchema.findById(user.id);
+        if (userData?.hasActiveSessions()) {
+            await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You cannot join a queue with an active coaching session.", empheral: true });
             return;
         }
 

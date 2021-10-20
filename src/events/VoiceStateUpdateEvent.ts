@@ -7,6 +7,7 @@ import { QueueEntry } from "../models/queue_entry";
 import moment from "moment";
 export const name = "voiceStateUpdate";
 import RoomSchema from "../models/rooms";
+import UserSchema from "../models/users";
 import EventSchema, { Event as EVT, eventType } from "../models/events";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
@@ -50,6 +51,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 let queueEntry: QueueEntry;
                 try {
                     if (queue.contains(newState.member!.id)) {
+                        return;
+                    }
+                    let userData = await UserSchema.findById(newState.member!.id);
+                    if (userData?.hasActiveSessions()) {
                         return;
                     }
                     queueEntry = await queue.join({
