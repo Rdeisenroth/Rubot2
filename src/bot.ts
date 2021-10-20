@@ -15,6 +15,13 @@ export class Bot extends Client {
     public componentInteractions: { buttons: Collection<string, ButtonInteraction> } = { buttons: new Collection() };
     // public aliases: Collection<string,string> = new Collection();
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
+    /**
+     * [client_id, [queue_id, stay?]]
+     *
+     * @type {Collection<string, Collection<string, boolean>>}
+     * @memberof Bot
+     */
+    public queue_stays: Collection<string, Collection<string, boolean>> = new Collection();
     public ownerID?: string;
     public prefix = "!";
     public version = "0.0";

@@ -154,7 +154,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 console.log(`deleted TEMP VC: ${cName} on ${guild.name}`);
             } else if (channelData.queue) {
                 const queueId = channelData.queue;
-                const queue = guildData?.queues.id(queueId);
+                const queue: QueueDocument | null | undefined = guildData?.queues.id(queueId);
                 if (!queue) {
                     client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
                     return;
@@ -164,19 +164,39 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 // Set Timeout
                 if (queue.contains(member_id)) {
                     const dm = await member.createDM();
-                    if (queue.disconnect_timeout) {
-                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: queue.getLeaveRoomMessage(member_id) });
-                        // Create Timer
-                        setTimeout(async () => {
-                            const leave_msg = queue.getLeaveMessage(member_id);
-                            await queue.leave(member_id);
-                            await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
-                        }, queue.disconnect_timeout);
-                    } else {
-                        const leave_msg = queue.getLeaveMessage(member_id);
-                        await queue.leave(member_id);
-                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
-                    }
+                    // if (queue.disconnect_timeout) {
+                    //     await client.utils.embeds.SimpleEmbed(dm, {
+                    //         title: "Queue System",
+                    //         text: queue.getLeaveRoomMessage(member_id),
+                    //         components: [
+                    //             new MessageActionRow(
+                    //                 {
+                    //                     components:
+                    //                         [
+                    //                             new MessageButton({ customId: "queue_stay", label: "Stay in Queue", style: "PRIMARY" }),
+                    //                             new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                    //                         ],
+                    //                 }),
+                    //         ],
+                    //     });
+                    //     // Create Timer
+                    //     setTimeout(async () => {
+                    //         if (client.queue_stays.get(member_id)?.get(queue._id) ?? false) {
+                    //             client.queue_stays.get(member_id)?.delete(queue._id);
+                    //             return;
+                    //         }
+                    //         const leave_msg = queue.getLeaveMessage(member_id);
+                    //         await queue.leave(member_id);
+                    //         await client.utils.embeds.SimpleEmbed(dm, {
+                    //             title: "Queue System",
+                    //             text: leave_msg,
+                    //         });
+                    //     }, queue.disconnect_timeout);
+                    // } else {
+                    const leave_msg = queue.getLeaveMessage(member_id);
+                    await queue.leave(member_id);
+                    await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
+                    // }
                 }
 
             }
