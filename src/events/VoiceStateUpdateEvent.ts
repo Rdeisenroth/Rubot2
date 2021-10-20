@@ -53,10 +53,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     if (queue.contains(newState.member!.id)) {
                         return;
                     }
-                    let userData = await UserSchema.findById(newState.member!.id);
-                    // if (userData?.hasActiveSessions()) {
-                    //     return;
-                    // }
+                    // let userData = await UserSchema.findById(newState.member!.id);
+                    if (newState.member?.roles.cache.find(x => x.name.toLowerCase() === "tutor" || x.name.toLowerCase() === "orga")) {
+                        return;
+                    }
                     queueEntry = await queue.join({
                         discord_id: newState.member!.id,
                         joinedAt: Date.now().toString(),
