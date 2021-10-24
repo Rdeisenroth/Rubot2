@@ -1,6 +1,7 @@
 import { EmojiIdentifierResolvable, Message, MessageEmbed } from "discord.js";
 import yargsParser from "yargs-parser";
 import { Command, RunCommand } from "../../typings";
+import GuildSchema from "../models/guilds";
 
 
 const command: Command = {
@@ -40,6 +41,9 @@ const command: Command = {
             embed.setThumbnail(client.user.displayAvatarURL());
         }
 
+        const guildData = await GuildSchema.findById(interaction?.guildId ?? 0);
+        const guildSettings = guildData?.guild_settings;
+
         /**
          * Default Categories //TODO: Use Database to enable per-server-categories
          */
@@ -62,7 +66,7 @@ const command: Command = {
             // Populate Command Categories (we do this every time because commands can change at runtime)
             let commandCount = 0;
             commands.forEach((command) => {
-                if (command.invisible == !(flags.showall as boolean)) {
+                if ((command.invisible || guildSettings?.getCommandByInternalName(command.name)?.disabled) && !flags.showall) {
                     return;
                 }
                 commandCount++;
