@@ -48,7 +48,11 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
         }
 
         // Execute Command
-        console.log(`${interaction.user.tag} Executed Command ${commandName}:\n${JSON.stringify(interaction.options.data)}`);
+        try {
+            console.log(`${interaction.user.tag} Executed Command ${commandName}:\n${JSON.stringify(interaction.options.data)}`);
+        } catch (error) {
+            console.error(error);
+        }
         // let optionString = interaction.options.data.map((x:CommandInteractionOption) => {
         //     if(x.type === "SUB_COMMAND_GROUP")
         // });
