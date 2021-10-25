@@ -5,10 +5,13 @@ import path from "path";
 
 const command: SubcommandHandler = {
     name: "session",
-    description: "Session Command Handler",
-    aliases: ["s"],
+    description: "Session Config Subcommand Handler",
+    aliases: ["session"],
+    category: "Administration",
+    guildOnly: true,
     subcommands: new Collection(),
     options: [],
+    defaultPermission: false,
     init: async (client) => {
         const commandFiles = fs.readdirSync(`${__dirname}/${command.name}`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
         //iterate over all the commands to store them in a collection

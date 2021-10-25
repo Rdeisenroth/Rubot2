@@ -21,7 +21,7 @@ const command: SubcommandHandler = {
             console.log(`\t∘${JSON.stringify(c.name)} (./${path.relative(process.cwd(), __dirname)}/${command.name}/${file})`);
             // Check Command Name
             if (c.name !== c.name.toLowerCase() || !c.name.match("^[\\w-]{1,32}$")) {
-                throw new Error(`Invalid Command Namefor ${c.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
+                throw new Error(`Invalid Command Name for ${c.name} at ./${path.relative(process.cwd(), __dirname)}/${command.name}/${file}: ${c.name}\nCommand Names must be all lowercase and must match ^[\\w-]{1,32}$`);
             }
             // Check Command Description
             if (c.description.length < 1 || c.description.length > 100) {

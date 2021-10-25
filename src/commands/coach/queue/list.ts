@@ -63,14 +63,6 @@ const command: Command = {
                         + (intent ? `\n-intent: ${intent}` : ""),
             });
         }
-        // let fields = await queueData.getSortedEntries(10).map(async x => {
-        //     return {
-        //         title: await g.members.fetch(x.discord_id),
-        //         text: `- Position: ${queueData.getPosition(x.discord_id)}`
-        //             + `\n-joined at: <t:${(+x.joinedAt) / 1000}:f>`
-        //             + `${x.intent ? `\n-intent: ${x.intent}` : ""}`,
-        //     }
-        // });
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Queue Information",
