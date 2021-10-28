@@ -30,7 +30,7 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-        await interaction.deferReply({ephemeral:true});
+        await interaction.deferReply({ ephemeral: true });
         let user = interaction.options.getUser("user", true);
         user = await user.fetch();
         let userData = await UserSchema.findById(user.id);
@@ -40,13 +40,20 @@ const command: Command = {
         }
 
         const fields: EmbedFieldData[] = [
-            { name: "> TU-ID", value: `${userData.tu_id}` },
-            { name: "> Moodle-ID", value: `${userData.moodle_id}` },
+            { name: "Verified", value: `${userData.tu_id != ""}` },
         ];
+        if (userData.tu_id) {
+            fields.push(
+                { name: "> TU-ID", value: `${userData.tu_id}` },
+                { name: "> Moodle-ID", value: `${userData.moodle_id}` },
+            );
+        }
+
+        // 
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Verification System",
-            text: `Information about User ${user}`,
+            text: `Information about User ${user} `,
             empheral: true,
             fields,
         });
