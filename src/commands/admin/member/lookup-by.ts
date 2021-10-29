@@ -2,9 +2,10 @@ import { EmbedFieldData, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
+import UserSchema, { UserDocument } from "../../../models/users";
 import SessionSchema from "../../../models/sessions";
 import QueueSchema from "../../../models/queues";
+import { FilterQuery } from "mongoose";
 
 const command: Command = {
     name: "lookup-by",
@@ -28,6 +29,10 @@ const command: Command = {
                     name: "moodle-id",
                     value: "moodle-id",
                 },
+                {
+                    name: "discord-id",
+                    value: "discord-id",
+                },
             ],
         },
         {
@@ -47,16 +52,24 @@ const command: Command = {
             return;
         }
         await interaction.deferReply({ ephemeral: true });
-        let type = interaction.options.getString("type", true);
-        let query = interaction.options.getString("query", true);
-        let userData = await UserSchema.findOne(type === "tu-id" ? { tu_id: query } : { moodle_id: query });
+        const type = interaction.options.getString("type", true);
+        const query = interaction.options.getString("query", true);
+        let userQuery: FilterQuery<UserDocument> = {};
+        if (type === "tu-id") {
+            userQuery = { tu_id: query };
+        } else if (type === "moodle-id") {
+            userQuery = { moodle_id: query };
+        } else {
+            userQuery = { _id: query };
+        }
+        const userData = await UserSchema.findOne(userQuery);
         // user = await user.fetch();
 
         if (!userData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System", text: `User ${query} not found in database.`, empheral: true });
         }
 
-        let user = await client.users.fetch(userData._id);
+        const user = await client.users.fetch(userData._id);
 
         const fields: EmbedFieldData[] = [
             { name: "Verified", value: `${(userData.tu_id && typeof userData.tu_id === "string" && userData.tu_id.length > 0) ? true : false}` },
