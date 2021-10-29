@@ -40,7 +40,7 @@ const command: Command = {
         }
 
         const fields: EmbedFieldData[] = [
-            { name: "Verified", value: `${(userData.tu_id && typeof userData.tu_id === "string" && userData.tu_id.length > 0)}` },
+            { name: "Verified", value: `${(userData.tu_id && typeof userData.tu_id === "string" && userData.tu_id.length > 0) ? true : false}` },
         ];
         if (userData.tu_id) {
             fields.push(
