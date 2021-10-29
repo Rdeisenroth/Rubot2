@@ -62,8 +62,8 @@ const command: Command = {
         const old_moodle_id = userData.moodle_id;
         try {
             member.roles.remove(verifiedRole, "Removed by admin");
-            userData.tu_id = "";
-            userData.moodle_id = "";
+            userData.tu_id = undefined;
+            userData.moodle_id = undefined;
             await userData.save();
             const dm = await member.createDM();
             await client.utils.embeds.SimpleEmbed(dm, { title: "Verification System", text: ("Your Verification has been undone by an admin. The Token can now be used on a different account." + (reason ? `\nreason: ${reason}` : "")) });

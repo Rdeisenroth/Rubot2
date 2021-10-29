@@ -20,11 +20,11 @@ export interface User {
     /**
      * Die TU-ID
      */
-    tu_id: string,
+    tu_id?: string,
     /**
      * Die Moodle-ID
      */
-    moodle_id: string,
+    moodle_id?: string,
     /**
      * Log all the Server Roles when a Member leaves
      */
