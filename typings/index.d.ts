@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions } from "discord.js";
+import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 import mongoose from "mongoose";
@@ -312,6 +312,10 @@ export type SimpleEmbedOptions = {
      * If the Message should only be visible for the reciever (only works for CommandInteractions)
      */
     empheral?: boolean,
+    /**
+     * The Message Attachments
+     */
+    attachments?: MessageAttachment[],
     /**
      * Message Components
      */

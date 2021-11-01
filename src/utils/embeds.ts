@@ -39,7 +39,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     } else {
         options = optionsortitle;
     }
-    const { title, text, style, deleteinterval, empheral, fields, components } = options!;
+    const { title, text, style, deleteinterval, empheral, fields, components, attachments } = options!;
     //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
     embed.setTitle(title);
     if (text) {
@@ -53,15 +53,15 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     let res: void | Message;
     if (interaction instanceof CommandInteraction) {
         if (interaction.replied || interaction.deferred) {
-            await interaction.editReply({ embeds: [embed], ...(components ? [components] : []) });
+            await interaction.editReply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) });
             res = void 0;
         } else {
-            res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components ? [components] : []) });
+            res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components && { components }), ...(attachments && { attachments }) });
         }
     } else if (interaction instanceof Message) {
-        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components ? [components] : []) })) : (await interaction.reply({ embeds: [embed], ...(components ? [components] : []) }));
+        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) })) : (await interaction.reply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) }));
     } else {
-        res = await interaction.send({ embeds: [embed], ...(components ? [components] : []) });
+        res = await interaction.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) });
     }
     if (res instanceof Message) {
         const m = res;

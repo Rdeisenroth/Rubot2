@@ -45,7 +45,7 @@ const QueueEntrySchema = new mongoose.Schema<QueueEntryDocument, QueueEntryModel
     },
 });
 
-export interface QueueEntryDocument extends QueueEntry, mongoose.Document {
+export interface QueueEntryDocument extends QueueEntry, mongoose.Document<mongoose.Types.ObjectId> {
     // List getters or non model methods here
 }
 

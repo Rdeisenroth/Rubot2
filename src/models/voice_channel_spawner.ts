@@ -82,7 +82,7 @@ export interface VoiceChannelCreateOptions extends VoiceChannelSpawner {
     name: string,
 }
 
-export interface VoiceChannelSpawnerDocument extends VoiceChannelSpawner, mongoose.Document {
+export interface VoiceChannelSpawnerDocument extends VoiceChannelSpawner, mongoose.Document<mongoose.Types.ObjectId> {
     supervisor_roles: mongoose.Types.Array<string>,
     permission_overwrites: mongoose.Types.DocumentArray<PermissionOverwriteDataDocument>,
 }

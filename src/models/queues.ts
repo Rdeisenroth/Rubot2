@@ -114,7 +114,7 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
     }],
 });
 
-export interface QueueDocument extends Queue, mongoose.Document {
+export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.ObjectId> {
     room_spawner?: VoiceChannelSpawnerDocument,
     entries: mongoose.Types.DocumentArray<QueueEntryDocument>,
     // List getters or non model methods here
@@ -290,7 +290,7 @@ QueueSchema.method("interpolateQueueString", function (string: string, entry_res
             "name": this.name,
             "description": this.description,
             "eta": "null",
-            "timeout": this.disconnect_timeout,
+            "timeout": (this.disconnect_timeout ?? 0) / 1000,
             "total": this.entries.length,
         };
 

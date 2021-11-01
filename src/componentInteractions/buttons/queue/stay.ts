@@ -1,4 +1,4 @@
-import { Collection, MessageEmbed } from "discord.js";
+import { Collection, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
@@ -26,13 +26,13 @@ const command: ButtonInteraction = {
             return;
         }
 
-        let member_id = interaction.user.id;
+        const member_id = interaction.user.id;
 
         if (!client.queue_stays.has(member_id)) {
             client.queue_stays.set(member_id, new Collection());
         }
 
-        client.queue_stays.get(member_id)!.set(queue._id, true);
+        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), true);
 
         let color = 0x7289da;
         try {
@@ -43,7 +43,22 @@ const command: ButtonInteraction = {
         } catch (error) {
             console.log(error);
         }
-        await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: "You stayed in the queue.", color: color })], components: [] });
+        await interaction.update({
+            embeds: [new MessageEmbed({
+                title: "Queue System",
+                description: "You stayed in the queue.",
+                color: color,
+            })],
+            components: [
+                new MessageActionRow(
+                    {
+                        components:
+                            [
+                                new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                            ],
+                    }),
+            ],
+        });
     },
 };
 

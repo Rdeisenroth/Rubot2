@@ -88,7 +88,7 @@ const SessionSchema = new mongoose.Schema<SessionDocument, SessionModel, Session
     }],
 });
 
-export interface SessionDocument extends Session, mongoose.Document {
+export interface SessionDocument extends Session, mongoose.Document<mongoose.Types.ObjectId> {
     rooms: mongoose.Types.Array<string>,
     /**
      * Gets The Number of Rooms that were Visited in the Session

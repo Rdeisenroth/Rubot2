@@ -43,7 +43,7 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
     }],
 });
 
-export interface GuildSettingsDocument extends GuildSettings, mongoose.Document {
+export interface GuildSettingsDocument extends GuildSettings, mongoose.Document<mongoose.Types.ObjectId> {
     slashCommands: mongoose.Types.DocumentArray<SlashCommandSettingsDocument>,
     /**
     * Checks whether command Settings exist

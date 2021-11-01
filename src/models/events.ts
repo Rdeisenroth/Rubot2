@@ -70,7 +70,7 @@ const EventSchema = new mongoose.Schema<EventDocument, EventModel, Event>({
     },
 });
 
-export interface EventDocument extends Event, mongoose.Document {
+export interface EventDocument extends Event, mongoose.Document<mongoose.Types.ObjectId> {
     // List getters or non model methods here
 }
 

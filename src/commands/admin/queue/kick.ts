@@ -62,7 +62,7 @@ const command: Command = {
             await queueData.leave(user.id);
             // Kick off Channel
             const vc = guildData.voice_channels.id(member.voice.channelId);
-            if (vc && vc.queue && vc.queue.equals(queueData._id)) {
+            if (vc && vc.queue && vc.queue.equals(queueData._id!)) {
                 try {
                     await member.voice.setChannel(null);
                 } catch (error) {
