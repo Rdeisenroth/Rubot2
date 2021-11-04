@@ -172,7 +172,7 @@ const command: Command = {
                 },
             },
         );
-        let attachment = new MessageAttachment(image, "graph.png");
+        const attachment = new MessageAttachment(image, "graph.png");
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Server Stats",
             text: "Server Information",
