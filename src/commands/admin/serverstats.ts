@@ -1,10 +1,12 @@
-import { Collection, Message, MessageAttachment, MessageEmbed } from "discord.js";
+import { Collection, GuildAuditLogs, GuildAuditLogsEntry, Message, MessageAttachment, MessageEmbed } from "discord.js";
 import { Command } from "../../../typings";
 import { version as djsversion } from "discord.js";
 import * as moment from "moment";
 import "moment-duration-format";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 import { string } from "yargs";
+import { APIRole } from "discord-api-types/v9";
+
 
 /**
  * The Command Definition
@@ -15,6 +17,14 @@ const command: Command = {
     guildOnly: false,
     description: "Shows general information about the bot.",
     category: "Miscellaneous",
+    options: [
+        {
+            name: "show-empty-days",
+            description: "Whether or not to show empty days in graph",
+            type: "BOOLEAN",
+            required: false,
+        },
+    ],
     async execute(client, interaction, args) {
         if (!interaction || !interaction.guild) {
             return;
@@ -37,21 +47,53 @@ const command: Command = {
 
             },
         );
-        let dataa = new Collection<string, number>();
-        let data = members.filter(x => x.joinedAt != null).sort((x, y) => (x.joinedAt!).getTime() - (y.joinedAt!).getTime());
-        let days: { x: number, y: number }[] = [];
-        for (const [id, m] of data) {
-            let roundedDate = m.joinedAt!;
-            roundedDate.setHours(0);
-            roundedDate.setMinutes(0);
-            roundedDate.setSeconds(0);
-            roundedDate.setMilliseconds(0);
+        // Member Joins
+        let data = [...members.values()].filter(x => x.joinedAt != null).sort((x, y) => (x.joinedAt!).getTime() - (y.joinedAt!).getTime());
+        let days: { x: number, y: number, z: number }[] = [];
+        if (data && interaction.options.getBoolean("show-empty-days")) {
+            let firstDay = data[0].joinedAt!;
+            let lastDay = new Date();
+            firstDay.setHours(0, 0, 0, 0);
+            lastDay.setHours(0, 0, 0, 0);
+            for (let i = firstDay.getTime(); i <= lastDay.getTime(); i += 86400000) {
+                days.push({ x: i, y: 0, z: 0 });
+            }
+        }
+        for (const m of data) {
+            const roundedDate = m.joinedAt!;
+            roundedDate.setHours(0, 0, 0, 0);
             const roundedDateString = roundedDate.getTime();
-            let day = days.find(x => x.x === roundedDateString);
+            const day = days.find(x => x.x === roundedDateString);
             if (day) {
                 day.y++;
             } else {
-                days.push({ x: roundedDateString, y: 1 });
+                days.push({ x: roundedDateString, y: 1, z: 0 });
+            }
+        }
+        // Verifications
+        let roleLog: Collection<string, GuildAuditLogsEntry> = new Collection();
+        try {
+            roleLog = (await interaction.guild.fetchAuditLogs({ type: "MEMBER_ROLE_UPDATE" })).entries;
+        } catch (error) {
+            console.error(error);
+        }
+        for (const [id, e] of roleLog) {
+            // verifyDays.push({})
+            // console.log(e);
+            for (const c of e.changes ?? []) {
+                for (const r of ((c.new ?? []) as APIRole[])) {
+                    if (r.id === verifiedRole?.id) {
+                        const roundedDate = e.createdAt;
+                        roundedDate.setHours(0, 0, 0, 0);
+                        const roundedDateString = roundedDate.getTime();
+                        const day = days.find(x => x.x === roundedDateString);
+                        if (day) {
+                            day.z++;
+                        } else {
+                            days.push({ x: roundedDateString, y: 0, z: 1 });
+                        }
+                    }
+                }
             }
         }
 
@@ -65,7 +107,7 @@ const command: Command = {
                     }),
                     datasets: [
                         {
-                            label: "Member Count",
+                            label: "Member Join Count",
                             // data: [15, 20],
                             data: days,
                             fill: true,
@@ -73,21 +115,56 @@ const command: Command = {
                             backgroundColor: "rgba(0, 162, 255, 0.5)",
                             // backgroundColor: "#7289d9",
                         },
+                        {
+                            label: "Member Verify Count",
+                            // data: [15, 20],
+                            data: days,
+                            parsing: {
+                                yAxisKey: "z",
+                            },
+                            fill: true,
+                            borderColor: "rgba(162, 162, 162, 1)",
+                            backgroundColor: "rgba(162, 162, 162, 0.5)",
+                            // backgroundColor: "#7289d9",
+                        },
                     ],
                 },
                 options: {
+                    // font: {
+                    //     size: 42,
+                    // },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#ffffff",
+                                font: {
+                                    size: 12,
+                                },
+                            },
+                        },
+                    },
                     scales: {
                         x: {
                             grid: {
                                 color: "#ffffff",
                             },
-                            // ticks: {
-                            //     display: false, //this will remove only the label
-                            // },
+                            ticks: {
+                                color: "#ffffff",
+                                font: {
+                                    size: 12,
+                                },
+                                // display: false, //this will remove only the label
+                            },
                         },
                         y: {
                             grid: {
                                 color: "#ffffff",
+                            },
+                            ticks: {
+                                color: "#ffffff",
+                                font: {
+                                    size: 12,
+                                },
                             },
                             min: 0,
                         },
