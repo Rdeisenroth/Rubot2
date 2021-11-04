@@ -317,6 +317,18 @@ export type SimpleEmbedOptions = {
      */
     attachments?: MessageAttachment[],
     /**
+     * Attached Files
+     */
+    files?: HTTPAttachmentData[] | null,
+    /**
+     * Thumbnail URL
+     */
+    thumbnail?: string,
+    /**
+     * Image
+     */
+    image?: string,
+    /**
      * Message Components
      */
     components?: (MessageActionRow | (Required<BaseMessageComponentOptions> & MessageActionRowOptions))[]

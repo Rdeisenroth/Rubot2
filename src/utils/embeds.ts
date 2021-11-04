@@ -39,7 +39,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     } else {
         options = optionsortitle;
     }
-    const { title, text, style, deleteinterval, empheral, fields, components, attachments } = options!;
+    const { title, text, style, deleteinterval, empheral, fields, components, attachments, files, thumbnail, image } = options!;
     //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
     embed.setTitle(title);
     if (text) {
@@ -50,18 +50,24 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
             embed.addField(field.name, field.value, field.inline);
         }
     }
+    if (thumbnail) {
+        embed.setThumbnail(thumbnail);
+    }
+    if (image) {
+        embed.setImage(image);
+    }
     let res: void | Message;
     if (interaction instanceof CommandInteraction) {
         if (interaction.replied || interaction.deferred) {
-            await interaction.editReply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) });
+            await interaction.editReply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
             res = void 0;
         } else {
-            res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components && { components }), ...(attachments && { attachments }) });
+            res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
         }
     } else if (interaction instanceof Message) {
-        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) })) : (await interaction.reply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) }));
+        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) })) : (await interaction.reply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) }));
     } else {
-        res = await interaction.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }) });
+        res = await interaction.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
     }
     if (res instanceof Message) {
         const m = res;
