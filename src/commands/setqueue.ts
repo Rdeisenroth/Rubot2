@@ -9,7 +9,7 @@ const command: Command = {
     aliases: ["setwaitingroom", "swr", "setwr", "setqueue", "sq"],
     usage: "[channel resolvable]",
     cooldown: 5,
-    category: "Miscellaneous",
+    category: "Coaching",
     options: [
         {
             name: "channel",

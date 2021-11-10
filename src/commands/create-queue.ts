@@ -4,12 +4,12 @@ import GuildSchema from "../models/guilds";
 import { Queue } from "../models/queues";
 
 const command: Command = {
-    name: "createqueue",
+    name: "create-queue",
     description: "creates a queue",
     aliases: ["cq"],
     usage: "[channel resolvable]",
     cooldown: 5,
-    category: "Miscellaneous",
+    category: "Coaching",
     options: [
         {
             name: "name",

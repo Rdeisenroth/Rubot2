@@ -7,7 +7,7 @@ const command: SubcommandHandler = {
     name: "voice",
     description: "voice Command Handler",
     aliases: ["v", "vc"],
-    category: "Miscellaneous",
+    category: "Coaching",
     guildOnly: true,
     subcommands: new Collection(),
     // options: [{

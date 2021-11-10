@@ -9,7 +9,7 @@ const command: Command = {
     aliases: ["sj2c", "setj2c"],
     usage: "[channel resolvable]",
     cooldown: 5,
-    category: "Miscellaneous",
+    category: "Coaching",
     guildOnly: true,
     defaultPermission: false,
     options: [{

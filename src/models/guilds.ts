@@ -7,6 +7,7 @@ import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_chan
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
+import { Command, SubcommandHandler } from "../../typings";
 
 /**
  * A Guild from the Database
@@ -126,6 +127,11 @@ export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
      * @param g The resolved guild (for speed improvement)
      */
     postSlashCommands(client: Bot, g?: djs.Guild | null): Promise<void>,
+    /**
+     * Gets all Command Names to append to help Command
+     * @param commands The Command Collection of the Guild
+     */
+    getRecursiveCommandNames(commands: djs.Collection<string, Command>): djs.ApplicationCommandOptionChoice[],
 }
 
 /**
@@ -148,6 +154,19 @@ export interface GuildModel extends mongoose.Model<GuildDocument> {
 GuildSchema.method("resolve", async function (client: Bot) {
     return await client.guilds.resolve(this._id);
 });
+
+GuildSchema.method("getRecursiveCommandNames", function (commands: djs.Collection<string, Command>) {
+    const data: ApplicationCommandOptionChoice[] = [];
+    commands.forEach((val, key) => {
+        data.push({ name: key, value: key });
+        if ((val as SubcommandHandler).subcommands) {
+            data.push(...this.getRecursiveCommandNames((val as SubcommandHandler).subcommands));
+        }
+    });
+    return data;
+});
+
+
 
 GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
     console.log("posting slash commands");
