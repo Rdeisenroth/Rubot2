@@ -1,3 +1,20 @@
+/**
+ * The Possible Annotations for queue Stayings
+ */
+export enum QueueStayOptions {
+    /**
+     * Annotates that a queue State Decision is Pending
+     */
+    PENDING,
+    /**
+     * Annotates a stay
+     */
+    STAY,
+    /**
+     * Annotates user already left
+     */
+    LEFT,
+}
 import { Client, Collection } from "discord.js";
 import consola, { Consola } from "consola";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
@@ -16,12 +33,12 @@ export class Bot extends Client {
     // public aliases: Collection<string,string> = new Collection();
     public cooldowns: Collection<string, Collection<string, number>> = new Collection();
     /**
-     * [client_id, [queue_id, stay?]]
+     * A Collection Of Queue Stays. The First string is the member id, the second string is the Queue id.
      *
-     * @type {Collection<string, Collection<string, boolean>>}
+     * @type {Collection<string, Collection<string, QueueStayOptions>>} A Collection of Queue Stays
      * @memberof Bot
      */
-    public queue_stays: Collection<string, Collection<string, boolean>> = new Collection();
+    public queue_stays: Collection<string, Collection<string, QueueStayOptions>> = new Collection();
     public ownerID?: string;
     public prefix = "!";
     public version = "0.0";

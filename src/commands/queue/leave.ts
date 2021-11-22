@@ -2,6 +2,7 @@ import { Message } from "discord.js";
 import moment from "moment";
 import path from "path";
 import { Command } from "../../../typings";
+import { QueueStayOptions } from "../../bot";
 import GuildSchema from "../../models/guilds";
 
 const command: Command = {
@@ -34,9 +35,23 @@ const command: Command = {
         const leave_msg = queueData.getLeaveMessage(user.id);
         await queueData.leave(user.id);
 
+
+        if (client.queue_stays.get(user.id)?.get(queueData._id!.toHexString()) === QueueStayOptions.PENDING) {
+            client.queue_stays.get(user.id)!.set(queueData._id!.toHexString(), QueueStayOptions.LEFT);
+        }
+
         try {
             const member = g.members.resolve(user);
-            await member?.voice.disconnect();
+            const vcData = await guildData.voice_channels.id(member?.voice.channelId);
+            if (vcData?.queue?.equals(queueData._id!)) {
+                await member!.voice.disconnect();
+            }
+            const roles = await g.roles.fetch();
+            const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+
+            if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                member.roles.remove(waiting_role);
+            }
         } catch (error) {
             console.log(error);
         }

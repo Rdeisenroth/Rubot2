@@ -1,5 +1,6 @@
-import { MessageEmbed } from "discord.js";
+import { Collection, MessageEmbed } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
+import { QueueStayOptions } from "../../../bot";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
 
@@ -25,6 +26,14 @@ const command: ButtonInteraction = {
             await interaction.update({ components: [] });
             return;
         }
+
+        const member_id = interaction.user.id;
+
+        if (client.queue_stays.get(member_id)?.get(queue._id!.toHexString()) === QueueStayOptions.PENDING) {
+            client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), QueueStayOptions.LEFT);
+        }
+
+
         // Leave the Queue
         const leave_msg = queue.getLeaveMessage(interaction.user.id);
         await queue.leave(interaction.user.id);
@@ -33,6 +42,16 @@ const command: ButtonInteraction = {
             const guild = client.guilds.cache.get(g._id);
             color = guild?.me?.roles.highest.color ?? 0x7289da;
             const member = guild?.members.cache.get(interaction.user.id);
+            const vcData = await g.voice_channels.id(member?.voice.channelId);
+            if (vcData?.queue?.equals(queue._id!)) {
+                await member!.voice.disconnect();
+            }
+            const roles = await guild?.roles.fetch();
+            const waiting_role = roles?.find(x => x.name.toLowerCase() === queue!.name.toLowerCase() + "-waiting");
+
+            if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                member.roles.remove(waiting_role);
+            }
             await member?.voice.disconnect();
         } catch (error) {
             console.log(error);

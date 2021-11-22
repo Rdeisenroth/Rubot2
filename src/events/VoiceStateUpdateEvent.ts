@@ -1,5 +1,5 @@
 import { ExecuteEvent } from "../../typings";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Collection, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import GuildSchema from "../models/guilds";
 import { VoiceChannelDocument } from "../models/voice_channels";
 import { QueueDocument } from "../models/queues";
@@ -9,6 +9,7 @@ export const name = "voiceStateUpdate";
 import RoomSchema from "../models/rooms";
 import UserSchema from "../models/users";
 import EventSchema, { Event as EVT, eventType } from "../models/events";
+import { QueueStayOptions } from "../bot";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;
@@ -51,6 +52,21 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 let queueEntry: QueueEntry;
                 try {
                     if (queue.contains(newState.member!.id)) {
+                        if (client.queue_stays.get(newState.member!.id)?.get(queueId.toHexString()) === QueueStayOptions.PENDING) {
+                            client.queue_stays.get(newState.member!.id)!.set(queue._id!.toHexString(), QueueStayOptions.STAY);
+                            await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), {
+                                title: "Queue System", text: "You stayed in the queue.", components: [
+                                    new MessageActionRow(
+                                        {
+                                            components:
+                                                [   
+                                                    new MessageButton({ customId: "queue_refresh", label: "Show Queue Information", style: "PRIMARY" }),
+                                                    new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                                ],
+                                        }),
+                                ],
+                            });
+                        }
                         return;
                     }
                     // let userData = await UserSchema.findById(newState.member!.id);
@@ -62,6 +78,14 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         joinedAt: Date.now().toString(),
                         importance: 1,
                     });
+
+                    const roles = await guild.roles.fetch();
+                    const waiting_role = roles.find(x => x.name.toLowerCase() === queue.name.toLowerCase() + "-waiting");
+
+                    const member = newState.member!;
+                    if (waiting_role && member && !member.roles.cache.has(waiting_role.id)) {
+                        member.roles.add(waiting_role);
+                    }
                 } catch (error) {
                     try {
                         await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), { title: "Queue System", text: `An error occurred: ${error}` });
@@ -179,14 +203,27 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                                     }),
                             ],
                         });
+                        if (!client.queue_stays.has(member_id)) {
+                            client.queue_stays.set(member_id, new Collection());
+                        }
+
+                        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), QueueStayOptions.PENDING);
                         // Create Timer
                         setTimeout(async () => {
-                            if (client.queue_stays.get(member_id)?.get(queue._id!.toHexString()) ?? false) {
-                                client.queue_stays.get(member_id)?.delete(queue._id!.toHexString());
+                            let queue_stays = client.queue_stays.get(member_id)?.get(queue._id!.toHexString());
+                            client.queue_stays.get(member_id)?.delete(queue._id!.toHexString());
+                            if (queue_stays !== QueueStayOptions.PENDING) {
                                 return;
                             }
                             const leave_msg = queue.getLeaveMessage(member_id);
                             await queue.leave(member_id);
+                            const roles = await guild.roles.fetch();
+                            const waiting_role = roles.find(x => x.name.toLowerCase() === queue.name.toLowerCase() + "-waiting");
+
+                            const member = newState.member!;
+                            if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                                member.roles.remove(waiting_role);
+                            }
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
                                 text: leave_msg,
@@ -195,6 +232,13 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     } else {
                         const leave_msg = queue.getLeaveMessage(member_id);
                         await queue.leave(member_id);
+                        const roles = await guild.roles.fetch();
+                        const waiting_role = roles.find(x => x.name.toLowerCase() === queue.name.toLowerCase() + "-waiting");
+
+                        const member = newState.member!;
+                        if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                            member.roles.remove(waiting_role);
+                        }
                         await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }
                 }

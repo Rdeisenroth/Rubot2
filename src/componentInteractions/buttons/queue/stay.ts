@@ -1,5 +1,6 @@
 import { Collection, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
+import { QueueStayOptions } from "../../../bot";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
 
@@ -32,7 +33,7 @@ const command: ButtonInteraction = {
             client.queue_stays.set(member_id, new Collection());
         }
 
-        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), true);
+        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), QueueStayOptions.STAY);
 
         let color = 0x7289da;
         try {

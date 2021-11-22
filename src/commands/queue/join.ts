@@ -69,8 +69,15 @@ const command: Command = {
             intent: interaction.options.getString("intent") ?? undefined,
         });
 
+
         try {
-            // const member = g.members.resolve(user);
+            const roles = await g.roles.fetch();
+            const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+
+            const member = g.members.resolve(user);
+            if (waiting_role && member && !member.roles.cache.has(waiting_role.id)) {
+                member.roles.add(waiting_role);
+            }
             // await member?.voice.disconnect();
         } catch (error) {
             console.log(error);

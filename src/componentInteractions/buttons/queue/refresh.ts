@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import moment from "moment";
 import { ButtonInteraction } from "../../../../typings";
 import GuildSchema, { Guild, GuildDocument } from "../../../models/guilds";
@@ -44,12 +44,35 @@ const command: ButtonInteraction = {
                 };
                 // Interpolate String
                 const join_message = client.utils.general.interpolateString(queue.join_message, replacements);
-                await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: join_message, color: interaction.guild?.me?.roles.highest.color || 0x7289da })] });
+                await interaction.update(
+                    {
+                        embeds:
+                            [
+                                new MessageEmbed({ title: "Queue System", description: join_message, color: interaction.guild?.me?.roles.highest.color || 0x7289da }),
+                            ],
+                        components: [
+                            new MessageActionRow(
+                                {
+                                    components:
+                                        [
+                                            new MessageButton({ customId: "queue_refresh", label: "Refresh", style: "PRIMARY" }),
+                                            new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                        ],
+                                }),
+                        ],
+                    });
             } catch (error) {
                 console.log(error);
             }
         } else {
-            await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: `--${queue.name}--\nPosition:${(queue as QueueDocument).getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.me?.roles.highest.color || 0x7289da })], components: [] });
+            await interaction.update(
+                {
+                    embeds:
+                        [
+                            new MessageEmbed({ title: "Queue System", description: `--${queue.name}--\nPosition:${(queue as QueueDocument).getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.me?.roles.highest.color || 0x7289da }),
+                        ],
+                    components: [],
+                });
         }
     },
 };
