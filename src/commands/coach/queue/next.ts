@@ -135,6 +135,16 @@ const command: Command = {
                     const queueData = guildData.queues.id(queue)!;
                     queueData.entries.remove({ _id: e._id });
                     await guildData.save();
+                    // const vcData = await guildData.voice_channels.id(member?.voice.channelId);
+                    // if (vcData?.queue?.equals(queueData._id!)) {
+                    //     await member!.voice.disconnect();
+                    // }
+                    const roles = await g.roles.fetch();
+                    const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+
+                    if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                        member.roles.remove(waiting_role);
+                    }
                 } catch (error) {
                     console.log(error);
                     return await client.utils.embeds.SimpleEmbed(interaction, "Coaching System", ":X: An Internal Error Occured.");

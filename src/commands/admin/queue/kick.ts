@@ -69,6 +69,11 @@ const command: Command = {
                     console.log(`Failed to set Voice Channel=null for ${member}`);
                 }
             }
+            const roles = await g.roles.fetch();
+            const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+            if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                member.roles.remove(waiting_role);
+            }
             const dmChannel = await user.createDM();
             await client.utils.embeds.SimpleEmbed(dmChannel, { title: "Coaching System", text: "You were Kicked from the Queue by an Administrator." + (reason ? `\nReason: ${reason}` : "") });
         } catch (error) {
