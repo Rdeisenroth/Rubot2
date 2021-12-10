@@ -54,6 +54,10 @@ export interface Queue {
      */
     room_spawner?: VoiceChannelSpawner,
     /**
+     * A text Channel to use if dms are disabled
+     */
+    text_channel?: string,
+    /**
      * The Entries of the Queue
      */
     entries: QueueEntry[],

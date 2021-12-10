@@ -1,6 +1,6 @@
 import EventSchema, { Event as EVT, eventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
-import ChannelType, { Message } from "discord.js";
+import ChannelType, { Message, TextChannel } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
@@ -126,11 +126,8 @@ const command: Command = {
             try {
                 const user = await client.users.fetch(e.discord_id);
                 console.log("coach queue next: Matches: Notify User");
-                // Notify user
-                await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
-                console.log("coach queue next: Matches: Remove User from Queue");
-                // remove from queue
                 try {
+                    // remove from queue
                     const guildData = (await GuildSchema.findById(g.id))!;
                     const queueData = guildData.queues.id(queue)!;
                     queueData.entries.remove({ _id: e._id });
@@ -144,6 +141,16 @@ const command: Command = {
 
                     if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                         member.roles.remove(waiting_role);
+                    }
+                    // Notify user
+                    try {
+                        await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
+                        console.log("coach queue next: Matches: Remove User from Queue");
+                    } catch (error) {
+                        if (queueData.text_channel) {
+                            let c = await g.channels.fetch(queueData.text_channel);
+                            await client.utils.embeds.SimpleEmbed(c as TextChannel, "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
+                        }
                     }
                 } catch (error) {
                     console.log(error);
