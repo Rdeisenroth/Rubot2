@@ -399,8 +399,9 @@ QueueSchema.method("toggleLock", function () {
 });
 
 QueueSchema.method("getWaitingRooms", function () {
-    const guild = this.$parent! as unknown as GuildDocument;
-    return guild.voice_channels.filter(x => x.queue?.equals(this._id!));
+    const guild = this.$parent! as unknown as GuildDocument | undefined;
+    console.log(guild?._id);
+    return guild?.voice_channels.filter(x => x.queue?.equals(this._id!)) ?? [];
 });
 
 // Default export
