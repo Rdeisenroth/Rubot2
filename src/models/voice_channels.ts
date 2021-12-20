@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import mongoose from "mongoose";
+import { Bot } from "../bot";
 import { Channel } from "./text_channels";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
+import * as djs from "discord.js";
 
 export interface VoiceChannel extends Channel {
     /**
@@ -114,11 +116,37 @@ export interface VoiceChannelDocument extends VoiceChannel, Omit<mongoose.Docume
     permitted: mongoose.Types.Array<string>,
     spawner?: VoiceChannelSpawnerDocument,
     supervisors?: mongoose.Types.Array<string>,
+    /**
+     * Locks the Voice Channel
+     */
+    lock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    /**
+     * Unlocks the Voice Channel
+     */
+    unlock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    /**
+     * Locks or Unlocks the Voice Channel (opposite State).
+     */
+    toggleLock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
 }
 
 export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> {
 
 }
+
+VoiceChannelSchema.method("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "CONNECT": false, "SPEAK": false });
+    this.locked = true;
+});
+
+VoiceChannelSchema.method("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
+    this.locked = false;
+});
+
+VoiceChannelSchema.method("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+    this.locked ? await this.lock(channel, roleId) : await this.unlock(channel, roleId);
+});
 
 // Default export
 export default VoiceChannelSchema;

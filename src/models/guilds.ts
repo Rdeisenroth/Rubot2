@@ -132,6 +132,12 @@ export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
      * @param commands The Command Collection of the Guild
      */
     getRecursiveCommandNames(commands: djs.Collection<string, Command>): djs.ApplicationCommandOptionChoice[],
+    /**
+     * Gets the verivied Role
+     * @param client The Bot Client
+     * @param g The resolved guild (for speed improvement)
+     */
+    getVerifiedRole(client: Bot, g?: djs.Guild | null | undefined): Promise<djs.Role | null>,
 }
 
 /**
@@ -166,6 +172,11 @@ GuildSchema.method("getRecursiveCommandNames", function (commands: djs.Collectio
     return data;
 });
 
+GuildSchema.method("getVerifiedRole", async function (client: Bot, g?: djs.Guild | null) {
+    g = g ?? (await this.resolve(client))!;
+    await g.roles.fetch();
+    return g.roles.cache.find(x => x.name.toLowerCase() === "verified") ?? null;
+});
 
 
 GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {

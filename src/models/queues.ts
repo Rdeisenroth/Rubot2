@@ -1,3 +1,5 @@
+import { GuildDocument } from "./guilds";
+import { VoiceChannelDocument } from "./voice_channels";
 import mongoose from "mongoose";
 import QueueEntrySchema, { QueueEntry, QueueEntryDocument } from "./queue_entry";
 import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
@@ -257,6 +259,10 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
      * Locks or Unlocks the queue (opposite State).
      */
     toggleLock(): void;
+    /**
+     * Resolves all Waiting rooms for the current Queue
+     */
+    getWaitingRooms(): VoiceChannelDocument[],
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -390,6 +396,11 @@ QueueSchema.method("unlock", function () {
 
 QueueSchema.method("toggleLock", function () {
     this.locked = !this.locked;
+});
+
+QueueSchema.method("getWaitingRooms", function () {
+    const guild = this.$parent! as unknown as GuildDocument;
+    return guild.voice_channels.filter(x => x.queue?.equals(this._id!));
 });
 
 // Default export

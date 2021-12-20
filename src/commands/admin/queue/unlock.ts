@@ -1,4 +1,4 @@
-import { VoiceChannelDocument } from "./../../../models/voice_channels";
+import { VoiceChannelDocument } from "../../../models/voice_channels";
 import { EmbedFieldData, Message, VoiceChannel } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
@@ -6,8 +6,8 @@ import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
 
 const command: Command = {
-    name: "lock",
-    description: "Locks the Queue and disables the /queue join command",
+    name: "unlock",
+    description: "Unlocks the Queue and disables the /queue join command",
     options: [
         {
             name: "queue",
@@ -39,21 +39,21 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `Queue ${queueName} could not be fould.`, empheral: true });
         }
 
-        // Lock
-        queueData.lock();
+        // UnLock
+        queueData.unlock();
         try {
-            queueData.getWaitingRooms().forEach(async x => x.lock(await g.channels.fetch(x._id) as VoiceChannel, (await guildData.getVerifiedRole(client, g))?.id || undefined));
+            queueData.getWaitingRooms().forEach(async x => x.unlock(await g.channels.fetch(x._id) as VoiceChannel, (await guildData.getVerifiedRole(client, g))?.id || undefined));
         } catch (error) {
             return await client.utils.embeds.SimpleEmbed(interaction, {
                 title: "Coaching System - Error",
-                text: `:x: Queue ${queueData.name}-could not be locked:\n${error}`,
+                text: `:x: Queue ${queueData.name}-could not be unlocked:\n${error}`,
                 empheral: true,
             });
         }
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System",
-            text: `Queue ${queueData.name}-was locked.`,
+            text: `Queue ${queueData.name}-was unlocked.`,
             empheral: true,
         });
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
