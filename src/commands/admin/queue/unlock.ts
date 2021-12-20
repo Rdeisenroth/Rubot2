@@ -42,7 +42,7 @@ const command: Command = {
         // UnLock
         queueData.unlock();
         try {
-            queueData.getWaitingRooms().forEach(async x => {
+            queueData.getWaitingRooms(guildData).forEach(async x => {
                 console.log(x.id);
                 x.unlock(await g.channels.fetch(x._id) as VoiceChannel, (await guildData.getVerifiedRole(client, g))?.id || undefined)});
         } catch (error) {

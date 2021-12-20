@@ -262,7 +262,7 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
     /**
      * Resolves all Waiting rooms for the current Queue
      */
-    getWaitingRooms(): VoiceChannelDocument[],
+    getWaitingRooms(guild: GuildDocument): VoiceChannelDocument[],
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -398,10 +398,8 @@ QueueSchema.method("toggleLock", function () {
     this.locked = !this.locked;
 });
 
-QueueSchema.method("getWaitingRooms", function () {
-    const guild = this.$parent! as unknown as GuildDocument | undefined;
-    console.log(guild?._id);
-    return guild?.voice_channels.filter(x => x.queue?.equals(this._id!)) ?? [];
+QueueSchema.method("getWaitingRooms", function (guild: GuildDocument) {
+    return guild.voice_channels?.filter(x => x.queue?.equals(this._id!)) ?? [];
 });
 
 // Default export

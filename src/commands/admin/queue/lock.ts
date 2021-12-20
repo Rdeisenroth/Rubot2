@@ -42,7 +42,7 @@ const command: Command = {
         // Lock
         queueData.lock();
         try {
-            queueData.getWaitingRooms().forEach(async x => x.lock(await g.channels.fetch(x._id) as VoiceChannel, (await guildData.getVerifiedRole(client, g))?.id || undefined));
+            queueData.getWaitingRooms(guildData).forEach(async x => x.lock(await g.channels.fetch(x._id) as VoiceChannel, (await guildData.getVerifiedRole(client, g))?.id || undefined));
         } catch (error) {
             return await client.utils.embeds.SimpleEmbed(interaction, {
                 title: "Coaching System - Error",
