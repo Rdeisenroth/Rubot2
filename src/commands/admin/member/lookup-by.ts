@@ -78,6 +78,7 @@ const command: Command = {
             fields.push(
                 { name: "> TU-ID", value: `${userData.tu_id}` },
                 { name: "> Moodle-ID", value: `${userData.moodle_id}` },
+                { name: "> Link", value: `https://moodle.informatik.tu-darmstadt.de/user/view.php?id=${userData.moodle_id}&course=1088` },
             );
         }
 
