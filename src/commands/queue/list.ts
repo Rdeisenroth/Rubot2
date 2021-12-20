@@ -25,7 +25,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
 
-        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Queue List", fields: guildData.queues.toObject<QueueDocument[]>().map(x => { return { name: x.name, value: x.description ?? "" }; }) });
+        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Queue List", fields: guildData.queues.toObject<QueueDocument[]>().map(x => { return { name: x.name + (x.locked ? " (locked)" : ""), value: x.description ?? "" }; }) });
 
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
     },

@@ -59,7 +59,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                                     new MessageActionRow(
                                         {
                                             components:
-                                                [   
+                                                [
                                                     new MessageButton({ customId: "queue_refresh", label: "Show Queue Information", style: "PRIMARY" }),
                                                     new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
                                                 ],
@@ -72,6 +72,12 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     // let userData = await UserSchema.findById(newState.member!.id);
                     if (newState.member?.roles.cache.find(x => x.name.toLowerCase() === "tutor" || x.name.toLowerCase() === "orga")) {
                         return;
+                    }
+                    if (queue.locked && !queue.contains(newState.member!.id)) {
+                        await newState.member?.voice.setChannel(null);
+                        await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), {
+                            title: "Queue System", text: `The Queue ${queue.name} is currently locked.`,
+                        });
                     }
                     queueEntry = await queue.join({
                         discord_id: newState.member!.id,

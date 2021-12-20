@@ -61,6 +61,11 @@ const command: Command = {
             return;
         }
 
+        // Locked?
+        if (queueData.locked) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `The Queue ${queueData.name} is currently Locked.`, empheral: true });
+        }
+
         // Join Queue
         await queueData.join({
             discord_id: user.id,

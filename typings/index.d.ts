@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment } from "discord.js";
+import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment, BaseApplicationCommandOptionsData } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 import mongoose from "mongoose";
@@ -191,7 +191,7 @@ export interface Command {
     /**
      * Data to parse for slash Commands
      */
-    options?: ApplicationCommandOptionData[],
+    options?: (ApplicationCommandOptionData & Pick<BaseApplicationCommandOptionsData, "required">)[],
     /**
      * The Paramers after command name surrounded with <>
      */

@@ -58,6 +58,10 @@ export interface Queue {
      */
     text_channel?: string,
     /**
+     * Whether the queue is locked (this also disables the /queue join command for this queue)
+     */
+    locked?: boolean,
+    /**
      * The Entries of the Queue
      */
     entries: QueueEntry[],
@@ -111,6 +115,11 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         type: VoiceChannelSpawnerSchema,
         required: false,
     },
+    locked: [{
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false,
+    }],
     entries: [{
         type: QueueEntrySchema,
         required: true,
@@ -236,6 +245,18 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
      * Returns `true` if the Queue is Empty
      */
     isEmpty(): boolean,
+    /**
+     * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command
+     */
+    lock(): void;
+    /**
+     * Unlocks the queue. This restores the voice Channel Permissions and allows the queue from the /queue join command
+     */
+    unlock(): void;
+    /**
+     * Locks or Unlocks the queue (opposite State).
+     */
+    toggleLock(): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -357,6 +378,18 @@ QueueSchema.method("getLeaveRoomMessage", function (entry_resolvable?: string | 
     else {
         return default_leave_message;
     }
+});
+
+QueueSchema.method("lock", function () {
+    this.locked = true;
+});
+
+QueueSchema.method("unlock", function () {
+    this.locked = false;
+});
+
+QueueSchema.method("toggleLock", function () {
+    this.locked = !this.locked;
 });
 
 // Default export
