@@ -141,17 +141,8 @@ export class Bot extends Client {
         }
 
         // Connect to db
-        mongoose.connect(
-            config.mongodb_connection_url,
-            {},
-            (err) => {
-                if (err) {
-                    throw err;
-                } else {
-                    this.logger.info("connected to DB!!");
-                }
-            },
-        );
+        this.database = await mongoose.connect(config.mongodb_connection_url, {});
+        this.logger.info("connected to DB!!");
 
         // Event Files
         this.logger.info("Loading Events...");
