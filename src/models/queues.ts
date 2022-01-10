@@ -250,15 +250,15 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
     /**
      * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command
      */
-    lock(): void;
+    lock(): Promise<void>;
     /**
      * Unlocks the queue. This restores the voice Channel Permissions and allows the queue from the /queue join command
      */
-    unlock(): void;
+    unlock(): Promise<void>;
     /**
      * Locks or Unlocks the queue (opposite State).
      */
-    toggleLock(): void;
+    toggleLock(): Promise<void>;
     /**
      * Resolves all Waiting rooms for the current Queue
      */
@@ -386,16 +386,19 @@ QueueSchema.method("getLeaveRoomMessage", function (entry_resolvable?: string | 
     }
 });
 
-QueueSchema.method("lock", function () {
+QueueSchema.method("lock", async function () {
     this.locked = true;
+    await this.$parent()?.save();
 });
 
-QueueSchema.method("unlock", function () {
+QueueSchema.method("unlock", async function () {
     this.locked = false;
+    await this.$parent()?.save();
 });
 
-QueueSchema.method("toggleLock", function () {
+QueueSchema.method("toggleLock", async function () {
     this.locked = !this.locked;
+    await this.$parent()?.save();
 });
 
 QueueSchema.method("getWaitingRooms", function (guild: GuildDocument) {

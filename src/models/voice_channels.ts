@@ -137,15 +137,18 @@ export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> 
 VoiceChannelSchema.method("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
     await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "CONNECT": false, "SPEAK": false });
     this.locked = true;
+    await this.$parent()?.save();
 });
 
 VoiceChannelSchema.method("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
+    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": !this.queue });
     this.locked = false;
+    await this.$parent()?.save();
 });
 
 VoiceChannelSchema.method("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
     this.locked ? await this.lock(channel, roleId) : await this.unlock(channel, roleId);
+    await this.$parent()?.save();
 });
 
 // Default export
