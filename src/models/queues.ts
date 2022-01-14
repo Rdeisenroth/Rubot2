@@ -117,11 +117,11 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         type: VoiceChannelSpawnerSchema,
         required: false,
     },
-    locked: [{
+    locked: {
         type: mongoose.SchemaTypes.Boolean,
         required: false,
         default: false,
-    }],
+    },
     entries: [{
         type: QueueEntrySchema,
         required: true,
