@@ -44,6 +44,10 @@ const command: Command = {
         if (!waiting_role) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Could not be found.", empheral: true });
         }
+        const role_members = waiting_role.members;
+        if (!role_members) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Members Could not be found.", empheral: true });
+        }
         waiting_role.members.forEach(async m => {
             if (!queueData.contains(m.id)) {
                 faultyRoleCount++;
