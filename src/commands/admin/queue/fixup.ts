@@ -41,14 +41,15 @@ const command: Command = {
 
         const roles = await g.roles.fetch();
         const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
-        if (waiting_role) {
-            waiting_role.members.forEach(async m => {
-                if (!queueData.contains(m.id)) {
-                    faultyRoleCount++;
-                    await m.roles.remove(waiting_role);
-                }
-            });
+        if (!waiting_role) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Could not be found.", empheral: true });
         }
+        waiting_role.members.forEach(async m => {
+            if (!queueData.contains(m.id)) {
+                faultyRoleCount++;
+                await m.roles.remove(waiting_role);
+            }
+        });
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Queue Fixup",
