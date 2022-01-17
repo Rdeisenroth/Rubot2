@@ -37,37 +37,23 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
         }
 
-        // await g.members.fetch();
-
-        const fields: EmbedFieldData[] = [];
-        for (const e of queueData.getSortedEntries()) {
-            const position = queueData.getPosition(e.discord_id) + 1;
-            const joined_at = `<t:${Math.round((+e.joinedAt) / 1000)}:f>`;
-            const intent = e.intent;
-            const member = await g.members.fetch(e.discord_id);
-            fields.push({
-                name: member.displayName, value:
-                    `-Position: ${position}`
-                    + `\n-joined at: ${joined_at}`
-                    + (intent ? `\n-intent: ${intent}` : ""),
-            });
-        }
+        let faultyRoleCount = 0;
 
         const roles = await g.roles.fetch();
         const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
         if (waiting_role) {
             waiting_role.members.forEach(async m => {
                 if (!queueData.contains(m.id)) {
+                    faultyRoleCount++;
                     await m.roles.remove(waiting_role);
                 }
             });
         }
 
         await client.utils.embeds.SimpleEmbed(interaction, {
-            title: "Queue Information",
-            text: fields && fields.length ? `Queue Entries of ${queueData.name}` : `Queue ${queueData.name} is empty`,
+            title: "Queue Fixup",
+            text: faultyRoleCount ? `Fixed ${faultyRoleCount} roles.` : "Everything Clean.",
             empheral: true,
-            fields,
         });
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
     },
