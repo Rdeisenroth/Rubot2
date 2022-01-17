@@ -228,7 +228,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                             const member = newState.member!;
                             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
-                                member.roles.remove(waiting_role);
+                                await member.roles.remove(waiting_role);
                             }
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
@@ -243,7 +243,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                         const member = newState.member!;
                         if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
-                            member.roles.remove(waiting_role);
+                            await member.roles.remove(waiting_role);
                         }
                         await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }

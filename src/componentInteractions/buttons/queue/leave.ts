@@ -50,7 +50,7 @@ const command: ButtonInteraction = {
             const waiting_role = roles?.find(x => x.name.toLowerCase() === queue!.name.toLowerCase() + "-waiting");
 
             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
-                member.roles.remove(waiting_role);
+                await member.roles.remove(waiting_role);
             }
             await member?.voice.disconnect();
         } catch (error) {

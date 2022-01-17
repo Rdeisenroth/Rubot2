@@ -132,6 +132,14 @@ const command: Command = {
                 // remove from queue
                 queueData.entries.remove({ _id: queueEntry._id });
                 await guildData.save();
+
+                const roles = await g.roles.fetch();
+                const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+
+                if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
+                    await member.roles.remove(waiting_role);
+                }
+                
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
