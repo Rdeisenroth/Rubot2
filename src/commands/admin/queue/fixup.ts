@@ -45,7 +45,7 @@ const command: Command = {
         if (!waiting_role) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Could not be found.", empheral: true });
         }
-        const role_members = waiting_role.members;
+        const role_members = members.filter(x => x.roles.cache.has(waiting_role.id));
         if (!role_members) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Members Could not be found.", empheral: true });
         }
