@@ -39,6 +39,7 @@ const command: Command = {
 
         let faultyRoleCount = 0;
 
+        const members = await g.members.fetch();
         const roles = await g.roles.fetch();
         const waiting_role: Role | undefined = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
         if (!waiting_role) {
