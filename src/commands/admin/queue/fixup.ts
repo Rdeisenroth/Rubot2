@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { EmbedFieldData, Message, Role } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -40,7 +40,7 @@ const command: Command = {
         let faultyRoleCount = 0;
 
         const roles = await g.roles.fetch();
-        const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+        const waiting_role: Role | undefined = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
         if (!waiting_role) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Could not be found.", empheral: true });
         }
@@ -48,6 +48,7 @@ const command: Command = {
         if (!role_members) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Waiting Role Members Could not be found.", empheral: true });
         }
+        const oldMemberCount = role_members.size;
         waiting_role.members.forEach(async m => {
             if (!queueData.contains(m.id)) {
                 faultyRoleCount++;
@@ -57,7 +58,7 @@ const command: Command = {
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Queue Fixup",
-            text: faultyRoleCount ? `Fixed ${faultyRoleCount} roles.` : "Everything Clean.",
+            text: `${faultyRoleCount ? `Fixed ${faultyRoleCount} roles.` : "Everything Clean."}\n >Old member Count: ${oldMemberCount}.\n >New Member Count: ${oldMemberCount - faultyRoleCount}`,
             empheral: true,
         });
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
