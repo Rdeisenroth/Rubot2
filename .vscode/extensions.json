@@ -1,6 +1,11 @@
 {
     "recommendations": [
+        "meganrogge.template-string-converter",
+        "steoates.autoimport",
+        "visualstudioexptteam.vscodeintellicode",
+        "gruntfuggly.todo-tree",
         "dbaeumer.vscode-eslint",
-        "meganrogge.template-string-converter"
+        "dsznajder.es7-react-js-snippets",
+        "coenraads.bracket-pair-colorizer-2"
     ]
 }
