@@ -33,9 +33,6 @@ const command: Command = {
 
         await interaction.deferReply();
 
-
-        await interaction.deferReply();
-
         const g = interaction.guild!;
         const guildData = (await GuildSchema.findById(g.id));
         if (!guildData) {
