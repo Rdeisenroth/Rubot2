@@ -54,12 +54,14 @@ const command: Command = {
             (
                 await Promise.all(
                     (await UserSchema.find())
-                        .map(async x => (
-                            {
+                        .map(async (x, i, a) => {
+                            console.log(`Processing User data of ${x._id} (${i}/${a.length})`)
+                            return {
                                 _id: x._id,
                                 roomCount: await RoomSchema.getParticipantRoomCount(x._id, rooms),
-                            }
-                        )))
+                            };
+                        },
+                        ))
             )
                 .sort((x, y) => x.roomCount - y.roomCount).slice(0, 10)
         ) {
