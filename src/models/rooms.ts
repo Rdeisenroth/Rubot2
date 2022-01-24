@@ -110,13 +110,15 @@ export interface RoomModel extends mongoose.Model<RoomDocument> {
     /**
      * Gets the Rooms a User participated in
      * @param user The User ID to check
+     * @param rooms All Rooms
      */
-    getParticipantRooms(user: User | Snowflake): Promise<Room[]>,
+    getParticipantRooms(user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]): Promise<Room[]>,
     /**
      * Gets the Amount of Rooms a User participated in
      * @param user The User ID to check
+     * @param rooms All Rooms
      */
-    getParticipantRoomCount(user: User | Snowflake): Promise<number>,
+    getParticipantRoomCount(user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]): Promise<number>,
 }
 
 // --Methods--
@@ -172,7 +174,7 @@ RoomSchema.method("wasParticipating", async function (user: User | Snowflake) {
     if (user instanceof User) {
         user = user.id;
     }
-    return (await this.getUserRoles()).some(x => x.userID === user && x.role === sessionRole.participant);
+    return (await this.getUserRoles()).some(x => x.userID === user && x.role != sessionRole.coach);
 });
 
 RoomSchema.method("getParticipants", async function () {
@@ -197,15 +199,15 @@ RoomSchema.static("getRoomCount", async function (user: User | Snowflake) {
     return (await this.getVisitedRooms(user)).length;
 });
 
-RoomSchema.static("getParticipantRooms", async function (user: User | Snowflake) {
+RoomSchema.static("getParticipantRooms", async function (user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]) {
     if (user instanceof User) {
         user = user.id;
     }
-    return (await filterAsync(await this.find(), async x => await x.wasParticipating(user))).map(x => x.toObject<Room>());
+    return (await filterAsync(rooms ?? await this.find(), async x => await x.wasParticipating(user))).map(x => x.toObject<Room>());
 });
 
-RoomSchema.static("getParticipantRoomCount", async function (user: User | Snowflake) {
-    return (await this.getParticipantRooms(user)).length;
+RoomSchema.static("getParticipantRoomCount", async function (user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]) {
+    return (await this.getParticipantRooms(user, rooms)).length;
 });
 
 // Default export

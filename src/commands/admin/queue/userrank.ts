@@ -49,6 +49,7 @@ const command: Command = {
         // await g.members.fetch();
 
         const fields: EmbedFieldData[] = [];
+        const rooms = await RoomSchema.find({});
         for (const u of
             (
                 await Promise.all(
@@ -56,13 +57,13 @@ const command: Command = {
                         .map(async x => (
                             {
                                 _id: x._id,
-                                roomCount: await RoomSchema.getParticipantRoomCount(x._id),
+                                roomCount: await RoomSchema.getParticipantRoomCount(x._id, rooms),
                             }
                         )))
             )
                 .sort((x, y) => x.roomCount - y.roomCount).slice(0, 10)
         ) {
-            console.log(u._id);
+            // console.log(u._id);
             const member = await g.members.fetch(u._id);
             const roomCount = await RoomSchema.getParticipantRoomCount(u._id);
 
