@@ -32,6 +32,8 @@ const command: Command = {
             return;
         }
 
+        await interaction.deferReply();
+
         const g = interaction.guild!;
         const guildData = (await GuildSchema.findById(g.id));
         if (!guildData) {
