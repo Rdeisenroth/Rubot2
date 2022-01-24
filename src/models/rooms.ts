@@ -5,6 +5,7 @@ import UserSchema from "./users";
 import { sessionRole } from "./sessions";
 import { Channel } from "./text_channels";
 import { Snowflake, User } from "discord.js";
+import { filterAsync } from "../utils/general";
 
 export interface Room extends Channel {
     /**
@@ -200,7 +201,7 @@ RoomSchema.static("getParticipantRooms", async function (user: User | Snowflake)
     if (user instanceof User) {
         user = user.id;
     }
-    return (await this.find()).filter(async x => await x.wasParticipating(user)).map(x => x.toObject<Room>());
+    return (await filterAsync(await this.find(), async x => await x.wasParticipating(user))).map(x => x.toObject<Room>());
 });
 
 RoomSchema.static("getParticipantRoomCount", async function (user: User | Snowflake) {

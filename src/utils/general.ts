@@ -269,4 +269,17 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     }
 
     return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System", text: "Your Discord-Account has been verified.", empheral: true });
+
+}
+
+export async function filterAsync<T>(array: readonly T[], callback: (value: T, index: number) => Promise<boolean>): Promise<T[]> {
+    checkArgument(array, "array");
+    checkArgument(callback, "callback");
+    const results = await Promise.all(array.map((value, index) => callback(value, index)));
+    return array.filter((_, i) => results[i]);
+}
+function checkArgument(value: unknown, name: string) {
+    if (!value) {
+        throw new Error(`The argument "${name}" cannot be empty`);
+    }
 }
