@@ -2,7 +2,7 @@ import { EmbedFieldData, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
-import UserSchema, { UserDocument } from "../../../models/users";
+import UserSchema, { User, UserDocument } from "../../../models/users";
 import SessionSchema from "../../../models/sessions";
 import QueueSchema from "../../../models/queues";
 import { FilterQuery } from "mongoose";
@@ -33,6 +33,10 @@ const command: Command = {
                     name: "discord-id",
                     value: "discord-id",
                 },
+                {
+                    name: "discord-tag",
+                    value: "discord-tag",
+                },
             ],
         },
         {
@@ -55,14 +59,25 @@ const command: Command = {
         const type = interaction.options.getString("type", true);
         const query = interaction.options.getString("query", true);
         let userQuery: FilterQuery<UserDocument> = {};
-        if (type === "tu-id") {
-            userQuery = { tu_id: query };
-        } else if (type === "moodle-id") {
-            userQuery = { moodle_id: query };
+        let userData: (User & { _id: string; }) | undefined;
+        if (type === "discord-tag") {
+            const members = await interaction.guild?.members.fetch();
+            const member = members?.find(x => x.user.tag === query);
+            userData = {
+                _id: member?.id ?? "",
+                server_roles: [],
+                sessions: [],
+            };
         } else {
-            userQuery = { _id: query };
+            if (type === "tu-id") {
+                userQuery = { tu_id: query };
+            } else if (type === "moodle-id") {
+                userQuery = { moodle_id: query };
+            } else {
+                userQuery = { _id: query };
+            }
+            userData = (await UserSchema.findOne(userQuery))?.toObject<User & { _id: string }>();
         }
-        const userData = await UserSchema.findOne(userQuery);
         // user = await user.fetch();
 
         if (!userData) {

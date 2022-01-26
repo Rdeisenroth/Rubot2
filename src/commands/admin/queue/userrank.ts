@@ -55,7 +55,7 @@ const command: Command = {
                 await Promise.all(
                     (await UserSchema.find())
                         .map(async (x, i, a) => {
-                            console.log(`Processing User data of ${x._id} (${i}/${a.length})`)
+                            console.log(`Processing User data of ${x._id} (${i}/${a.length})`);
                             return {
                                 _id: x._id,
                                 roomCount: await RoomSchema.getParticipantRoomCount(x._id, rooms),
