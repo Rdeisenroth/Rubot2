@@ -242,7 +242,7 @@ export class Bot extends Client {
             ),
         ];
         const job = new CronJob("*/30 * * * * *", async () => {
-            // console.log(new Date().toLocaleString());
+            console.log(new Date().toLocaleString());
             let guildData = await GuildSchema.findById("855035619843112960");
             // let guildData = await GuildSchema.findById("899678380251816036");
             if (!guildData) {
@@ -258,7 +258,7 @@ export class Bot extends Client {
                 console.log(origState ? "Unlocked Queue" : "Locked Queue");
                 return await this.utils.embeds.SimpleEmbed((await this.channels.fetch("879701388354019388")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
             } else {
-                // console.log(`queue Still ${queueData.locked}`);
+                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
             }
         }, null, true, "America/Los_Angeles");
         job.start();
