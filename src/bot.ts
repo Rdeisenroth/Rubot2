@@ -15,7 +15,7 @@ export enum QueueStayOptions {
      */
     LEFT,
 }
-import { Client, Collection, TextChannel } from "discord.js";
+import { Client, Collection, TextChannel, VoiceChannel } from "discord.js";
 import consola, { Consola } from "consola";
 import cron, { CronJob } from "cron";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
@@ -159,7 +159,7 @@ export class Bot extends Client {
 
         // Check for queue Timestamps
         // TODO: not hardcode
-        const openShift = -1*1000 * 60 * 15; // 15 Minuten Vorlauf
+        const openShift = -1 * 1000 * 60 * 15; // 15 Minuten Vorlauf
         const closeShift = 0;
         /**
          * Times for opening the queue
@@ -243,8 +243,8 @@ export class Bot extends Client {
         ];
         const job = new CronJob("*/30 * * * * *", async () => {
             console.log(new Date().toLocaleString());
+
             let guildData = await GuildSchema.findById("855035619843112960");
-            // let guildData = await GuildSchema.findById("899678380251816036");
             if (!guildData) {
                 return;
             }
@@ -256,12 +256,68 @@ export class Bot extends Client {
                 let origState = queueData.locked;
                 await queueData.toggleLock();
                 console.log(origState ? "Unlocked Queue" : "Locked Queue");
-                return await this.utils.embeds.SimpleEmbed((await this.channels.fetch("879701388354019388")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("879701388354019388")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                try {
+                    queueData.getWaitingRooms(guildData).forEach(async x => {
+                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
+                    });
+                } catch (error) {
+                    return;
+                }
             } else {
                 console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
             }
+            try {
+                console.log(queueData.locked);
+                queueData.getWaitingRooms(guildData).forEach(async x => {
+                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
+                });
+            } catch (error) {
+                return;
+            }
         }, null, true, "America/Los_Angeles");
         job.start();
+
+        const job2 = new CronJob("*/30 * * * * *", async () => {
+            // console.log(new Date().toLocaleString());
+
+            let guildData = await GuildSchema.findById("899678380251816036");
+            if (!guildData) {
+                return;
+            }
+            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "team1".toLowerCase());
+            if (!queueData) {
+                return;
+            }
+            if (queue_stamps.some(x => x.isActive(new Date())) === queueData.locked) {
+                let origState = queueData.locked;
+                await queueData.toggleLock();
+                console.log(origState ? "Unlocked Queue" : "Locked Queue");
+                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("899678381082300522")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                try {
+                    queueData.getWaitingRooms(guildData).forEach(async x => {
+                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
+                    });
+                } catch (error) {
+                    return;
+                }
+            } else {
+                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
+            }
+            try {
+                console.log(queueData.locked);
+                queueData.getWaitingRooms(guildData).forEach(async x => {
+                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
+                });
+            } catch (error) {
+                return;
+            }
+        }, null, true, "America/Los_Angeles");
+        job2.start();
     }
 
 

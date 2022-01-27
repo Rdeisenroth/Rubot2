@@ -128,22 +128,46 @@ export interface VoiceChannelDocument extends VoiceChannel, Omit<mongoose.Docume
      * Locks or Unlocks the Voice Channel (opposite State).
      */
     toggleLock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    /**
+     * Sync The VC-Permissions with the Database
+     * @param channel The Channel to Sync
+     * @param roleId The ROle ID
+     * @returns true, if changes occured
+     */
+    syncPermissions(channel: djs.VoiceChannel, roleId?: string | undefined, lockOverwrite?: boolean): Promise<boolean>;
 }
 
 export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> {
 
 }
 
+VoiceChannelSchema.method("syncPermissions", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake, lockOverwrite?: boolean) {
+    lockOverwrite = lockOverwrite ?? this.locked;
+    const actual_permissions = channel.permissionOverwrites.cache.get(roleId ?? channel.guild.roles.everyone.id);
+    if (!actual_permissions
+        || (lockOverwrite && !(actual_permissions.allow.has("VIEW_CHANNEL") && actual_permissions.deny.has("CONNECT")))
+        || (!lockOverwrite && !(actual_permissions.allow.has("VIEW_CHANNEL") && actual_permissions.allow.has("CONNECT")))
+        || (!this.queue && !actual_permissions.allow.has("SPEAK"))
+        || (this.queue && !actual_permissions.deny.has("SPEAK"))
+    ) {
+        // Update roles
+        await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": !lockOverwrite, "SPEAK": !this.queue });
+        return true;
+    } else {
+        return false;
+    }
+});
+
 VoiceChannelSchema.method("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "CONNECT": false, "SPEAK": false });
     this.locked = true;
     await this.$parent()?.save();
+    await this.syncPermissions(channel, roleId);
 });
 
 VoiceChannelSchema.method("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": !this.queue });
     this.locked = false;
     await this.$parent()?.save();
+    await this.syncPermissions(channel, roleId);
 });
 
 VoiceChannelSchema.method("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
