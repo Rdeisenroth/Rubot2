@@ -159,7 +159,7 @@ export class Bot extends Client {
 
         // Check for queue Timestamps
         // TODO: not hardcode
-        const openShift = 1000 * 60 * 15; // 15 Minuten Vorlauf
+        const openShift = -1*1000 * 60 * 15; // 15 Minuten Vorlauf
         const closeShift = 0;
         /**
          * Times for opening the queue
