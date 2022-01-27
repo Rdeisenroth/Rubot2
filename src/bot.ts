@@ -15,16 +15,19 @@ export enum QueueStayOptions {
      */
     LEFT,
 }
-import { Client, Collection } from "discord.js";
+import { Client, Collection, TextChannel } from "discord.js";
 import consola, { Consola } from "consola";
+import cron, { CronJob } from "cron";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
 import glob from "glob";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
+import GuildSchema from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
+import G from "glob";
 const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
@@ -46,6 +49,7 @@ export class Bot extends Client {
     public parser = parser;
     public database = mongoose;
     public readonly initTimestamp = Date.now();
+    public jobs: CronJob[] = [];
     public constructor() {
         super({
             intents: [
@@ -152,9 +156,207 @@ export class Bot extends Client {
             console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
             this.on(event.name, event.execute.bind(null, this));
         });
+
+        // Check for queue Timestamps
+        // TODO: not hardcode
+        const openShift = 1000 * 60 * 15; // 15 Minuten Vorlauf
+        const closeShift = 0;
+        /**
+         * Times for opening the queue
+         */
+        const queue_stamps: QueueSpan[] = [
+            // Montag
+            new QueueSpan(
+                new WeekTimestamp(Weekday.MONDAY, 11, 40),
+                new WeekTimestamp(Weekday.MONDAY, 13, 20),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.MONDAY, 16, 15),
+                new WeekTimestamp(Weekday.MONDAY, 17, 55),
+                openShift,
+                closeShift,
+            ),
+            // Dienstag
+            new QueueSpan(
+                new WeekTimestamp(Weekday.TUESDAY, 9, 50),
+                new WeekTimestamp(Weekday.TUESDAY, 11, 30),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.TUESDAY, 16, 15),
+                new WeekTimestamp(Weekday.TUESDAY, 17, 55),
+                openShift,
+                closeShift,
+            ),
+            // Mittwoch
+            new QueueSpan(
+                new WeekTimestamp(Weekday.WEDNESDAY, 11, 40),
+                new WeekTimestamp(Weekday.WEDNESDAY, 13, 20),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.WEDNESDAY, 18, 5),
+                new WeekTimestamp(Weekday.WEDNESDAY, 19, 55),
+                openShift,
+                closeShift,
+            ),
+            // Donnerstag
+            // new QueueSpan(
+            //     new WeekTimestamp(Weekday.THURSDAY, 3, 51),
+            //     new WeekTimestamp(Weekday.THURSDAY, 3, 52),
+            // ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.THURSDAY, 11, 40),
+                new WeekTimestamp(Weekday.THURSDAY, 13, 20),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.THURSDAY, 16, 15),
+                new WeekTimestamp(Weekday.THURSDAY, 17, 55),
+                openShift,
+                closeShift,
+            ),
+            // Friday
+            new QueueSpan(
+                new WeekTimestamp(Weekday.FRIDAY, 9, 50),
+                new WeekTimestamp(Weekday.FRIDAY, 11, 30),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.FRIDAY, 13, 30),
+                new WeekTimestamp(Weekday.FRIDAY, 15, 10),
+                openShift,
+                closeShift,
+            ),
+            new QueueSpan(
+                new WeekTimestamp(Weekday.FRIDAY, 18, 5),
+                new WeekTimestamp(Weekday.FRIDAY, 19, 55),
+                openShift,
+                closeShift,
+            ),
+        ];
+        const job = new CronJob("*/30 * * * * *", async () => {
+            // console.log(new Date().toLocaleString());
+            let guildData = await GuildSchema.findById("855035619843112960");
+            // let guildData = await GuildSchema.findById("899678380251816036");
+            if (!guildData) {
+                return;
+            }
+            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "FOP-Sprechstunde".toLowerCase());
+            if (!queueData) {
+                return;
+            }
+            if (queue_stamps.some(x => x.isActive(new Date())) === queueData.locked) {
+                let origState = queueData.locked;
+                await queueData.toggleLock();
+                console.log(origState ? "Unlocked Queue" : "Locked Queue");
+                return await this.utils.embeds.SimpleEmbed((await this.channels.fetch("879701388354019388")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+            } else {
+                // console.log(`queue Still ${queueData.locked}`);
+            }
+        }, null, true, "America/Los_Angeles");
+        job.start();
     }
+
 
     // public async createGuildCommand(data:any, guildId:string) {
     //     return await this.api.appl
     // }
+}
+
+
+export enum Weekday {
+    /**
+     * Sonntag
+     */
+    SUNDAY = 0,
+    /**
+     * Montag
+     */
+    MONDAY = 1,
+    /**
+     * Dienstag
+     */
+    TUESDAY = 2,
+    /**
+     * Mittwoch
+     */
+    WEDNESDAY = 3,
+    /**
+     * Donnerstag
+     */
+    THURSDAY = 4,
+    /**
+     * Freitag
+     */
+    FRIDAY = 5,
+    /**
+     * Samstag
+     */
+    SATURDAY = 6,
+}
+
+/**
+ * A Timestamp of the queue
+ */
+export class WeekTimestamp {
+    constructor(
+        /**
+         * The Day of the Week
+         */
+        public weekday: Weekday,
+        /**
+         * The Hour of the Day
+         */
+        public hour: number,
+        /**
+         * The Minute of the Hour
+         */
+        public minute: number,
+    ) {
+
+    }
+    /**
+     * returns the weektime in ms
+     * @returns The WeekTime in ms
+     */
+    public getTime(): number {
+        return this.minute * 1000 * 60 + this.hour * 1000 * 60 * 60 + this.weekday * 1000 * 60 * 60 * 24;
+    }
+
+    /**
+     * Returns a Relative Weekdate
+     * @param date The Date to convert
+     * @returns The created WeekTimestamp
+     */
+    public static fromDate(date: Date) {
+        return new WeekTimestamp(date.getDay(), date.getHours(), date.getMinutes());
+    }
+}
+
+/**
+ * A Queue Span
+ */
+export class QueueSpan {
+    /**
+     * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
+     * @param begin The Begin Timestamp
+     * @param end The End Timestamp
+     */
+    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0) {
+
+    }
+
+    public isActive(date: Date) {
+        const cur = WeekTimestamp.fromDate(date).getTime();
+        const begin = this.begin.getTime() + this.openShift;
+        const end = this.end.getTime() + this.closeShift;
+        return cur >= begin && cur <= end;
+    }
 }

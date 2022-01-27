@@ -54,7 +54,7 @@ const command: Command = {
             fields.push({
                 name: member.displayName, value:
                     `-Mention: ${member}`
-                    + `-Position: ${position}`
+                    + `\n-Position: ${position}`
                     + `\n-joined at: ${joined_at}`
                     + (intent ? `\n-intent: ${intent}` : ""),
             });
