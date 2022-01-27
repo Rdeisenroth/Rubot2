@@ -52,7 +52,7 @@ const command: Command = {
             const intent = e.intent;
             const member = await g.members.fetch(e.discord_id);
             fields.push({
-                name: member.displayName, value:
+                name: member.toString(), value:
                     `-Position: ${position}`
                     + `\n-joined at: ${joined_at}`
                     + (intent ? `\n-intent: ${intent}` : ""),
