@@ -22,23 +22,27 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
 
     // allow for Supervisors to see, join and edit the channel
     for (const i of options.supervisor_roles) {
-        permoverrides.push({
-            id: i,
-            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
-        });
+        if (await guild.roles.fetch(i) || await guild.members.fetch(i)) {
+            permoverrides.push({
+                id: i,
+                allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
+            });
+        }
     }
 
     // Lock?
     if (options.lock_initially) {
         permoverrides.push({
-            id: guild.roles.everyone.id, deny: ["CONNECT", "SPEAK"],
+            id: guild.roles.everyone.id,
+            deny: ["CONNECT", "SPEAK"],
         });
     }
 
     // Hide?
     if (options.hide_initially) {
         permoverrides.push({
-            id: guild.roles.everyone.id, deny: ["VIEW_CHANNEL"],
+            id: guild.roles.everyone.id,
+            deny: ["VIEW_CHANNEL"],
         });
     }
 
