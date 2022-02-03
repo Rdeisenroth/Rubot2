@@ -283,3 +283,112 @@ function checkArgument(value: unknown, name: string) {
         throw new Error(`The argument "${name}" cannot be empty`);
     }
 }
+
+
+/**
+ * The Possible Annotations for queue Stayings
+ */
+export enum QueueStayOptions {
+    /**
+     * Annotates that a queue State Decision is Pending
+     */
+    PENDING,
+    /**
+     * Annotates a stay
+     */
+    STAY,
+    /**
+     * Annotates user already left
+     */
+    LEFT,
+}
+
+export enum Weekday {
+    /**
+     * Sonntag
+     */
+    SUNDAY = 0,
+    /**
+     * Montag
+     */
+    MONDAY = 1,
+    /**
+     * Dienstag
+     */
+    TUESDAY = 2,
+    /**
+     * Mittwoch
+     */
+    WEDNESDAY = 3,
+    /**
+     * Donnerstag
+     */
+    THURSDAY = 4,
+    /**
+     * Freitag
+     */
+    FRIDAY = 5,
+    /**
+     * Samstag
+     */
+    SATURDAY = 6,
+}
+
+/**
+ * A Timestamp of the queue
+ */
+export class WeekTimestamp {
+    constructor(
+        /**
+         * The Day of the Week
+         */
+        public weekday: Weekday,
+        /**
+         * The Hour of the Day
+         */
+        public hour: number,
+        /**
+         * The Minute of the Hour
+         */
+        public minute: number,
+    ) {
+
+    }
+    /**
+     * returns the weektime in ms
+     * @returns The WeekTime in ms
+     */
+    public getTime(): number {
+        return this.minute * 1000 * 60 + this.hour * 1000 * 60 * 60 + this.weekday * 1000 * 60 * 60 * 24;
+    }
+
+    /**
+     * Returns a Relative Weekdate
+     * @param date The Date to convert
+     * @returns The created WeekTimestamp
+     */
+    public static fromDate(date: Date) {
+        return new WeekTimestamp(date.getDay(), date.getHours(), date.getMinutes());
+    }
+}
+
+/**
+ * A Queue Span
+ */
+export class QueueSpan {
+    /**
+     * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
+     * @param begin The Begin Timestamp
+     * @param end The End Timestamp
+     */
+    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0) {
+
+    }
+
+    public isActive(date: Date) {
+        const cur = WeekTimestamp.fromDate(date).getTime();
+        const begin = this.begin.getTime() + this.openShift;
+        const end = this.end.getTime() + this.closeShift;
+        return cur >= begin && cur <= end;
+    }
+}

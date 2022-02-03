@@ -74,7 +74,7 @@ const command: Command = {
         if (!spawner) {
             spawner = {
                 owner: user.id,
-                supervisor_roles: [], // TODO
+                supervisor_roles: queue_channel_data?.supervisors ?? [],
                 permission_overwrites: [
                     ...entries.map(x => {
                         return {
@@ -94,6 +94,7 @@ const command: Command = {
             // await guildData.save();
         } else {
             spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
+            spawner.owner = user.id;
             spawner.name = `${member.displayName}s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
             spawner.permission_overwrites = [
                 ...entries.map(x => {

@@ -18,12 +18,12 @@ const command: Command = {
             type: "USER",
             required: true,
         },
-        {
-            name: "current",
-            description: "Add to current Room?",
-            type: "BOOLEAN",
-            required: true,
-        },
+        // {
+        //     name: "current",
+        //     description: "Add to current Room?",
+        //     type: "BOOLEAN",
+        //     required: true,
+        // },
     ],
     guildOnly: true,
     execute: async (client, interaction, args) => {
@@ -68,15 +68,16 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Queue is Empty", empheral: true });
         }
 
-        const pickedUser = interaction.options.getUser("amount", true);
+        const pickedUser = interaction.options.getUser("member", true);
 
         if (!queueData.contains(pickedUser.id)) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: "The Picked User is not in the Queue", empheral: true });
         }
 
-        let queueEntry = queueData.getEntry(pickedUser.id)!;
+        const queueEntry = queueData.getEntry(pickedUser.id)!;
 
-        let add_to_current = interaction.options.getBoolean("current", true);
+        // const add_to_current = interaction.options.getBoolean("current", true);
+        const add_to_current = false;
 
         if (!add_to_current) {
 

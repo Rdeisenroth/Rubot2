@@ -2,7 +2,6 @@ import { Message } from "discord.js";
 import moment from "moment";
 import path from "path";
 import { Command } from "../../../typings";
-import { QueueStayOptions } from "../../bot";
 import GuildSchema from "../../models/guilds";
 
 const command: Command = {
@@ -36,8 +35,8 @@ const command: Command = {
         await queueData.leave(user.id);
 
 
-        if (client.queue_stays.get(user.id)?.get(queueData._id!.toHexString()) === QueueStayOptions.PENDING) {
-            client.queue_stays.get(user.id)!.set(queueData._id!.toHexString(), QueueStayOptions.LEFT);
+        if (client.queue_stays.get(user.id)?.get(queueData._id!.toHexString()) === client.utils.general.QueueStayOptions.PENDING) {
+            client.queue_stays.get(user.id)!.set(queueData._id!.toHexString(), client.utils.general.QueueStayOptions.LEFT);
         }
 
         try {

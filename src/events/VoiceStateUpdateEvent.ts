@@ -9,7 +9,6 @@ export const name = "voiceStateUpdate";
 import RoomSchema from "../models/rooms";
 import UserSchema from "../models/users";
 import EventSchema, { Event as EVT, eventType } from "../models/events";
-import { QueueStayOptions } from "../bot";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;
@@ -52,8 +51,8 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 let queueEntry: QueueEntry;
                 try {
                     if (queue.contains(newState.member!.id)) {
-                        if (client.queue_stays.get(newState.member!.id)?.get(queueId.toHexString()) === QueueStayOptions.PENDING) {
-                            client.queue_stays.get(newState.member!.id)!.set(queue._id!.toHexString(), QueueStayOptions.STAY);
+                        if (client.queue_stays.get(newState.member!.id)?.get(queueId.toHexString()) === client.utils.general.QueueStayOptions.PENDING) {
+                            client.queue_stays.get(newState.member!.id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.STAY);
                             await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), {
                                 title: "Queue System", text: "You stayed in the queue.", components: [
                                     new MessageActionRow(
@@ -213,12 +212,12 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             client.queue_stays.set(member_id, new Collection());
                         }
 
-                        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), QueueStayOptions.PENDING);
+                        client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.PENDING);
                         // Create Timer
                         setTimeout(async () => {
                             let queue_stays = client.queue_stays.get(member_id)?.get(queue._id!.toHexString());
                             client.queue_stays.get(member_id)?.delete(queue._id!.toHexString());
-                            if (queue_stays !== QueueStayOptions.PENDING) {
+                            if (queue_stays !== client.utils.general.QueueStayOptions.PENDING) {
                                 return;
                             }
                             const leave_msg = queue.getLeaveMessage(member_id);

@@ -104,7 +104,7 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
     // }
     spawner.permission_overwrites.push({
         id: member.id,
-        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MANAGE_CHANNELS", "KICK_MEMBERS"],
     });
 
     spawner.name = name;

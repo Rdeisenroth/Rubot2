@@ -1,20 +1,3 @@
-/**
- * The Possible Annotations for queue Stayings
- */
-export enum QueueStayOptions {
-    /**
-     * Annotates that a queue State Decision is Pending
-     */
-    PENDING,
-    /**
-     * Annotates a stay
-     */
-    STAY,
-    /**
-     * Annotates user already left
-     */
-    LEFT,
-}
 import { Client, Collection, TextChannel, VoiceChannel } from "discord.js";
 import consola, { Consola } from "consola";
 import cron, { CronJob } from "cron";
@@ -41,7 +24,7 @@ export class Bot extends Client {
      * @type {Collection<string, Collection<string, QueueStayOptions>>} A Collection of Queue Stays
      * @memberof Bot
      */
-    public queue_stays: Collection<string, Collection<string, QueueStayOptions>> = new Collection();
+    public queue_stays: Collection<string, Collection<string, utils.general.QueueStayOptions>> = new Collection();
     public ownerID?: string;
     public prefix = "!";
     public version = "0.0";
@@ -164,43 +147,43 @@ export class Bot extends Client {
         /**
          * Times for opening the queue
          */
-        const queue_stamps: QueueSpan[] = [
+        const queue_stamps: utils.general.QueueSpan[] = [
             // Montag
-            new QueueSpan(
-                new WeekTimestamp(Weekday.MONDAY, 11, 40),
-                new WeekTimestamp(Weekday.MONDAY, 13, 20),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 11, 40),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 13, 20),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.MONDAY, 16, 15),
-                new WeekTimestamp(Weekday.MONDAY, 17, 55),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 16, 15),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 55),
                 openShift,
                 closeShift,
             ),
             // Dienstag
-            new QueueSpan(
-                new WeekTimestamp(Weekday.TUESDAY, 9, 50),
-                new WeekTimestamp(Weekday.TUESDAY, 11, 30),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 9, 50),
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 11, 30),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.TUESDAY, 16, 15),
-                new WeekTimestamp(Weekday.TUESDAY, 17, 55),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 16, 15),
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 55),
                 openShift,
                 closeShift,
             ),
             // Mittwoch
-            new QueueSpan(
-                new WeekTimestamp(Weekday.WEDNESDAY, 11, 40),
-                new WeekTimestamp(Weekday.WEDNESDAY, 13, 20),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 11, 40),
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 13, 20),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.WEDNESDAY, 18, 5),
-                new WeekTimestamp(Weekday.WEDNESDAY, 19, 55),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 18, 5),
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 19, 55),
                 openShift,
                 closeShift,
             ),
@@ -209,34 +192,34 @@ export class Bot extends Client {
             //     new WeekTimestamp(Weekday.THURSDAY, 3, 51),
             //     new WeekTimestamp(Weekday.THURSDAY, 3, 52),
             // ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.THURSDAY, 11, 40),
-                new WeekTimestamp(Weekday.THURSDAY, 13, 20),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 11, 40),
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 13, 20),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.THURSDAY, 16, 15),
-                new WeekTimestamp(Weekday.THURSDAY, 17, 55),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 16, 15),
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 55),
                 openShift,
                 closeShift,
             ),
             // Friday
-            new QueueSpan(
-                new WeekTimestamp(Weekday.FRIDAY, 9, 50),
-                new WeekTimestamp(Weekday.FRIDAY, 11, 30),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 9, 50),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 11, 30),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.FRIDAY, 13, 30),
-                new WeekTimestamp(Weekday.FRIDAY, 15, 10),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 13, 30),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 15, 10),
                 openShift,
                 closeShift,
             ),
-            new QueueSpan(
-                new WeekTimestamp(Weekday.FRIDAY, 18, 5),
-                new WeekTimestamp(Weekday.FRIDAY, 19, 55),
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 18, 5),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 19, 55),
                 openShift,
                 closeShift,
             ),
@@ -324,95 +307,4 @@ export class Bot extends Client {
     // public async createGuildCommand(data:any, guildId:string) {
     //     return await this.api.appl
     // }
-}
-
-
-export enum Weekday {
-    /**
-     * Sonntag
-     */
-    SUNDAY = 0,
-    /**
-     * Montag
-     */
-    MONDAY = 1,
-    /**
-     * Dienstag
-     */
-    TUESDAY = 2,
-    /**
-     * Mittwoch
-     */
-    WEDNESDAY = 3,
-    /**
-     * Donnerstag
-     */
-    THURSDAY = 4,
-    /**
-     * Freitag
-     */
-    FRIDAY = 5,
-    /**
-     * Samstag
-     */
-    SATURDAY = 6,
-}
-
-/**
- * A Timestamp of the queue
- */
-export class WeekTimestamp {
-    constructor(
-        /**
-         * The Day of the Week
-         */
-        public weekday: Weekday,
-        /**
-         * The Hour of the Day
-         */
-        public hour: number,
-        /**
-         * The Minute of the Hour
-         */
-        public minute: number,
-    ) {
-
-    }
-    /**
-     * returns the weektime in ms
-     * @returns The WeekTime in ms
-     */
-    public getTime(): number {
-        return this.minute * 1000 * 60 + this.hour * 1000 * 60 * 60 + this.weekday * 1000 * 60 * 60 * 24;
-    }
-
-    /**
-     * Returns a Relative Weekdate
-     * @param date The Date to convert
-     * @returns The created WeekTimestamp
-     */
-    public static fromDate(date: Date) {
-        return new WeekTimestamp(date.getDay(), date.getHours(), date.getMinutes());
-    }
-}
-
-/**
- * A Queue Span
- */
-export class QueueSpan {
-    /**
-     * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
-     * @param begin The Begin Timestamp
-     * @param end The End Timestamp
-     */
-    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0) {
-
-    }
-
-    public isActive(date: Date) {
-        const cur = WeekTimestamp.fromDate(date).getTime();
-        const begin = this.begin.getTime() + this.openShift;
-        const end = this.end.getTime() + this.closeShift;
-        return cur >= begin && cur <= end;
-    }
 }

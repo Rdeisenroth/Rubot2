@@ -1,6 +1,5 @@
 import { Collection, MessageEmbed } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import { QueueStayOptions } from "../../../bot";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
 
@@ -29,8 +28,8 @@ const command: ButtonInteraction = {
 
         const member_id = interaction.user.id;
 
-        if (client.queue_stays.get(member_id)?.get(queue._id!.toHexString()) === QueueStayOptions.PENDING) {
-            client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), QueueStayOptions.LEFT);
+        if (client.queue_stays.get(member_id)?.get(queue._id!.toHexString()) === client.utils.general.QueueStayOptions.PENDING) {
+            client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.LEFT);
         }
 
 
