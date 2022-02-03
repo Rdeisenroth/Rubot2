@@ -90,7 +90,7 @@ const command: Command = {
             if (!spawner) {
                 spawner = {
                     owner: user.id,
-                    supervisor_roles: [], // TODO
+                    supervisor_roles: queue_channel_data?.supervisors ?? [],
                     permission_overwrites: [
                         {
                             id: pickedUser.id,
@@ -105,6 +105,16 @@ const command: Command = {
                 console.log(spawner.parent);
                 // queueData.set("room_spawner", spawner);
                 // await guildData.save();
+            } else {
+                spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
+                spawner.owner = user.id;
+                spawner.name = `${member.displayName}s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+                spawner.permission_overwrites = [
+                    {
+                        id: pickedUser.id,
+                        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                    } as PermissionOverwriteData,
+                ];
             }
 
             // Spawn Room
@@ -140,7 +150,7 @@ const command: Command = {
                 if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                     await member.roles.remove(waiting_role);
                 }
-                
+
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
