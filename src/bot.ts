@@ -150,79 +150,79 @@ export class Bot extends Client {
         const queue_stamps: utils.general.QueueSpan[] = [
             // Montag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 11, 40),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 13, 20),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 14, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 0),
                 openShift,
                 closeShift,
             ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 16, 15),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 55),
-                openShift,
-                closeShift,
-            ),
-            // Dienstag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 9, 50),
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 11, 30),
-                openShift,
-                closeShift,
-            ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 16, 15),
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 55),
-                openShift,
-                closeShift,
-            ),
-            // Mittwoch
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 11, 40),
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 13, 20),
-                openShift,
-                closeShift,
-            ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 18, 5),
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 19, 55),
-                openShift,
-                closeShift,
-            ),
-            // Donnerstag
-            // new QueueSpan(
-            //     new WeekTimestamp(Weekday.THURSDAY, 3, 51),
-            //     new WeekTimestamp(Weekday.THURSDAY, 3, 52),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 16, 15),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 55),
+            //     openShift,
+            //     closeShift,
             // ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 11, 40),
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 13, 20),
-                openShift,
-                closeShift,
-            ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 16, 15),
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 55),
-                openShift,
-                closeShift,
-            ),
-            // Friday
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 9, 50),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 11, 30),
-                openShift,
-                closeShift,
-            ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 13, 30),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 15, 10),
-                openShift,
-                closeShift,
-            ),
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 18, 5),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 19, 55),
-                openShift,
-                closeShift,
-            ),
+            // // Dienstag
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 9, 50),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 11, 30),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 16, 15),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 55),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // // Mittwoch
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 11, 40),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 13, 20),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 18, 5),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 19, 55),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // // Donnerstag
+            // // new QueueSpan(
+            // //     new WeekTimestamp(Weekday.THURSDAY, 3, 51),
+            // //     new WeekTimestamp(Weekday.THURSDAY, 3, 52),
+            // // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 11, 40),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 13, 20),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 16, 15),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 55),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // // Friday
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 9, 50),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 11, 30),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 13, 30),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 15, 10),
+            //     openShift,
+            //     closeShift,
+            // ),
+            // new utils.general.QueueSpan(
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 18, 5),
+            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 19, 55),
+            //     openShift,
+            //     closeShift,
+            // ),
         ];
         const job = new CronJob("*/30 * * * * *", async () => {
             console.log(new Date().toLocaleString());
