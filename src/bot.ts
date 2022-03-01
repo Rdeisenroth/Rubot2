@@ -150,8 +150,8 @@ export class Bot extends Client {
         const queue_stamps: utils.general.QueueSpan[] = [
             // Montag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 14, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 23, 59),
                 openShift,
                 closeShift,
             ),
