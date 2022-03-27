@@ -20,7 +20,7 @@ import UserSchema from "../models/users";
 export const isArraywithContent = (variable: any) => Array.isArray(variable) && (!!variable.length) && (variable.length > 0);
 
 /**
- * Gets a random Integer
+ * Generates a random integer between the given min and max
  *
  * @param min the minimum int
  * @param max the maximum int
@@ -35,7 +35,7 @@ export const getRandomInt = (min: number, max: number) => {
 /**
  * Counts the Amount of Digits after the Comma of a Number
  *
- * @param {Number} number
+ * @param {Number} number the number to count the digits of
  */
 export const countDigits = (number: number) => (Math.floor(number) === number) ? 0 : number.toString().split(".")[1].length;
 
@@ -143,7 +143,7 @@ export const interpolateString = (str: string, replacements?: StringReplacements
 
 /**
  * Sleeps for given amount of Time
- * @param msec the Sleep Duration in ms
+ * @param msec the Sleep Duration in milliseconds
  * @returns Nothing
  */
 export const sleep = async (msec: number) => {
@@ -272,12 +272,26 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
 
 }
 
+/**
+ * Asynchronously filters a given array by a given filter function
+ * @param array the array to be filtered asynchronously
+ * @param callback the asynchronous filter callback
+ * @returns the filtered array
+ */
 export async function filterAsync<T>(array: readonly T[], callback: (value: T, index: number) => Promise<boolean>): Promise<T[]> {
     checkArgument(array, "array");
     checkArgument(callback, "callback");
     const results = await Promise.all(array.map((value, index) => callback(value, index)));
     return array.filter((_, i) => results[i]);
 }
+
+/**
+ * Checks whether the given value is empty and Throws an Error with the given name if it is.  
+ * A value is considered empty if it is `null`, `undefined`, `0`, `""`, `false`, or an empty array or object.
+ * 
+ * @param value the value to check
+ * @param name the name of the value
+ */
 function checkArgument(value: unknown, name: string) {
     if (!value) {
         throw new Error(`The argument "${name}" cannot be empty`);
@@ -338,6 +352,13 @@ export enum Weekday {
  * A Timestamp of the queue
  */
 export class WeekTimestamp {
+
+    /**
+     * Creates a new WeekTimestamp
+     * @param weekday The current day of the week
+     * @param hour The current hour of the day
+     * @param minute The current minute of the hour
+     */
     constructor(
         /**
          * The Day of the Week
@@ -373,22 +394,131 @@ export class WeekTimestamp {
 }
 
 /**
- * A Queue Span
+ * A Queue Span - A Weekly Timespan with a start- and End Date that can be used to automate Events every week
  */
 export class QueueSpan {
     /**
      * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
      * @param begin The Begin Timestamp
      * @param end The End Timestamp
+     * @param openShift Shift the Opening by X millixeconds
+     * @param closeShift Shift the Closing by X milliseconds
+     * @param startDate limit the span to after this date
+     * @param endDate limit the span to before this date
      */
-    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0) {
+    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0, public startDate?: Date, public endDate?: Date) {
 
     }
 
-    public isActive(date: Date) {
-        const cur = WeekTimestamp.fromDate(date).getTime();
-        const begin = this.begin.getTime() + this.openShift;
-        const end = this.end.getTime() + this.closeShift;
-        return cur >= begin && cur <= end;
+    /**
+     * Checks whether the cycle has started at a given Date (or now if no date was given)
+     * @param date The Date to check
+     * @returns `true`, if the cycle has started at the given date
+     */
+    public cycleHasStarted(date = new Date()) {
+        return !this.startDate || date >= this.startDate;
+    }
+
+    /**
+     * Checks whether the cycle has ended at a given Date (or now if no date was given)
+     * @param date The Date to check
+     * @returns `true`, if the cycle has ended at the given date
+     */
+    public cycleHasEnded(date = new Date()) {
+        return this.endDate && date >= this.endDate;
+    }
+
+    /**
+     * Checks whether the cycle is active at a given Date (or now if no date was given)
+     * 
+     * @param date The Date to check
+     * @returns `true`, if the cycle is active at the given date
+     */
+    public cycleIsActive(date = new Date()) {
+        return this.cycleHasStarted(date) && !this.cycleHasEnded(date);
+    }
+
+    /**
+     * Returns the WeekTime of a given Date (or now if no date was given)
+     * 
+     * @param date The Date to check
+     * @returns the WeekTime of the given Date
+     */
+    private getWeekTime(date = new Date()) {
+        return WeekTimestamp.fromDate(date).getTime();
+    }
+
+    /**
+     * returns The Shifted begin Timestamp
+     * 
+     * @returns The Shifted begin Timestamp
+     */
+    private actualBeginTime() {
+        return this.begin.getTime() + this.openShift;
+    }
+
+    /**
+     * returns The Shifted end Timestamp
+     * 
+     * @returns The Shifted end Timestamp
+     */
+    private actualEndTime() {
+        return this.end.getTime() + this.closeShift;
+    }
+
+    /**
+     * Checks whether the span is active at a given Date (or now if no date was given)
+     * 
+     * @param date The Date to check
+     * @returns `true`, if the span is active at the given date
+     */
+    public isActive(date = new Date()) {
+        const cur = this.getWeekTime(date);
+        return this.cycleIsActive(date) && cur >= this.actualBeginTime() && cur <= this.actualEndTime();
+    }
+
+    /**
+     * A String representation of the span
+     * @returns A String representation of the current span
+     */
+    public toString() {
+        return `${this.begin.weekday} ${this.begin.hour}:${this.begin.minute} - ${this.end.weekday} ${this.end.hour}:${this.end.minute}`;
+    }
+
+    /**
+     * Creates a Queue Span from a String
+     * @param str the String to parse
+     * @returns The created Queue Span
+     * @throws An Error if the String could not be parsed
+     * @example
+     * ```
+     * const span = QueueSpan.fromString("MONDAY 08:00 - WEDNESDAY 16:00");
+     * ```
+     */
+    public static fromString(str: string) {
+        // Name capturing group 1: weekday
+        // Name capturing group 2: hour
+        // Name capturing group 3: minute
+        // Name capturing group 4: weekday 2
+        // Name capturing group 5: hour 2
+        // Name capturing group 6: minute 2
+        const regex = /^(?<weekday>\w+) (?<hour>\d+):(?<minute>\d+) - (?<weekday2>\w+) (?<hour2>\d+):(?<minute2>\d+)$/;
+        const match = regex.exec(str);
+        if (!match) {
+            throw new Error(`Invalid Queue Span String: ${str}`);
+        }
+
+        return new QueueSpan(
+            new WeekTimestamp(
+                Weekday[match.groups!.weekday.toUpperCase() as keyof typeof Weekday],
+                +match.groups!.hour,
+                +match.groups!.minute,
+            ),
+            new WeekTimestamp(
+                Weekday[match.groups!.weekday2.toUpperCase() as keyof typeof Weekday],
+                +match.groups!.hour2,
+                +match.groups!.minute2,
+            ),
+        );
     }
 }

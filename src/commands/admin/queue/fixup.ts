@@ -38,6 +38,7 @@ const command: Command = {
         }
 
         let faultyRoleCount = 0;
+        let as_faultyRoleCount = 0;
 
         const members = await g.members.fetch();
         const roles = await g.roles.fetch();
@@ -54,6 +55,25 @@ const command: Command = {
             if (!queueData.contains(m.id)) {
                 faultyRoleCount++;
                 await m.roles.remove(waiting_role);
+            }
+        });
+        const active_session_role: Role | undefined = roles.find(x => x.name.toLowerCase() === "aktive sprechstunde");
+        if (!active_session_role) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Active Session Role Could not be found.", empheral: true });
+        }
+        const as_role_members = members.filter(x => x.roles.cache.has(active_session_role.id));
+        if (!as_role_members) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Active Session Role Members Could not be found.", empheral: true });
+        }
+        const user = client.utils.general.getUser(interaction);
+        const userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
+        // Check if User has Active Sessions
+        const activeSessions = await userEntry.getActiveSessions();
+        const as_oldMemberCount = as_role_members.size;
+        active_session_role.members.forEach(async m => {
+            if (!queueData.contains(m.id)) {
+                as_faultyRoleCount++;
+                await m.roles.remove(active_session_role);
             }
         });
 
