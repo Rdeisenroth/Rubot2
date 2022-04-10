@@ -1,3 +1,4 @@
+import { QueueSpan } from "./../utils/general";
 import { GuildDocument } from "./guilds";
 import { VoiceChannelDocument } from "./voice_channels";
 import mongoose from "mongoose";
@@ -63,6 +64,14 @@ export interface Queue {
      * Whether the queue is locked (this also disables the /queue join command for this queue)
      */
     locked?: boolean,
+    /**
+     * Whether to automatically lock and unlock the queue according to the opening_times
+     */
+    auto_lock?: boolean,
+    /**
+     * The opening times of the Queue
+     */
+    opening_times: QueueSpan[],
     /**
      * The Entries of the Queue
      */

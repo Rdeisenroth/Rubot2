@@ -1,7 +1,11 @@
+import DBRoleSchema, { DBRole, DBRoleDocument } from "./bot_roles";
 import SlashCommandSettingsSchema, { SlashCommandSettings, SlashCommandSettingsDocument } from "./slash_command_settings";
 import { ApplicationCommandPermissionData } from "discord.js";
 import mongoose from "mongoose";
 
+/**
+ * Command Listen Modes
+ */
 export enum CommandListenMode {
     WHITELIST = 0,
     BLACKLIST = 1
@@ -21,7 +25,15 @@ export interface GuildSettings {
     /**
      * The Guild Specific command Settings
      */
-    slashCommands: SlashCommandSettings[]
+    slashCommands: SlashCommandSettings[],
+    /**
+     * The Guild Specific role Settings
+     */
+    roles?: DBRole[],
+    /**
+     * The User Account URL related to the guild
+     */
+    account_url?: string,
 }
 
 const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSettingsModel, GuildSettings>({
@@ -41,10 +53,16 @@ const GuildSettingsSchema = new mongoose.Schema<GuildSettingsDocument, GuildSett
         required: true,
         default: [],
     }],
+    roles: [{
+        type: DBRoleSchema,
+        required: false,
+        default: [],
+    }],
 });
 
 export interface GuildSettingsDocument extends GuildSettings, mongoose.Document<mongoose.Types.ObjectId> {
     slashCommands: mongoose.Types.DocumentArray<SlashCommandSettingsDocument>,
+    roles: mongoose.Types.DocumentArray<DBRoleDocument>,
     /**
     * Checks whether command Settings exist
     * @param name The internal Command Name

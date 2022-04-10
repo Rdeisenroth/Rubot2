@@ -55,6 +55,7 @@ const command: Command = {
             timeout_message: "Your queue Timed out after ${timeout} seconds.",
             leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
             entries: [],
+            opening_times: [],
         };
         guildData.queues.push(queue);
         await guildData.save();

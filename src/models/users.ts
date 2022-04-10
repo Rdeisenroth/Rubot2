@@ -29,6 +29,10 @@ export interface User {
      * Log all the Server Roles when a Member leaves
      */
     server_roles: string[],
+    /**
+     * The Roles that the User was assigned after verification
+     */
+    token_roles: mongoose.Types.ObjectId[],
 }
 
 /**
@@ -61,10 +65,16 @@ const UserSchema = new mongoose.Schema<UserDocument, UserModel, User>({
         required: true,
         default: [],
     }],
+    token_roles: [{
+        type: mongoose.Types.ObjectId,
+        required: true,
+        default: [],
+    }],
 });
 
 export interface UserDocument extends User, Omit<mongoose.Document, "_id"> {
     sessions: mongoose.Types.Array<mongoose.Types.ObjectId>,
+    token_roles: mongoose.Types.Array<mongoose.Types.ObjectId>,
     server_roles: mongoose.Types.Array<string>,
     // List getters or non model methods here
     /**

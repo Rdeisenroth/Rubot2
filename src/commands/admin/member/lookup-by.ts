@@ -67,6 +67,7 @@ const command: Command = {
                 _id: member?.id ?? "",
                 server_roles: [],
                 sessions: [],
+                token_roles: [],
             };
         } else {
             if (type === "tu-id") {
