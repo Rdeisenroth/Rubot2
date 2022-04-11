@@ -239,14 +239,12 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot. (Guild not found)`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
     }
-    console.log(guild.id);
     const dbGuild = await GuildSchema.findById(guild.id);
     if (!dbGuild) {
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot. (Database Server not found)", empheral: true });
     }
 
-    console.log(`${user.id}`);
     const member = await guild.members.fetch({ user, force: true });
     if (!(member instanceof GuildMember)) {
         console.log(`Failed Verifying User ${author.tag} with message: You are not a Member of the Guild.`);
@@ -263,7 +261,6 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     databaseUser.moodle_id = moodle_id;
     const dbTokenRoles = [] as DBRoleDocument[];
     // find roles
-    console.log(`internal_role_names: ${internal_role_names}`);
     internal_role_names.forEach(async x => {
         const token_role = dbGuild.guild_settings.roles.find(r => r.internal_name.toLowerCase() === x.toLowerCase());
         if (!token_role) {
@@ -273,8 +270,6 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         dbTokenRoles.push(token_role);
         databaseUser!.token_roles.push(token_role._id);
     });
-    console.log(`internal_role_names_length: ${internal_role_names.length}`);
-    console.log(`db_token_roles_length: ${dbTokenRoles.length}`);
     // Check Duplicate Entry
     try {
         await databaseUser.save();
@@ -298,17 +293,13 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     // Give Roles
     const guildRoles = await member.guild.roles.fetch();
     for (const role of dbTokenRoles) {
-        console.log(`processing role ${role.internal_name}`);
         if (role.scope !== RoleScopes.SERVER) continue;
-        console.log(`role ${role.internal_name} is server scope`);
         if (!role.role_id) continue;
-        console.log(`role ${role.internal_name} has role_id`);
         const guildRole = guildRoles.get(role.role_id);
         if (!guildRole) {
             faulty_roles.push(role);
             continue;
         }
-        console.log(`role ${role.internal_name} has guildRole`);
         if (member.roles.cache.has(guildRole.id)) {
             existing_roles.push(role);
             continue;
@@ -319,16 +310,26 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         new_roles.push(role);
     }
 
+    const fields = [
+        { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false },
+    ];
+    if (existing_roles.length > 0) {
+        fields.push({ name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false });
+    }
+    if (faulty_roles.length > 0) {
+        fields.push({ name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false });
+    }
+
+    let text = "Your Discord-Account has been verified.";
+    if (new_roles.length == 0 && faulty_roles.length == 0) {
+        text = "Your Discord-Account has already been verified.";
+    }
     return await client.utils.embeds.SimpleEmbed(
         replyable,
         {
             title: "Verification System",
-            text: "Your Discord-Account has been verified.",
-            fields: [
-                { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false },
-                ...(existing_roles && [{ name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }]),
-                ...(faulty_roles && [{ name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }]),
-            ],
+            text,
+            fields,
             empheral: true,
         },
     );
