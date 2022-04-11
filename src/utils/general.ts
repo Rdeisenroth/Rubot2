@@ -296,18 +296,24 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     // Give Roles
     const guildRoles = await member.guild.roles.fetch();
     for (const role of dbTokenRoles) {
+        console.log(`processing role ${role.internal_name}`);
         if (role.scope !== RoleScopes.SERVER) continue;
+        console.log(`role ${role.internal_name} is server scope`);
         if (!role.role_id) continue;
+        console.log(`role ${role.internal_name} has role_id`);
         const guildRole = guildRoles.get(role.role_id);
         if (!guildRole) {
             faulty_roles.push(role);
             continue;
         }
+        console.log(`role ${role.internal_name} has guildRole`);
         if (member.roles.cache.has(guildRole.id)) {
             existing_roles.push(role);
             continue;
         }
+        console.log(`member ${member.displayName} has not role ${role.internal_name}`);
         await member.roles.add(guildRole);
+        console.log(`role ${role.internal_name} added to member ${member.displayName}`);
         new_roles.push(role);
     }
 
@@ -318,8 +324,8 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
             text: "Your Discord-Account has been verified.",
             fields: [
                 { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false },
-                { ...(existing_roles && { name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }) },
-                { ...(faulty_roles && { name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }) },
+                ...(existing_roles && [{ name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }]),
+                ...(faulty_roles && [{ name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }]),
             ],
             empheral: true,
         },
