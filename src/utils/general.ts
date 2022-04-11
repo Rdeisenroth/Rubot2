@@ -1,3 +1,4 @@
+import { DBRoleDocument, InternalRoles, RoleScopes } from "./../models/bot_roles";
 import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, Role, RoleResolvable, User, UserResolvable } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
@@ -10,6 +11,7 @@ const globPromise = promisify(glob);
 import * as crypto from "crypto";
 import { dm_only_verify, dm_verify_guild, verify_secret } from "../../config.json";
 import UserSchema from "../models/users";
+import * as cryptojs from "crypto-js";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -168,6 +170,23 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
     return (commandSettings?.defaultPermission ?? command.defaultPermission ?? true) || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
 }
 
+export function encryptText(text: string) {
+    return cryptojs.AES.encrypt(text, verify_secret).toString();
+}
+
+export function decryptText(text: string) {
+    return cryptojs.AES.decrypt(text, verify_secret).toString(cryptojs.enc.Utf8);
+}
+
+
+export function encryptTokenString(server_id: string, version_id: string, tu_id: string, moodle_id: string, internal_role_names: InternalRoles[]): string {
+    const token = `${server_id}|${version_id}|${tu_id}|${moodle_id}|${internal_role_names.join(",")}`;
+    const crypted_token_string = encryptText(token);
+    return crypted_token_string;
+}
+
+encryptTokenString("940632262272237568", "01", "rd61fymu", "69420", ["verified" as InternalRoles, "server_admin" as InternalRoles]);
+
 /**
  * Handles User Verification
  * @param replyable A Replyable message
@@ -180,31 +199,31 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     // let content = (replyable instanceof Message) ? replyable.cleanContent : replyable.options.;
     console.log(`Verifying User ${author.tag} with token: ${tokenstring}`);
     const token = tokenstring.trim();
-    const rauteSplit = token.split("#");
-    if (rauteSplit.length != 2) {
-        console.log(`Failed Verifying User ${author.tag} with message: Invalid Token String.`);
-        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Invalid Token String.", empheral: true });
+    const decrypted = decryptText(token);
 
+    // Token-Format: <server_id>|<version_id>|<tu_id>|<moodle_id>|<internal_role_names>
+    // get token parts using name capturing regex groups
+    const regex = /^(?<server_id>\d+)\|(?<version_id>\d+)\|(?<tu_id>\w{8})\|(?<moodle_id>\d+)$|(?<internal_role_names>.*)/;
+    const match = regex.exec(decrypted);
+    if (!match) {
+        console.log(`Failed Verifying User ${author.tag} with message: Token is not valid.`);
+        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Token is not valid.", empheral: true });
     }
-    const [other_infos, hmac] = rauteSplit;
 
-    // HMAC bilden
-    const expected_hmac = crypto.createHmac("sha256", verify_secret)
-        .update(other_infos)
-        .digest("hex");
+    const { server_id, version_id, tu_id, moodle_id, internal_role_names_string } = match.groups!;
+    const internal_role_names = internal_role_names_string?.split(",") ?? [];
 
-    const buffer1 = Buffer.from(hmac);
-    const buffer2 = Buffer.from(expected_hmac);
-
-
-    if (buffer1.length != buffer2.length || !crypto.timingSafeEqual(buffer1, buffer2)) {
-        console.log(`Failed Verifying User ${author.tag} with message: Invalid Token String.`);
-        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Invalid Token String.", empheral: true });
-    }
 
     const user = author;
-    const guild = await client.guilds.fetch(dm_verify_guild);
+
+    const guild = await client.guilds.fetch(server_id);
     if (!(guild instanceof Guild)) {
+        console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
+        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
+    }
+
+    const dbGuild = await GuildSchema.findById(guild.id);
+    if (!dbGuild) {
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
     }
@@ -217,9 +236,6 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "You are not a Member of the Guild.", empheral: true });
     }
 
-    // Token-Format: "FOP-DiscordV1|tu-id|moodle-id#hmac"
-    const [version_string, tu_id, moodle_id] = other_infos.split("|");
-
     let databaseUser = await UserSchema.findById(member.id);
     if (!databaseUser) {
         databaseUser = new UserSchema({ _id: member.id });
@@ -227,9 +243,19 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     }
     databaseUser.tu_id = tu_id;
     databaseUser.moodle_id = moodle_id;
+    const dbTokenRoles = [] as DBRoleDocument[];
+    // find roles
+    const token_roles = internal_role_names.forEach(async x => {
+        const token_role = dbGuild.guild_settings.roles.find(r => r.internal_name.toLowerCase() === x.toLowerCase());
+        if (!token_role) {
+            console.log(`Failed Verifying User ${author.tag} with message: Role ${x} not found.`);
+            return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: `Role ${x} not found.`, empheral: true });
+        }
+        dbTokenRoles.push(token_role);
+        databaseUser!.token_roles.push(token_role._id);
+    });
 
     // Check Duplicate Entry
-
     try {
         await databaseUser.save();
     } catch (error) {
@@ -243,32 +269,43 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     }
     console.log(`Linked ${member.displayName} to TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
 
+    // faulty roles
+    const faulty_roles: DBRoleDocument[] = [];
+    // existing roles
+    const existing_roles: DBRoleDocument[] = [];
+    // new roles
+    const new_roles: DBRoleDocument[] = [];
     // Give Roles
-    await member.guild.roles.fetch();
-    const verifiedRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
-    if (!verifiedRole) {
-        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Verified-Role Could not be found.", empheral: true });
-    }
-
-    if (member.roles.cache.has(verifiedRole.id) && version_string !== "FOP-DiscordV1-Tutor") {
-        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Your account has already been verified.", empheral: true });
-    }
-    await member.roles.add(verifiedRole);
-
-
-
-    if (version_string === "FOP-DiscordV1-Tutor") {
-        const coachRole = member.guild.roles.cache.find(x => x.name.toLowerCase() === "tutor");
-        if (!coachRole) {
-            return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Coach-Role Could not be found.", empheral: true });
+    const guildRoles = await member.guild.roles.fetch();
+    for (const role of dbTokenRoles) {
+        if (role.scope !== RoleScopes.SERVER) continue;
+        if (!role.role_id) continue;
+        const guildRole = guildRoles.get(role.role_id);
+        if (!guildRole) {
+            faulty_roles.push(role);
+            continue;
         }
-        if (member.roles.cache.has(coachRole.id)) {
-            return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Your already have the coach Role.", empheral: true });
+        if (member.roles.cache.has(guildRole.id)) {
+            existing_roles.push(role);
+            continue;
         }
-        await member.roles.add(coachRole);
+        await member.roles.add(guildRole);
+        new_roles.push(role);
     }
 
-    return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System", text: "Your Discord-Account has been verified.", empheral: true });
+    return await client.utils.embeds.SimpleEmbed(
+        replyable,
+        {
+            title: "Verification System",
+            text: "Your Discord-Account has been verified.",
+            fields: [
+                { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", "), inline: false },
+                { ...existing_roles && { name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", "), inline: false } },
+                { ...faulty_roles && { name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", "), inline: false } },
+            ],
+            empheral: true,
+        },
+    );
 
 }
 
