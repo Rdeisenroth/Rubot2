@@ -170,15 +170,33 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
     return (commandSettings?.defaultPermission ?? command.defaultPermission ?? true) || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
 }
 
+/**
+ * Encrypts a given Text
+ * @param text The Text to encrypt
+ * @returns the encrypted Text
+ */
 export function encryptText(text: string) {
     return cryptojs.AES.encrypt(text, verify_secret).toString();
 }
 
+/**
+ * Decrypts a given Text
+ * @param text the Text to decrypt
+ * @returns the decrypted Text
+ */
 export function decryptText(text: string) {
     return cryptojs.AES.decrypt(text, verify_secret).toString(cryptojs.enc.Utf8);
 }
 
-
+/**
+ * Generates an encrypted Token-String with the given parameters
+ * @param server_id The ID of the Server
+ * @param version_id The Token Version
+ * @param tu_id The TU ID
+ * @param moodle_id The Moodle ID
+ * @param internal_role_names The internal role names
+ * @returns The generated Token
+ */
 export function encryptTokenString(server_id: string, version_id: string, tu_id: string, moodle_id: string, internal_role_names: InternalRoles[]): string {
     const token = `${server_id}|${version_id}|${tu_id}|${moodle_id}|${internal_role_names.join(",")}`;
     const crypted_token_string = encryptText(token);
@@ -218,14 +236,14 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
 
     const guild = await client.guilds.cache.get(server_id);
     if (!(guild instanceof Guild)) {
-        console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
+        console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot. (Guild not found)`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
     }
-
+    console.log(guild.id);
     const dbGuild = await GuildSchema.findById(guild.id);
     if (!dbGuild) {
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
-        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
+        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot. (Database Server not found)", empheral: true });
     }
 
     console.log(`${user.id}`);
