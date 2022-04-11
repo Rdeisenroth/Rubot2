@@ -317,9 +317,9 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
             title: "Verification System",
             text: "Your Discord-Account has been verified.",
             fields: [
-                { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") ?? "none", inline: false },
-                { ...(existing_roles && { name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") ?? "none", inline: false }) },
-                { ...(faulty_roles && { name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") ?? "none", inline: false }) },
+                { name: "❯ New Roles that were given:", value: new_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false },
+                { ...(existing_roles && { name: "❯ Existing Roles (untouched):", value: existing_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }) },
+                { ...(faulty_roles && { name: "❯ Faulty Roles (were not given):", value: faulty_roles.map(x => `\`${x.server_role_name ?? x.internal_name}\``).join(", ") || "none", inline: false }) },
             ],
             empheral: true,
         },
