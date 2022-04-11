@@ -216,7 +216,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
 
     const user = author;
 
-    const guild = await client.guilds.fetch(server_id);
+    const guild = await client.guilds.cache.get(server_id);
     if (!(guild instanceof Guild)) {
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
