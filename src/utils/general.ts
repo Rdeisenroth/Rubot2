@@ -263,7 +263,8 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     databaseUser.moodle_id = moodle_id;
     const dbTokenRoles = [] as DBRoleDocument[];
     // find roles
-    const token_roles = internal_role_names.forEach(async x => {
+    console.log(`internal_role_names: ${internal_role_names}`);
+    internal_role_names.forEach(async x => {
         const token_role = dbGuild.guild_settings.roles.find(r => r.internal_name.toLowerCase() === x.toLowerCase());
         if (!token_role) {
             console.log(`Failed Verifying User ${author.tag} with message: Role ${x} not found.`);
@@ -272,7 +273,8 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         dbTokenRoles.push(token_role);
         databaseUser!.token_roles.push(token_role._id);
     });
-
+    console.log(`internal_role_names_length: ${internal_role_names.length}`);
+    console.log(`db_token_roles_length: ${dbTokenRoles.length}`);
     // Check Duplicate Entry
     try {
         await databaseUser.save();
