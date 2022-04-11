@@ -227,7 +227,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         console.log(`Failed Verifying User ${author.tag} with message: Token is not valid.`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Token is not valid.", empheral: true });
     }
-
+    console.log(`matches: ${JSON.stringify(match.groups)}`);
     const { server_id, version_id, tu_id, moodle_id, internal_role_names_string } = match.groups!;
     const internal_role_names = internal_role_names_string?.split(",") ?? [];
 
