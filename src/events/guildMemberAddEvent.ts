@@ -24,12 +24,12 @@ export const execute: ExecuteEvent<"guildMemberAdd"> = async (client, member) =>
             return [];
         }
     });
-    try {
-        await member.roles.add(guildRoles);
-        console.log(`Updated Roles for Member ${member.displayName}`);
-    } catch (error) {
-        console.error(`Could not restore Roles for Member ${member.displayName}:\n${error}`);
-    }
+    // try {
+    //     await member.roles.add(guildRoles);
+    //     console.log(`Updated Roles for Member ${member.displayName}`);
+    // } catch (error) {
+    //     console.error(`Could not restore Roles for Member ${member.displayName}:\n${error}`);
+    // }
     await databaseUser.save();
     // Send Welcome Message
     if (guildData?.welcome_text) {
