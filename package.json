@@ -24,6 +24,7 @@
     "consola": "^2.15.3",
     "cron": "^1.8.2",
     "crypto-js": "^4.1.1",
+    "csv-parse": "^5.0.4",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "glob": "^7.1.7",
