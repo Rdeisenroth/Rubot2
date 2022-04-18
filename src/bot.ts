@@ -228,42 +228,42 @@ export class Bot extends Client {
         const queue_stamps_aud: utils.general.QueueSpan[] = [
             // Montag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 55),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 59),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 2, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 2, 5),
                 openShift,
                 closeShift,
             ),
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 9, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 18, 0),
                 openShift,
                 closeShift,
             ),
             // Dienstag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 9, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 18, 0),
                 openShift,
                 closeShift,
             ),
             // Mittwoch
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 9, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 18, 0),
                 openShift,
                 closeShift,
             ),
             // Donnerstag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 9, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 18, 0),
                 openShift,
                 closeShift,
             ),
             // Freitag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 17, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 9, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 18, 0),
                 openShift,
                 closeShift,
             ),
