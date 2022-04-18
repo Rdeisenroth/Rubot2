@@ -355,7 +355,7 @@ export class Bot extends Client {
                 let origState = queueData.locked;
                 await queueData.toggleLock();
                 console.log(origState ? "Unlocked Queue" : "Locked Queue");
-                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("940632263014645797")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`AuD-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("940632263014645793")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`AuD-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
                 try {
                     queueData.getWaitingRooms(guildData).forEach(async x => {
                         const c = (await this.channels.fetch(x._id)) as VoiceChannel;
