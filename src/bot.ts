@@ -224,6 +224,44 @@ export class Bot extends Client {
             //     closeShift,
             // ),
         ];
+
+        const queue_stamps_aud: utils.general.QueueSpan[] = [
+            // Montag
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 8, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 0),
+                openShift,
+                closeShift,
+            ),
+            // Dienstag
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 8, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 0),
+                openShift,
+                closeShift,
+            ),
+            // Mittwoch
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 8, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 17, 0),
+                openShift,
+                closeShift,
+            ),
+            // Donnerstag
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 8, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 0),
+                openShift,
+                closeShift,
+            ),
+            // Freitag
+            new utils.general.QueueSpan(
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 8, 0),
+                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 17, 0),
+                openShift,
+                closeShift,
+            ),
+        ];
         const job = new CronJob("*/30 * * * * *", async () => {
             console.log(new Date().toLocaleString());
 
@@ -301,8 +339,46 @@ export class Bot extends Client {
             }
         }, null, true, "America/Los_Angeles");
         job2.start();
-    }
 
+        const job3 = new CronJob("*/30 * * * * *", async () => {
+            console.log(new Date().toLocaleString());
+
+            let guildData = await GuildSchema.findById("940632262272237568");
+            if (!guildData) {
+                return;
+            }
+            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "AuD-Sprechstunde".toLowerCase());
+            if (!queueData) {
+                return;
+            }
+            if (queue_stamps_aud.some(x => x.isActive(new Date())) === queueData.locked) {
+                let origState = queueData.locked;
+                await queueData.toggleLock();
+                console.log(origState ? "Unlocked Queue" : "Locked Queue");
+                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("940632263014645797")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`AuD-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                try {
+                    queueData.getWaitingRooms(guildData).forEach(async x => {
+                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
+                    });
+                } catch (error) {
+                    return;
+                }
+            } else {
+                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
+            }
+            try {
+                console.log(queueData.locked);
+                queueData.getWaitingRooms(guildData).forEach(async x => {
+                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
+                });
+            } catch (error) {
+                return;
+            }
+        }, null, true, "America/Los_Angeles");
+        job.start();
+    }
 
     // public async createGuildCommand(data:any, guildId:string) {
     //     return await this.api.appl
