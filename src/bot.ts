@@ -228,8 +228,8 @@ export class Bot extends Client {
         const queue_stamps_aud: utils.general.QueueSpan[] = [
             // Montag
             new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 50),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 53),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 55),
+                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 59),
                 openShift,
                 closeShift,
             ),
@@ -293,7 +293,7 @@ export class Bot extends Client {
                     return;
                 }
             } else {
-                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
+                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - FOP`);
             }
             try {
                 console.log(queueData.locked);
@@ -371,7 +371,7 @@ export class Bot extends Client {
                     return;
                 }
             } else {
-                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
+                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - AuD`);
             }
             try {
                 console.log(queueData.locked);
@@ -383,7 +383,7 @@ export class Bot extends Client {
                 return;
             }
         }, null, true, "America/Los_Angeles");
-        job.start();
+        job3.start();
     }
 
     // public async createGuildCommand(data:any, guildId:string) {
