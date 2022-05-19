@@ -203,8 +203,6 @@ export function encryptTokenString(server_id: string, version_id: string, tu_id:
     return crypted_token_string;
 }
 
-encryptTokenString("940632262272237568", "01", "rd61fymu", "69420", ["verified" as InternalRoles, "server_admin" as InternalRoles]);
-
 /**
  * Handles User Verification
  * @param replyable A Replyable message
