@@ -116,7 +116,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Channel could not be created.", empheral: true });
         }
 
-        const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id, events: [] });
+        const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id });
         roomData.events.push({ emitted_by: "me", type: eventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
         // Update Coach Session
         coachingSession.rooms.push(roomData._id);

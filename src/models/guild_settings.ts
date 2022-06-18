@@ -86,14 +86,14 @@ export interface GuildSettingsModel extends mongoose.Model<GuildSettingsDocument
 
 }
 
-GuildSettingsSchema.method("hasCommandSettings", function (name: string) {
+GuildSettingsSchema.method<GuildSettingsDocument>("hasCommandSettings", function (name: string) {
     return this.slashCommands.some(x => x.internal_name === name);
 });
 
-GuildSettingsSchema.method("getCommandByInternalName", function (name: string) {
+GuildSettingsSchema.method<GuildSettingsDocument>("getCommandByInternalName", function (name: string) {
     return this.slashCommands.find(x => x.internal_name === name) ?? null;
 });
-GuildSettingsSchema.method("getCommandByGuildName", function (name: string) {
+GuildSettingsSchema.method<GuildSettingsDocument>("getCommandByGuildName", function (name: string) {
     return this.slashCommands.find(x => x.name === name) ?? this.getCommandByInternalName(name);
 });
 

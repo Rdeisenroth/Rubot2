@@ -81,7 +81,7 @@ export interface SlashCommandSettingsModel extends mongoose.Model<SlashCommandSe
 
 // Methods
 
-SlashCommandSettingsSchema.method("getPostablePermissions", function () {
+SlashCommandSettingsSchema.method<SlashCommandSettingsDocument>("getPostablePermissions", function () {
     return this.permissions.toObject<Array<SlashCommandPermissionDocument>>()
         .map(x => { return { id: x.id, permission: x.permission, type: x.type } as SlashCommandPermission; });
 });

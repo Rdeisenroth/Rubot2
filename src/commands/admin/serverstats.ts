@@ -71,7 +71,7 @@ const command: Command = {
             }
         }
         // Verifications
-        let roleLog: Collection<string, GuildAuditLogsEntry> = new Collection();
+        let roleLog: Collection<string, GuildAuditLogsEntry<"MEMBER_ROLE_UPDATE", "MEMBER_ROLE_UPDATE", "UPDATE", "USER">> = new Collection();
         try {
             roleLog = (await interaction.guild.fetchAuditLogs({ type: "MEMBER_ROLE_UPDATE" })).entries;
         } catch (error) {
