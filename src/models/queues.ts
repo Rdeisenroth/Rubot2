@@ -7,6 +7,7 @@ import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocu
 import * as utils from "../utils/utils";
 import { StringReplacements } from "../../typings";
 import moment from "moment";
+import QueueSpanSchema from "./queue_span";
 
 /**
  * A Queue from the Database
@@ -136,6 +137,20 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         required: true,
         default: [],
     }],
+    opening_times: [{
+        type: QueueSpanSchema,
+        required: true,
+        default: [],
+    }],
+    text_channel: {
+        type: String,
+        required: false,
+    },
+    auto_lock: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false,
+    },
 });
 
 export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.ObjectId> {

@@ -42,12 +42,13 @@ type Student = {
     id_tu: string;
     id_moodle: string;
     first_access: Date;
+    name: string;
 };
 
 (() => {
     const csvFilePath = path.resolve(__dirname, "report.csv");
 
-    const headers = ["id_tu", "id_moodle", "first_access"];
+    const headers = ["id_tu", "id_moodle", "first_access","name"];
 
     const fileContent = fs.readFileSync(csvFilePath, { encoding: "utf-8" });
 

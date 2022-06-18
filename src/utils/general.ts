@@ -453,6 +453,15 @@ export class WeekTimestamp {
     public static fromDate(date: Date) {
         return new WeekTimestamp(date.getDay(), date.getHours(), date.getMinutes());
     }
+
+    /**
+     * Returns a Relative Weekdate from a given Time in ms
+     * @param number The Time elapsed since Sunday 00:00 in ms
+     * @returns The created WeekTimestamp
+     */
+    public static fromNumber(number: number) {
+        return new WeekTimestamp(Math.floor(number / 1000 / 60 / 60 / 24), Math.floor(number / 1000 / 60 / 60) % 24, Math.floor(number / 1000 / 60) % 60);
+    }
 }
 
 /**
