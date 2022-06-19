@@ -43,7 +43,7 @@ const command: Command = {
             // Notify Coach
             try {
                 const member = await g.members.fetch(e.user);
-                let dmChannel = await member.createDM();
+                const dmChannel = await member.createDM();
                 await client.utils.embeds.SimpleEmbed(dmChannel, {
                     title: "Coaching System", text: "Your coaching Session was terminated by an administrator."
                         + `\n\\> Total Time Spent: ${moment.duration((+e.ended_at!) - (+e.started_at)).format("d[d ]h[h ]m[m ]s.S[s]")}`

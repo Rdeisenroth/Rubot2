@@ -21,7 +21,7 @@ const WeekTimestampSchema = new mongoose.Schema<WeekTimestampDocument, WeekTimes
     },
 });
 
-export interface WeekTimestampDocument extends WeekTimestamp, mongoose.Document<mongoose.Types.ObjectId> {
+export interface WeekTimestampDocument extends WeekTimestamp, Omit<mongoose.Document<mongoose.Types.ObjectId>,"equals"> {
     // List getters or non model methods here
 }
 

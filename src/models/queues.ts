@@ -1,4 +1,3 @@
-import { QueueSpan } from "./../utils/general";
 import { GuildDocument } from "./guilds";
 import { VoiceChannelDocument } from "./voice_channels";
 import mongoose from "mongoose";
@@ -7,7 +6,7 @@ import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocu
 import * as utils from "../utils/utils";
 import { StringReplacements } from "../../typings";
 import moment from "moment";
-import QueueSpanSchema from "./queue_span";
+import QueueSpanSchema, { QueueSpan, QueueSpanDocument } from "./queue_span";
 
 /**
  * A Queue from the Database
@@ -73,6 +72,14 @@ export interface Queue {
      * The opening times of the Queue
      */
     opening_times: QueueSpan[],
+    /**
+     * The standard time to shift the unlocking of the queue by in milliseconds
+     */
+    openShift?: number,
+    /**
+     * The standard time to shift the locking of the queue by in milliseconds
+     */
+    closeShift?: number,
     /**
      * The Entries of the Queue
      */
@@ -151,11 +158,22 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         required: false,
         default: false,
     },
+    openShift: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
+    closeShift: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
 });
 
 export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.ObjectId> {
     room_spawner?: VoiceChannelSpawnerDocument,
     entries: mongoose.Types.DocumentArray<QueueEntryDocument>,
+    opening_times: mongoose.Types.DocumentArray<QueueSpanDocument>,
     // List getters or non model methods here
     /**
      * Put an Entry into the Queue

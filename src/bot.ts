@@ -11,6 +11,7 @@ import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
 import G from "glob";
+import { QueueSpan } from "./models/queue_span";
 const globPromise = promisify(glob);
 export class Bot extends Client {
     public logger: Consola = consola;
@@ -140,247 +141,60 @@ export class Bot extends Client {
             this.on(event.name, event.execute.bind(null, this));
         });
 
-        // Check for queue Timestamps
-        // TODO: not hardcode
-        const openShift = -1 * 1000 * 60 * 15; // 15 Minuten Vorlauf
-        const closeShift = 0;
-        /**
-         * Times for opening the queue
-         */
-        const queue_stamps: utils.general.QueueSpan[] = [
-            // Montag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 0, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 23, 59),
-                openShift,
-                closeShift,
-            ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 16, 15),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 55),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // // Dienstag
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 9, 50),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 11, 30),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 16, 15),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 55),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // // Mittwoch
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 11, 40),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 13, 20),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 18, 5),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 19, 55),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // // Donnerstag
-            // // new QueueSpan(
-            // //     new WeekTimestamp(Weekday.THURSDAY, 3, 51),
-            // //     new WeekTimestamp(Weekday.THURSDAY, 3, 52),
-            // // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 11, 40),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 13, 20),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 16, 15),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 55),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // // Friday
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 9, 50),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 11, 30),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 13, 30),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 15, 10),
-            //     openShift,
-            //     closeShift,
-            // ),
-            // new utils.general.QueueSpan(
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 18, 5),
-            //     new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 19, 55),
-            //     openShift,
-            //     closeShift,
-            // ),
-        ];
+        const queueGuardJob = new CronJob("*/30 * * * * *", async () => {
+            for (const g of this.guilds.cache.values()) {
+                console.log(new Date().toLocaleString());
 
-        const queue_stamps_aud: utils.general.QueueSpan[] = [
-            // Montag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.MONDAY, 17, 0),
-                openShift,
-                closeShift,
-            ),
-            // Dienstag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.TUESDAY, 17, 0),
-                openShift,
-                closeShift,
-            ),
-            // Mittwoch
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.WEDNESDAY, 17, 0),
-                openShift,
-                closeShift,
-            ),
-            // Donnerstag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.THURSDAY, 17, 0),
-                openShift,
-                closeShift,
-            ),
-            // Freitag
-            new utils.general.QueueSpan(
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 8, 0),
-                new utils.general.WeekTimestamp(utils.general.Weekday.FRIDAY, 17, 0),
-                openShift,
-                closeShift,
-            ),
-        ];
-        const job = new CronJob("*/30 * * * * *", async () => {
-            console.log(new Date().toLocaleString());
-
-            let guildData = await GuildSchema.findById("855035619843112960");
-            if (!guildData) {
-                return;
-            }
-            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "FOP-Sprechstunde".toLowerCase());
-            if (!queueData) {
-                return;
-            }
-            if (queue_stamps.some(x => x.isActive(new Date())) === queueData.locked) {
-                let origState = queueData.locked;
-                await queueData.toggleLock();
-                console.log(origState ? "Unlocked Queue" : "Locked Queue");
-                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("879701388354019388")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
-                try {
-                    queueData.getWaitingRooms(guildData).forEach(async x => {
-                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
-                    });
-                } catch (error) {
+                const guildData = await GuildSchema.findById(g.id);
+                if (!guildData) {
                     return;
                 }
-            } else {
-                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - FOP`);
-            }
-            try {
-                console.log(queueData.locked);
-                queueData.getWaitingRooms(guildData).forEach(async x => {
-                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
-                });
-            } catch (error) {
-                return;
-            }
-        }, null, true, "America/Los_Angeles");
-        job.start();
+                for (const queueData of guildData.queues) {
+                    if (!queueData.auto_lock) {
+                        continue;
+                    }
 
-        const job2 = new CronJob("*/30 * * * * *", async () => {
-            // console.log(new Date().toLocaleString());
-
-            let guildData = await GuildSchema.findById("899678380251816036");
-            if (!guildData) {
-                return;
-            }
-            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "team1".toLowerCase());
-            if (!queueData) {
-                return;
-            }
-            if (queue_stamps.some(x => x.isActive(new Date())) === queueData.locked) {
-                let origState = queueData.locked;
-                await queueData.toggleLock();
-                console.log(origState ? "Unlocked Queue" : "Locked Queue");
-                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("899678381082300522")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`FOP-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
-                try {
-                    queueData.getWaitingRooms(guildData).forEach(async x => {
-                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
-                    });
-                } catch (error) {
-                    return;
+                    if (queueData.opening_times.map(x => new QueueSpan(
+                        new utils.general.WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
+                        new utils.general.WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
+                        x.openShift,
+                        x.closeShift,
+                        x.startDate,
+                        x.endDate,
+                    )).some(x => x.isActive(new Date())) === queueData.locked) {
+                        const origState = queueData.locked;
+                        await queueData.toggleLock();
+                        console.log(origState ? `Unlocked Queue ${queueData.name}` : `Locked Queue ${queueData.name}`);
+                        if (queueData.text_channel) {
+                            await this.utils.embeds.SimpleEmbed((await this.channels.fetch(queueData.text_channel)) as TextChannel, { title: "Sprechstundensystem", text: `Die \`${queueData.name}\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
+                        }
+                        try {
+                            queueData.getWaitingRooms(guildData).forEach(async x => {
+                                const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                                await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
+                            });
+                        } catch (error) {
+                            return;
+                        }
+                    } else {
+                        console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - ${queueData.name}`);
+                    }
+                    try {
+                        console.log(queueData.locked);
+                        queueData.getWaitingRooms(guildData).forEach(async x => {
+                            const c = (await this.channels.fetch(x._id)) as VoiceChannel;
+                            await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
+                        });
+                    } catch (error) {
+                        return;
+                    }
                 }
-            } else {
-                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"}`);
-            }
-            try {
-                console.log(queueData.locked);
-                queueData.getWaitingRooms(guildData).forEach(async x => {
-                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
-                });
-            } catch (error) {
-                return;
             }
         }, null, true, "America/Los_Angeles");
-        job2.start();
+        queueGuardJob.start();
 
-        const job3 = new CronJob("*/30 * * * * *", async () => {
-            console.log(new Date().toLocaleString());
-
-            let guildData = await GuildSchema.findById("940632262272237568");
-            if (!guildData) {
-                return;
-            }
-            const queueData = guildData.queues.find(x => x.name.toLowerCase() === "AuD-Sprechstunde".toLowerCase());
-            if (!queueData) {
-                return;
-            }
-            if (queue_stamps_aud.some(x => x.isActive(new Date())) === queueData.locked) {
-                let origState = queueData.locked;
-                await queueData.toggleLock();
-                console.log(origState ? "Unlocked Queue" : "Locked Queue");
-                await this.utils.embeds.SimpleEmbed((await this.channels.fetch("940632263014645793")) as TextChannel, { title: "Sprechstundensystem", text: `Die \`AuD-Sprechstunden\`-Warteschlange wurde ${origState ? "freigeschaltet" : "gesperrt"}.\nEine Übersicht der Zeiten findet sich in den Pins.` });
-                try {
-                    queueData.getWaitingRooms(guildData).forEach(async x => {
-                        const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                        await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, !origState);
-                    });
-                } catch (error) {
-                    return;
-                }
-            } else {
-                console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - AuD`);
-            }
-            try {
-                console.log(queueData.locked);
-                queueData.getWaitingRooms(guildData).forEach(async x => {
-                    const c = (await this.channels.fetch(x._id)) as VoiceChannel;
-                    await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
-                });
-            } catch (error) {
-                return;
-            }
-        }, null, true, "America/Los_Angeles");
-        job3.start();
+        // public async createGuildCommand(data:any, guildId:string) {
+        //     return await this.api.appl
+        // }
     }
-
-    // public async createGuildCommand(data:any, guildId:string) {
-    //     return await this.api.appl
-    // }
 }

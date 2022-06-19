@@ -7,8 +7,8 @@ import { inspect } from "util";
 export const name = "guildMemberAdd";
 
 export const execute: ExecuteEvent<"guildMemberAdd"> = async (client, member) => {
-    let guild = member.guild;
-    let guildData = await GuildSchema.findById(guild.id);
+    const guild = member.guild;
+    const guildData = await GuildSchema.findById(guild.id);
     // Create User Entry
     let databaseUser = await UserSchema.findById(member.id);
     if (!databaseUser) {

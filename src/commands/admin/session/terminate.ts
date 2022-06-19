@@ -41,7 +41,7 @@ const command: Command = {
         const sessions = await SessionSchema.find({ guild: g.id, active: true, user: member.id });
         const sortedSessions = sessions.sort((x, y) => (+x.started_at) - (+y.started_at));
 
-        let dmChannel = await member.createDM();
+        const dmChannel = await member.createDM();
 
         const fields: EmbedFieldData[] = [];
         for (const e of sortedSessions) {

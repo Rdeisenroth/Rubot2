@@ -214,27 +214,27 @@ GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: B
     }
     try {
         const commands = await g.commands.set(data);
-        const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
-        // permissions
-        for (const c of [...commands.values()]) {
-            const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
-            fullPermissions.push({
-                id: c.id,
-                permissions: [
-                    // Overwrites von Settings
-                    ...cmdSettings?.getPostablePermissions() ?? [],
-                    // Bot owner
-                    {
-                        id: client.ownerID!,
-                        type: "USER",
-                        permission: true,
-                    },
-                ],
-            });
-        }
-        await g.commands.permissions.set({
-            fullPermissions: fullPermissions,
-        });
+        // // permissions
+        // const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
+        // for (const c of [...commands.values()]) {
+        //     const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
+        //     fullPermissions.push({
+        //         id: c.id,
+        //         permissions: [
+        //             // Overwrites von Settings
+        //             ...cmdSettings?.getPostablePermissions() ?? [],
+        //             // Bot owner
+        //             {
+        //                 id: client.ownerID!,
+        //                 type: "USER",
+        //                 permission: true,
+        //             },
+        //         ],
+        //     });
+        // }
+        // await g.commands.permissions.set({
+        //     fullPermissions: fullPermissions,
+        // });
 
     } catch (error) {
         console.log(error);

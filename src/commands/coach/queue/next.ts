@@ -149,7 +149,7 @@ const command: Command = {
                         console.log("coach queue next: Matches: Remove User from Queue");
                     } catch (error) {
                         if (queueData.text_channel) {
-                            let c = await g.channels.fetch(queueData.text_channel);
+                            const c = await g.channels.fetch(queueData.text_channel);
                             await client.utils.embeds.SimpleEmbed(c as TextChannel, "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
                         }
                     }

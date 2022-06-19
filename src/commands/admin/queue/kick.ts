@@ -53,9 +53,9 @@ const command: Command = {
 
         // Kick
         let user = interaction.options.getUser("user", true);
-        let reason = interaction.options.getString("reason", false);
+        const reason = interaction.options.getString("reason", false);
         user = await user.fetch();
-        let member = await interaction.guild!.members.fetch(user);
+        const member = await interaction.guild!.members.fetch(user);
         // let entry = queueData.getEntry(user.id);
         // queueData.leave()
         try {

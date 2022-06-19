@@ -33,7 +33,7 @@ const command: Command = {
         await interaction.deferReply({ ephemeral: true });
         let user = interaction.options.getUser("user", true);
         user = await user.fetch();
-        let userData = await UserSchema.findById(user.id);
+        const userData = await UserSchema.findById(user.id);
 
         if (!userData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System", text: `User ${user} not found in database.`, empheral: true });
