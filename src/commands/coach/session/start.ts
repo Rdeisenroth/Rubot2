@@ -46,7 +46,7 @@ const command: Command = {
         }
 
         const queueName = interaction.options.getString("queue");
-        let queueData = guildData.queues.find(x => x.name === queueName);
+        let queueData: QueueDocument | undefined = guildData.queues.find(x => x.name === queueName);
         if (!queueData) {
             // await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `${queueName} could not be Found. Available Queues: ${guildData.queues.map(x => x.name).join(", ")}`, empheral: true });
             // return;

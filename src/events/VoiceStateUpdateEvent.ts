@@ -215,7 +215,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         client.queue_stays.get(member_id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.PENDING);
                         // Create Timer
                         setTimeout(async () => {
-                            let queue_stays = client.queue_stays.get(member_id)?.get(queue._id!.toHexString());
+                            const queue_stays = client.queue_stays.get(member_id)?.get(queue._id!.toHexString());
                             client.queue_stays.get(member_id)?.delete(queue._id!.toHexString());
                             if (queue_stays !== client.utils.general.QueueStayOptions.PENDING) {
                                 return;

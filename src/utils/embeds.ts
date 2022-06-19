@@ -1,4 +1,4 @@
-import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, PartialDMChannel, ReplyMessageOptions, TextBasedChannels, TextChannel, ThreadChannel, UserResolvable } from "discord.js";
+import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, PartialDMChannel, ReplyMessageOptions, TextBasedChannel, TextChannel, ThreadChannel, UserResolvable } from "discord.js";
 import { APIMessage } from "discord-api-types/v9";
 import * as utils from "./utils";
 import { SimpleEmbedOptions } from "../../typings";

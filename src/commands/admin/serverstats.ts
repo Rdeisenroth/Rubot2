@@ -48,11 +48,11 @@ const command: Command = {
             },
         );
         // Member Joins
-        let data = [...members.values()].filter(x => x.joinedAt != null).sort((x, y) => (x.joinedAt!).getTime() - (y.joinedAt!).getTime());
-        let days: { x: number, y: number, z: number }[] = [];
+        const data = [...members.values()].filter(x => x.joinedAt != null).sort((x, y) => (x.joinedAt!).getTime() - (y.joinedAt!).getTime());
+        const days: { x: number, y: number, z: number }[] = [];
         if (data && interaction.options.getBoolean("show-empty-days")) {
-            let firstDay = data[0].joinedAt!;
-            let lastDay = new Date();
+            const firstDay = data[0].joinedAt!;
+            const lastDay = new Date();
             firstDay.setHours(0, 0, 0, 0);
             lastDay.setHours(0, 0, 0, 0);
             for (let i = firstDay.getTime(); i <= lastDay.getTime(); i += 86400000) {
@@ -71,7 +71,7 @@ const command: Command = {
             }
         }
         // Verifications
-        let roleLog: Collection<string, GuildAuditLogsEntry> = new Collection();
+        let roleLog: Collection<string, GuildAuditLogsEntry<"MEMBER_ROLE_UPDATE", "MEMBER_ROLE_UPDATE", "UPDATE", "USER">> = new Collection();
         try {
             roleLog = (await interaction.guild.fetchAuditLogs({ type: "MEMBER_ROLE_UPDATE" })).entries;
         } catch (error) {

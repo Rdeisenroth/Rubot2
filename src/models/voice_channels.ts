@@ -141,7 +141,7 @@ export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> 
 
 }
 
-VoiceChannelSchema.method("syncPermissions", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake, lockOverwrite?: boolean) {
+VoiceChannelSchema.method<VoiceChannelDocument>("syncPermissions", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake, lockOverwrite?: boolean) {
     lockOverwrite = lockOverwrite ?? this.locked;
     const actual_permissions = channel.permissionOverwrites.cache.get(roleId ?? channel.guild.roles.everyone.id);
     if (!actual_permissions
@@ -158,19 +158,19 @@ VoiceChannelSchema.method("syncPermissions", async function (channel: djs.VoiceC
     }
 });
 
-VoiceChannelSchema.method("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+VoiceChannelSchema.method<VoiceChannelDocument>("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
     this.locked = true;
     await this.$parent()?.save();
     await this.syncPermissions(channel, roleId);
 });
 
-VoiceChannelSchema.method("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+VoiceChannelSchema.method<VoiceChannelDocument>("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
     this.locked = false;
     await this.$parent()?.save();
     await this.syncPermissions(channel, roleId);
 });
 
-VoiceChannelSchema.method("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
+VoiceChannelSchema.method<VoiceChannelDocument>("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
     this.locked ? await this.lock(channel, roleId) : await this.unlock(channel, roleId);
     await this.$parent()?.save();
 });

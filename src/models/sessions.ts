@@ -107,11 +107,11 @@ export interface SessionModel extends mongoose.Model<SessionDocument> {
 
 // --Methods--
 
-SessionSchema.method("getRoomAmount", function () {
+SessionSchema.method<SessionDocument>("getRoomAmount", function () {
     return this.rooms.length;
 });
 
-SessionSchema.method("getParticipantAmount", async function () {
+SessionSchema.method<SessionDocument>("getParticipantAmount", async function () {
     let amount = 0;
     for (const r of this.rooms) {
         const roomData = await RoomSchema.findById(r);

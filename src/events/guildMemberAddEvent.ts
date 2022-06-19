@@ -1,5 +1,5 @@
 import { ClientEventListener, ExecuteEvent, StringReplacements } from "../../typings";
-import { ApplicationCommandData, ApplicationCommandOptionChoice, Client, ClientEvents, Guild } from "discord.js";
+import { ApplicationCommandData, ApplicationCommandOptionChoiceData, Client, ClientEvents, Guild } from "discord.js";
 import GuildSchema from "../models/guilds";
 import UserSchema from "../models/users";
 import { inspect } from "util";
@@ -7,8 +7,8 @@ import { inspect } from "util";
 export const name = "guildMemberAdd";
 
 export const execute: ExecuteEvent<"guildMemberAdd"> = async (client, member) => {
-    let guild = member.guild;
-    let guildData = await GuildSchema.findById(guild.id);
+    const guild = member.guild;
+    const guildData = await GuildSchema.findById(guild.id);
     // Create User Entry
     let databaseUser = await UserSchema.findById(member.id);
     if (!databaseUser) {

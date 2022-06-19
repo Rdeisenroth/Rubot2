@@ -1,5 +1,5 @@
 import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { ApplicationCommandData, ApplicationCommandOptionChoice, Client, ClientEvents, Guild } from "discord.js";
+import { ApplicationCommandData, ApplicationCommandOptionChoiceData, Client, ClientEvents, Guild } from "discord.js";
 import GuildSchema from "../models/guilds";
 import { inspect } from "util";
 

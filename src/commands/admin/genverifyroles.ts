@@ -36,7 +36,7 @@ const command: Command = {
         let dbTutorRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.TUTOR);
 
         // Create the roles if they don't exist
-        for (let [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
             if (!r) continue;
             if (!dbr) {
                 console.log(`creating role ${irn}`);

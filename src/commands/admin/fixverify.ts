@@ -36,7 +36,7 @@ const command: Command = {
         let dbTutorRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.TUTOR);
 
         // Create the roles if they don't exist
-        for (let [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
             if (!r) continue;
             if (!dbr) {
                 console.log(`creating role ${irn}`);
@@ -59,11 +59,11 @@ const command: Command = {
             }
         }
 
-        let users = await UserSchema.find({});
+        const users = await UserSchema.find({});
         let count = 0;
         for (const u of users) {
             console.log(`(${++count}/${users.length}) updating roles for user ${u.tu_id}`);
-            for (let [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+            for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
                 if (!r || !dbr) continue;
                 if (members.get(u._id)?.roles.cache.has(r.id)) {
                     console.log(`${u.tu_id} has role ${irn}`);

@@ -38,7 +38,7 @@ const command: Command = {
         }
         await interaction.deferReply({ ephemeral: true });
         let user = interaction.options.getUser("user", true);
-        let reason = interaction.options.getString("reason", true);
+        const reason = interaction.options.getString("reason", true);
         user = await user.fetch();
         const userData = await UserSchema.findById(user.id);
 

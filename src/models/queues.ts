@@ -1,4 +1,3 @@
-import { QueueSpan } from "./../utils/general";
 import { GuildDocument } from "./guilds";
 import { VoiceChannelDocument } from "./voice_channels";
 import mongoose from "mongoose";
@@ -7,7 +6,7 @@ import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocu
 import * as utils from "../utils/utils";
 import { StringReplacements } from "../../typings";
 import moment from "moment";
-import QueueSpanSchema from "./queue_span";
+import QueueSpanSchema, { QueueSpan, QueueSpanDocument } from "./queue_span";
 
 /**
  * A Queue from the Database
@@ -73,6 +72,14 @@ export interface Queue {
      * The opening times of the Queue
      */
     opening_times: QueueSpan[],
+    /**
+     * The standard time to shift the unlocking of the queue by in milliseconds
+     */
+    openShift?: number,
+    /**
+     * The standard time to shift the locking of the queue by in milliseconds
+     */
+    closeShift?: number,
     /**
      * The Entries of the Queue
      */
@@ -151,11 +158,22 @@ const QueueSchema = new mongoose.Schema<QueueDocument, QueueModel, Queue>({
         required: false,
         default: false,
     },
+    openShift: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
+    closeShift: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
 });
 
 export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.ObjectId> {
     room_spawner?: VoiceChannelSpawnerDocument,
     entries: mongoose.Types.DocumentArray<QueueEntryDocument>,
+    opening_times: mongoose.Types.DocumentArray<QueueSpanDocument>,
     // List getters or non model methods here
     /**
      * Put an Entry into the Queue
@@ -296,7 +314,7 @@ export interface QueueModel extends mongoose.Model<QueueDocument> {
 
 // --Methods--
 
-QueueSchema.method("join", async function (entry: QueueEntry) {
+QueueSchema.method<QueueDocument>("join", async function (entry: QueueEntry) {
     if (this.entries.find(x => x.discord_id === entry.discord_id)) {
         throw new Error("Dublicate Entry");
     }
@@ -305,7 +323,7 @@ QueueSchema.method("join", async function (entry: QueueEntry) {
     return this.getEntry(entry.discord_id)!;
 });
 
-QueueSchema.method("leave", async function (discord_id: string) {
+QueueSchema.method<QueueDocument>("leave", async function (discord_id: string) {
     const entry = this.entries.find(x => x.discord_id === discord_id);
     if (!entry) {
         throw new Error("Not Found");
@@ -315,7 +333,7 @@ QueueSchema.method("leave", async function (discord_id: string) {
     return entry;
 });
 
-QueueSchema.method("getSortedEntries", function (limit?: number) {
+QueueSchema.method<QueueDocument>("getSortedEntries", function (limit?: number) {
     const entries = this.entries.toObject<Array<QueueEntryDocument>>().sort((x, y) => {
         const x_importance = (Date.now() - (+x.joinedAt)) * (x.importance || 1);
         const y_importance = (Date.now() - (+y.joinedAt)) * (y.importance || 1);
@@ -324,21 +342,21 @@ QueueSchema.method("getSortedEntries", function (limit?: number) {
     return entries.slice(0, limit);
 });
 
-QueueSchema.method("isEmpty", function (): boolean {
+QueueSchema.method<QueueDocument>("isEmpty", function (): boolean {
     return this.entries.length < 1;
 });
-QueueSchema.method("contains", function (discord_id: string): boolean {
+QueueSchema.method<QueueDocument>("contains", function (discord_id: string): boolean {
     return (this.entries.toObject<Array<QueueEntryDocument>>().find(x => x.discord_id === discord_id)) ? true : false;
 });
-QueueSchema.method("getEntry", function (discord_id: string) {
+QueueSchema.method<QueueDocument>("getEntry", function (discord_id: string) {
     return this.entries.find(x => x.discord_id === discord_id) ?? null;
 });
 
-QueueSchema.method("getPosition", function (discord_id: string): number {
+QueueSchema.method<QueueDocument>("getPosition", function (discord_id: string): number {
     return this.getSortedEntries().findIndex(x => x.discord_id === discord_id);
 });
 
-QueueSchema.method("interpolateQueueString", function (string: string, entry_resolvable?: string | QueueEntry): string | null {
+QueueSchema.method<QueueDocument>("interpolateQueueString", function (string: string, entry_resolvable?: string | QueueEntry): string | null {
     try {
         const replacements: StringReplacements = {
             "limit": this.limit,
@@ -377,7 +395,7 @@ QueueSchema.method("interpolateQueueString", function (string: string, entry_res
 });
 
 
-QueueSchema.method("getJoinMessage", function (entry_resolvable?: string | QueueEntry) {
+QueueSchema.method<QueueDocument>("getJoinMessage", function (entry_resolvable?: string | QueueEntry) {
     const default_join_message = "You left the Queue.";
     if (this.join_message) {
         const join_msg = this.interpolateQueueString(this.join_message, entry_resolvable);
@@ -388,7 +406,7 @@ QueueSchema.method("getJoinMessage", function (entry_resolvable?: string | Queue
     }
 });
 
-QueueSchema.method("getLeaveMessage", function (entry_resolvable?: string | QueueEntry) {
+QueueSchema.method<QueueDocument>("getLeaveMessage", function (entry_resolvable?: string | QueueEntry) {
     const default_leave_message = "You left the Queue.";
     if (this.leave_message) {
         const leave_msg = this.interpolateQueueString(this.leave_message, entry_resolvable);
@@ -399,7 +417,7 @@ QueueSchema.method("getLeaveMessage", function (entry_resolvable?: string | Queu
     }
 });
 
-QueueSchema.method("getLeaveRoomMessage", function (entry_resolvable?: string | QueueEntry) {
+QueueSchema.method<QueueDocument>("getLeaveRoomMessage", function (entry_resolvable?: string | QueueEntry) {
     const default_leave_message = `You left the Room. Please confirm your stay or you will be removed from the queue after the Timeout of ${(this.disconnect_timeout ?? 0) / 1000}s.`;
     if (this.leave_room_message) {
         const leave_msg = this.interpolateQueueString(this.leave_room_message, entry_resolvable);
@@ -410,22 +428,22 @@ QueueSchema.method("getLeaveRoomMessage", function (entry_resolvable?: string | 
     }
 });
 
-QueueSchema.method("lock", async function () {
+QueueSchema.method<QueueDocument>("lock", async function () {
     this.locked = true;
     await this.$parent()?.save();
 });
 
-QueueSchema.method("unlock", async function () {
+QueueSchema.method<QueueDocument>("unlock", async function () {
     this.locked = false;
     await this.$parent()?.save();
 });
 
-QueueSchema.method("toggleLock", async function () {
+QueueSchema.method<QueueDocument>("toggleLock", async function () {
     this.locked = !this.locked;
     await this.$parent()?.save();
 });
 
-QueueSchema.method("getWaitingRooms", function (guild: GuildDocument) {
+QueueSchema.method<QueueDocument>("getWaitingRooms", function (guild: GuildDocument) {
     return guild.voice_channels?.filter(x => x.queue?.equals(this._id!)) ?? [];
 });
 

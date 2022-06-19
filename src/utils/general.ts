@@ -462,134 +462,46 @@ export class WeekTimestamp {
     public static fromNumber(number: number) {
         return new WeekTimestamp(Math.floor(number / 1000 / 60 / 60 / 24), Math.floor(number / 1000 / 60 / 60) % 24, Math.floor(number / 1000 / 60) % 60);
     }
-}
-
-/**
- * A Queue Span - A Weekly Timespan with a start- and End Date that can be used to automate Events every week
- */
-export class QueueSpan {
-    /**
-     * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
-     * @param begin The Begin Timestamp
-     * @param end The End Timestamp
-     * @param openShift Shift the Opening by X millixeconds
-     * @param closeShift Shift the Closing by X milliseconds
-     * @param startDate limit the span to after this date
-     * @param endDate limit the span to before this date
-     */
-    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0, public startDate?: Date, public endDate?: Date) {
-
-    }
 
     /**
-     * Checks whether the cycle has started at a given Date (or now if no date was given)
-     * @param date The Date to check
-     * @returns `true`, if the cycle has started at the given date
-     */
-    public cycleHasStarted(date = new Date()) {
-        return !this.startDate || date >= this.startDate;
-    }
-
-    /**
-     * Checks whether the cycle has ended at a given Date (or now if no date was given)
-     * @param date The Date to check
-     * @returns `true`, if the cycle has ended at the given date
-     */
-    public cycleHasEnded(date = new Date()) {
-        return this.endDate && date >= this.endDate;
-    }
-
-    /**
-     * Checks whether the cycle is active at a given Date (or now if no date was given)
-     * 
-     * @param date The Date to check
-     * @returns `true`, if the cycle is active at the given date
-     */
-    public cycleIsActive(date = new Date()) {
-        return this.cycleHasStarted(date) && !this.cycleHasEnded(date);
-    }
-
-    /**
-     * Returns the WeekTime of a given Date (or now if no date was given)
-     * 
-     * @param date The Date to check
-     * @returns the WeekTime of the given Date
-     */
-    private getWeekTime(date = new Date()) {
-        return WeekTimestamp.fromDate(date).getTime();
-    }
-
-    /**
-     * returns The Shifted begin Timestamp
-     * 
-     * @returns The Shifted begin Timestamp
-     */
-    private actualBeginTime() {
-        return this.begin.getTime() + this.openShift;
-    }
-
-    /**
-     * returns The Shifted end Timestamp
-     * 
-     * @returns The Shifted end Timestamp
-     */
-    private actualEndTime() {
-        return this.end.getTime() + this.closeShift;
-    }
-
-    /**
-     * Checks whether the span is active at a given Date (or now if no date was given)
-     * 
-     * @param date The Date to check
-     * @returns `true`, if the span is active at the given date
-     */
-    public isActive(date = new Date()) {
-        const cur = this.getWeekTime(date);
-        return this.cycleIsActive(date) && cur >= this.actualBeginTime() && cur <= this.actualEndTime();
-    }
-
-    /**
-     * A String representation of the span
-     * @returns A String representation of the current span
-     */
-    public toString() {
-        return `${this.begin.weekday} ${this.begin.hour}:${this.begin.minute} - ${this.end.weekday} ${this.end.hour}:${this.end.minute}`;
-    }
-
-    /**
-     * Creates a Queue Span from a String
-     * @param str the String to parse
-     * @returns The created Queue Span
-     * @throws An Error if the String could not be parsed
+     * Returns a string representation of the WeekTimestamp.
+     * @param padWeekday Whether to pad the weekday to the length of the longest weekday name
+     * @returns The WeekTimestamp as String
      * @example
+     * ```ts
+     * const weekTimestamp = new WeekTimestamp(Weekday.MONDAY, 12, 0);
+     * console.log(weekTimestamp.toString()); // "MONDAY 12:00"
      * ```
-     * const span = QueueSpan.fromString("MONDAY 08:00 - WEDNESDAY 16:00");
+     */
+    public toString(padWeekday = false): string {
+        const weekdayString = padWeekday ? Weekday[this.weekday].padEnd(Object.keys(Weekday).reduce((a, b) => a.length > b.length ? a : b).length, " ") : Weekday[this.weekday];
+        return `${weekdayString} ${String(this.hour).padStart(2, "0")}:${String(this.minute).padStart(2, "0")}`;
+    }
+
+    /**
+     * Creates a new WeekTimestamp from a given string
+     * @param string The string to parse
+     * @returns The created WeekTimestamp
+     * @throws Throws an Error if the string is not a valid WeekTimestamp
+     * @example
+     * ```ts
+     * const weekTimestamp = WeekTimestamp.fromString("Monday 12:00");
      * ```
      */
     public static fromString(str: string) {
-        // Name capturing group 1: weekday
-        // Name capturing group 2: hour
-        // Name capturing group 3: minute
-        // Name capturing group 4: weekday 2
-        // Name capturing group 5: hour 2
-        // Name capturing group 6: minute 2
-        const regex = /^(?<weekday>\w+) (?<hour>\d+):(?<minute>\d+) - (?<weekday2>\w+) (?<hour2>\d+):(?<minute2>\d+)$/;
+        const regex = /^(?<weekday>\d+) (?<hour>\d+):(?<minute>\d+)$/;
         const match = regex.exec(str);
         if (!match) {
-            throw new Error(`Invalid Queue Span String: ${str}`);
+            throw new Error(`Invalid WeekTimestamp String: ${str}`);
         }
-
-        return new QueueSpan(
-            new WeekTimestamp(
-                Weekday[match.groups!.weekday.toUpperCase() as keyof typeof Weekday],
-                +match.groups!.hour,
-                +match.groups!.minute,
-            ),
-            new WeekTimestamp(
-                Weekday[match.groups!.weekday2.toUpperCase() as keyof typeof Weekday],
-                +match.groups!.hour2,
-                +match.groups!.minute2,
-            ),
+        return new WeekTimestamp(
+            Weekday[match.groups!.weekday.toUpperCase() as keyof typeof Weekday],
+            +match.groups!.hour,
+            +match.groups!.minute,
         );
+    }
+
+    equals(other: WeekTimestamp): boolean {
+        return this.weekday === other.weekday && this.hour === other.hour && this.minute === other.minute;
     }
 }

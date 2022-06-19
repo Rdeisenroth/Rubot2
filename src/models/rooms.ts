@@ -123,11 +123,11 @@ export interface RoomModel extends mongoose.Model<RoomDocument> {
 
 // --Methods--
 
-RoomSchema.method("getUsers", function () {
+RoomSchema.method<RoomDocument>("getUsers", function () {
     return [... new Set(this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => x.type === eventType.user_join ? x.emitted_by : x.target!))];
 });
 
-RoomSchema.method("getUserRoles", async function () {
+RoomSchema.method<RoomDocument>("getUserRoles", async function () {
     const users = this.getFirstJoinTimes();
     const userRoles: {
         userID: string;
@@ -163,26 +163,26 @@ RoomSchema.method("getUserRoles", async function () {
     // let a = await userRoles;
 });
 
-RoomSchema.method("wasVisitedBy", function (user: User | Snowflake) {
+RoomSchema.method<RoomDocument>("wasVisitedBy", function (user: User | Snowflake) {
     if (user instanceof User) {
         user = user.id;
     }
     return this.getUsers().includes(user);
 });
 
-RoomSchema.method("wasParticipating", async function (user: User | Snowflake) {
+RoomSchema.method<RoomDocument>("wasParticipating", async function (user: User | Snowflake) {
     if (user instanceof User) {
         user = user.id;
     }
     return (await this.getUserRoles()).some(x => x.userID === user && x.role != sessionRole.coach);
 });
 
-RoomSchema.method("getParticipants", async function () {
+RoomSchema.method<RoomDocument>("getParticipants", async function () {
     const roles = await this.getUserRoles();
     return roles.filter(x => x.role == sessionRole.participant || x.role == null).map(x => x.userID);
 });
 
-RoomSchema.method("getFirstJoinTimes", function () {
+RoomSchema.method<RoomDocument>("getFirstJoinTimes", function () {
     // We Assume that the Role Does not change During the Rooms Lifetime
     const eventDates = this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => { return { timestamp: x.timestamp, target_id: (x.type === eventType.user_join ? x.emitted_by : x.target!), event_id: (x as EventDocument)._id } as EventDate; });
     return eventDates.filter((x, pos) => eventDates.findIndex(y => y.target_id === x.target_id) === pos);

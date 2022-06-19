@@ -31,8 +31,8 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-        let encrypted = client.utils.general.encryptText(interaction.options.getString("encryptionstring", true));
-        let decrypted = client.utils.general.decryptText(encrypted);
+        const encrypted = client.utils.general.encryptText(interaction.options.getString("encryptionstring", true));
+        const decrypted = client.utils.general.decryptText(encrypted);
         return client.utils.embeds.SimpleEmbed(interaction, { title: "Encrypted+Decrypted Text", text: `encrypted: ${encrypted}\ndecrypted: ${decrypted}`, empheral:true});
     },
 };

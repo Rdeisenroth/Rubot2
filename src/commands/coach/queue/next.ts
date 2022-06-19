@@ -116,7 +116,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Channel could not be created.", empheral: true });
         }
 
-        const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id, events: [] });
+        const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id });
         roomData.events.push({ emitted_by: "me", type: eventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
         // Update Coach Session
         coachingSession.rooms.push(roomData._id);
@@ -149,7 +149,7 @@ const command: Command = {
                         console.log("coach queue next: Matches: Remove User from Queue");
                     } catch (error) {
                         if (queueData.text_channel) {
-                            let c = await g.channels.fetch(queueData.text_channel);
+                            const c = await g.channels.fetch(queueData.text_channel);
                             await client.utils.embeds.SimpleEmbed(c as TextChannel, "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
                         }
                     }

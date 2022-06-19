@@ -1,12 +1,12 @@
 // import mongoose from 'mongoose';
-import mongoose from "mongoose";
+import mongoose, { AnyKeys, AnyObject } from "mongoose";
 import { Bot } from "../bot";
 import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
 import QueueSchema, { Queue, QueueDocument } from "./queues";
 import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_channels";
 import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
 import * as djs from "discord.js";
-import { ApplicationCommandData, ApplicationCommandOptionChoice } from "discord.js";
+import { ApplicationCommandData, ApplicationCommandOptionChoiceData } from "discord.js";
 import { Command, SubcommandHandler } from "../../typings";
 
 /**
@@ -131,7 +131,7 @@ export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
      * Gets all Command Names to append to help Command
      * @param commands The Command Collection of the Guild
      */
-    getRecursiveCommandNames(commands: djs.Collection<string, Command>): djs.ApplicationCommandOptionChoice[],
+    getRecursiveCommandNames(commands: djs.Collection<string, Command>): ApplicationCommandOptionChoiceData[],
     /**
      * Gets the verivied Role
      * @param client The Bot Client
@@ -157,12 +157,12 @@ export interface GuildModel extends mongoose.Model<GuildDocument> {
 
 // TODO Find better Names so that they don't conflict with discordjs Interfaces
 
-GuildSchema.method("resolve", async function (client: Bot) {
+GuildSchema.method<GuildDocument>("resolve", async function (client: Bot) {
     return await client.guilds.resolve(this._id);
 });
 
-GuildSchema.method("getRecursiveCommandNames", function (commands: djs.Collection<string, Command>) {
-    const data: ApplicationCommandOptionChoice[] = [];
+GuildSchema.method<GuildDocument>("getRecursiveCommandNames", function (commands: djs.Collection<string, Command>) {
+    const data: ApplicationCommandOptionChoiceData[] = [];
     commands.forEach((val, key) => {
         data.push({ name: key, value: key });
         if ((val as SubcommandHandler).subcommands) {
@@ -172,14 +172,14 @@ GuildSchema.method("getRecursiveCommandNames", function (commands: djs.Collectio
     return data;
 });
 
-GuildSchema.method("getVerifiedRole", async function (client: Bot, g?: djs.Guild | null) {
+GuildSchema.method<GuildDocument>("getVerifiedRole", async function (client: Bot, g?: djs.Guild | null) {
     g = g ?? (await this.resolve(client))!;
     await g.roles.fetch();
     return g.roles.cache.find(x => x.name.toLowerCase() === "verified") ?? null;
 });
 
 
-GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
+GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
     console.log("posting slash commands");
     g = g ?? await this.resolve(client);
     if (!g) {
@@ -204,7 +204,7 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
         };
         // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
         if (c.name === "help") {
-            const cmdChoices: ApplicationCommandOptionChoice[] = client.commands.map((val, key) => {
+            const cmdChoices: ApplicationCommandOptionChoiceData[] = client.commands.map((val, key) => {
                 return { name: key, value: key };
             });
             (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
@@ -214,27 +214,27 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
     }
     try {
         const commands = await g.commands.set(data);
-        const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
-        // permissions
-        for (const c of [...commands.values()]) {
-            const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
-            fullPermissions.push({
-                id: c.id,
-                permissions: [
-                    // Overwrites von Settings
-                    ...cmdSettings?.getPostablePermissions() ?? [],
-                    // Bot owner
-                    {
-                        id: client.ownerID!,
-                        type: "USER",
-                        permission: true,
-                    },
-                ],
-            });
-        }
-        await g.commands.permissions.set({
-            fullPermissions: fullPermissions,
-        });
+        // // permissions
+        // const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
+        // for (const c of [...commands.values()]) {
+        //     const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
+        //     fullPermissions.push({
+        //         id: c.id,
+        //         permissions: [
+        //             // Overwrites von Settings
+        //             ...cmdSettings?.getPostablePermissions() ?? [],
+        //             // Bot owner
+        //             {
+        //                 id: client.ownerID!,
+        //                 type: "USER",
+        //                 permission: true,
+        //             },
+        //         ],
+        //     });
+        // }
+        // await g.commands.permissions.set({
+        //     fullPermissions: fullPermissions,
+        // });
 
     } catch (error) {
         console.log(error);
@@ -243,9 +243,9 @@ GuildSchema.method("postSlashCommands", async function (client: Bot, g?: djs.Gui
 
 GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
     console.log(`Processing guild "${g.name}" (${g.id})`);
-    let guildData = await this.findById(g.id);
+    let guildData: GuildDocument | null = await this.findById(g.id);
     if (!guildData) {
-        guildData = new this({
+        const newGuildData = new this<AnyKeys<GuildDocument> & AnyObject>({
             _id: g.id,
             name: g.name,
             member_count: g.memberCount,
@@ -254,8 +254,12 @@ GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
                 prefix: "!",
                 slashCommands: [],
             } as GuildSettings,
+            text_channels: [],
+            voice_channels: [],
+            queues: [],
         });
-        await guildData.save();
+        await newGuildData.save();
+        guildData = newGuildData as unknown as GuildDocument;
     }
     // Post slash Commands
     await guildData.postSlashCommands(client, g);

@@ -104,7 +104,7 @@ export interface UserModel extends mongoose.Model<UserDocument> {
 
 // --Methods--
 
-UserSchema.method("hasActiveSessions", async function () {
+UserSchema.method<UserDocument>("hasActiveSessions", async function () {
     if (await SessionSchema.findOne({ user: (this._id as string), active: true })) {
         return true;
     } else {
@@ -112,16 +112,16 @@ UserSchema.method("hasActiveSessions", async function () {
     }
 });
 
-UserSchema.method("getSessions", async function () {
+UserSchema.method<UserDocument>("getSessions", async function () {
     return await SessionSchema.find({ user: (this._id as string) });
 });
 
-UserSchema.method("getActiveSessions", async function () {
+UserSchema.method<UserDocument>("getActiveSessions", async function () {
     return await SessionSchema.find({ user: (this._id as string), active: true });
 });
 
 
-UserSchema.method("getRole", async function (guildID: string, timestamp?: number) {
+UserSchema.method<UserDocument>("getRole", async function (guildID: string, timestamp?: number) {
     if (!timestamp) {
         timestamp = Date.now();
     }
