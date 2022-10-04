@@ -1,4 +1,4 @@
-import { GuildMember, Message } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, Message } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 import { VoiceChannelDocument } from "../../models/voice_channels";
@@ -12,7 +12,7 @@ const command: Command = {
     options: [{
         name: "member",
         description: "The member to Permit",
-        type: "USER",
+        type: ApplicationCommandOptionType.User,
         required: true,
     }],
     category: "Miscellaneous",
@@ -54,7 +54,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to Permit a Member.");
         }
 
-        const permitMember = interaction.options.getMember("member", true);
+        const permitMember = interaction.options.getMember("member");
 
         if (!(permitMember instanceof GuildMember)) {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have to specify a valid Member.");
@@ -66,8 +66,8 @@ const command: Command = {
 
         if (channelData.permitted.includes(permitMember.id)) {
             const memberperms = channel.permissionOverwrites.cache.get(permitMember.id);
-            if (!memberperms || !memberperms.allow.has("VIEW_CHANNEL") || !memberperms.allow.has("CONNECT") || !memberperms.allow.has("SPEAK")) {
-                await channel.permissionOverwrites.edit(permitMember.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
+            if (!memberperms || !memberperms.allow.has("ViewChannel") || !memberperms.allow.has("Connect") || !memberperms.allow.has("Speak")) {
+                await channel.permissionOverwrites.edit(permitMember.id, { "ViewChannel": true, "Connect": true, "Speak": true });
                 return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "Someone messed with My permissions... :angry: Should be fixed now. :thumbsup: ");
             } else {
                 return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The member already has Permission to join your channel.");
@@ -78,7 +78,7 @@ const command: Command = {
         channelData.permitted.push(permitMember.id);
         await guildData!.save();
 
-        await channel.permissionOverwrites.edit(permitMember.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
+        await channel.permissionOverwrites.edit(permitMember.id, { "ViewChannel": true, "Connect": true, "Speak": true });
 
         await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", `${permitMember} was permitted to join your channel.`);
     },

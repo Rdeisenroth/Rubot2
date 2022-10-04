@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message, Role } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -12,7 +12,7 @@ const command: Command = {
         {
             name: "queue",
             description: "The Queue",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],

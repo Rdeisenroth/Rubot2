@@ -1,4 +1,4 @@
-import { ColorResolvable, CommandInteraction, DMChannel, EmbedFieldData, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, MessageEmbed, NewsChannel, PartialDMChannel, ReplyMessageOptions, TextBasedChannel, TextChannel, ThreadChannel, UserResolvable } from "discord.js";
+import { ColorResolvable, CommandInteraction, DMChannel, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, Embed, NewsChannel, PartialDMChannel, TextBasedChannel, TextChannel, ThreadChannel, UserResolvable, EmbedBuilder, InteractionResponse } from "discord.js";
 import { APIMessage } from "discord-api-types/v9";
 import * as utils from "./utils";
 import { SimpleEmbedOptions } from "../../typings";
@@ -25,9 +25,9 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     ) && !interaction.channel) {
         throw new Error("Embed Requires a Channel");
     }
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     if (!(interaction instanceof DMChannel)) {
-        embed.setColor(interaction.guild?.me?.roles.highest.color ?? 0x7289da);
+        embed.setColor(interaction.guild?.members.me?.roles.highest.color ?? 0x7289da);
     } else {
         embed.setColor(0x7289da);
     }
@@ -46,9 +46,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
         embed.setDescription(`${text}`);
     }
     if (fields) {
-        for (const field of fields) {
-            embed.addField(field.name, field.value, field.inline);
-        }
+        embed.addFields(fields);
     }
     if (thumbnail) {
         embed.setThumbnail(thumbnail);
@@ -56,7 +54,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
     if (image) {
         embed.setImage(image);
     }
-    let res: void | Message;
+    let res: void | Message | InteractionResponse;
     if (interaction instanceof CommandInteraction) {
         if (interaction.replied || interaction.deferred) {
             await interaction.editReply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
@@ -65,7 +63,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
             res = await interaction.reply({ embeds: [embed], ephemeral: empheral, ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
         }
     } else if (interaction instanceof Message) {
-        res = interaction.deleted ? (await interaction.channel.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) })) : (await interaction.reply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) }));
+        res = await interaction.reply({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
     } else {
         res = await interaction.send({ embeds: [embed], ...(components && { components }), ...(attachments && { attachments }), ...(files && { files }) });
     }
@@ -145,7 +143,7 @@ export async function SimpleEmbed(interaction: Message | CommandInteraction | DM
 //     return new Promise((resolve, reject) => {
 //         try {
 //             let embed = new Discord.RichEmbed()
-//             embed.setColor(message.guild.me.highestRole.color || 0x7289da)
+//             embed.setColor(message.guild.members.me.highestRole.color || 0x7289da)
 //             //embed.setAuthor(`${message.member.displayName}`, message.member.user.displayAvatarURL || null)
 //             embed.setTitle(`__new Rank__`)
 //             embed.setDescription(`Congratulations for reaching the Rank of ${utils.ranks.HRN_to_Name}. Your rank roles will be updated.`)

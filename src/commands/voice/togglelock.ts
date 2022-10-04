@@ -58,12 +58,12 @@ const command: Command = {
         if (channelData.locked) {
             overwrites.push({
                 id: g.roles.everyone.id,
-                deny: ["CONNECT", "SPEAK"],
+                deny: ["Connect", "Speak"],
             });
         } else {
             overwrites.push({
                 id: g.roles.everyone.id,
-                allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK"],
+                allow: ["ViewChannel", "Connect", "Speak"],
             });
         }
         await channel.permissionOverwrites.set(overwrites);

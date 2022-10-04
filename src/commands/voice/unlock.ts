@@ -47,7 +47,7 @@ const command: Command = {
         channelData.set("locked", false);
         await guildData!.save();
 
-        await channel.permissionOverwrites.edit(g.roles.everyone.id, { "CONNECT": true, "SPEAK": true, "VIEW_CHANNEL": true });
+        await channel.permissionOverwrites.edit(g.roles.everyone.id, { "Connect": true, "Speak": true, "ViewChannel": true });
 
         // // change channel name
         // var newName = cName;

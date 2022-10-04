@@ -1,4 +1,4 @@
-import ChannelType, { Collection, CommandInteraction, Message } from "discord.js";
+import ChannelType, { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandSubCommandData, ApplicationCommandSubGroupData, Collection, CommandInteraction, Message } from "discord.js";
 import * as fs from "fs";
 import { Command, SubcommandHandler } from "../../typings";
 import path from "path";
@@ -45,9 +45,9 @@ const command: SubcommandHandler = {
                 }
             }
             if (((c as SubcommandHandler).subcommands)) {
-                scopts.push({ name: c.name, description: c.description, type: "SUB_COMMAND_GROUP", options: (c.options as ChannelType.ApplicationCommandSubCommandData[]) });
+                scopts.push({ name: c.name, description: c.description, type: ApplicationCommandOptionType.SubcommandGroup, options: (c.options as ChannelType.ApplicationCommandSubCommandData[]) });
             } else {
-                scopts.push({ name: c.name, description: c.description, type: "SUB_COMMAND", options: (c.options as ChannelType.ApplicationCommandChoicesData[]) });
+                scopts.push({ name: c.name, description: c.description, type: ApplicationCommandOptionType.Subcommand, options: (c.options as Exclude<ApplicationCommandOptionData, ApplicationCommandSubGroupData | ApplicationCommandSubCommandData>[]) });
             }
         }
         command.options = scopts;

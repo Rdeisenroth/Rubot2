@@ -1,6 +1,6 @@
 import { VoiceChannelSpawner } from "./../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "./../../../models/slash_command_permission";
-import { Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 
@@ -14,13 +14,13 @@ const command: Command = {
         {
             name: "queue",
             description: "A Queue",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "category",
             description: "A Category channel",
-            type: "CHANNEL",
+            type: ApplicationCommandOptionType.Channel,
             required: true,
         },
     ],

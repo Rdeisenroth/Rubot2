@@ -1,4 +1,4 @@
-import { EmbedFieldData, GuildMember, Message, User } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, GuildMember, Message, User } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -17,7 +17,7 @@ const command: Command = {
         {
             name: "coach",
             description: "The Coach linked to the session",
-            type: "USER",
+            type: ApplicationCommandOptionType.User,
             required: true,
         },
     ],
@@ -43,7 +43,7 @@ const command: Command = {
 
         const dmChannel = await member.createDM();
 
-        const fields: EmbedFieldData[] = [];
+        const fields: EmbedField[] = [];
         for (const e of sortedSessions) {
             // Set inactive
             e.active = false;

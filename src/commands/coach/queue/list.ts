@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -11,7 +11,7 @@ const command: Command = {
     options: [{
         name: "amount",
         description: "The Amount of Entries to display (this option will soon be replaced with navigation buttons)",
-        type: "INTEGER",
+        type: ApplicationCommandOptionType.Integer,
         required: false,
     }],
     execute: async (client, interaction, args) => {
@@ -50,23 +50,24 @@ const command: Command = {
 
         // await g.members.fetch();
 
-        const fields: EmbedFieldData[] = [];
+        const fields: EmbedField[] = [];
         for (const e of queueData.getSortedEntries(10)) {
-            const position = queueData.getPosition(e.discord_id)+1;
+            const position = queueData.getPosition(e.discord_id) + 1;
             const joined_at = `<t:${Math.round((+e.joinedAt) / 1000)}:f>`;
             const intent = e.intent;
             const member = await g.members.fetch(e.discord_id);
             fields.push({
                 name: member.displayName, value:
                     `-Position: ${position}`
-                        + `\n-joined at: ${joined_at}`
-                        + (intent ? `\n-intent: ${intent}` : ""),
+                    + `\n-joined at: ${joined_at}`
+                    + (intent ? `\n-intent: ${intent}` : ""),
+                inline: false,
             });
         }
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Queue Information",
-            text: fields&&fields.length ? `Queue Entries of ${queueData.name}` : `Queue ${queueData.name} is empty`,
+            text: fields && fields.length ? `Queue Entries of ${queueData.name}` : `Queue ${queueData.name} is empty`,
             empheral: true,
             fields,
         });

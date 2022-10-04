@@ -1,5 +1,5 @@
 import { ExecuteEvent } from "../../typings";
-import { ApplicationCommandData } from "discord.js";
+import { ActivityType, ApplicationCommandData } from "discord.js";
 import GuildSchema from "../models/guilds";
 
 export const execute: ExecuteEvent<"ready"> = async (client) => {
@@ -30,7 +30,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
         await GuildSchema.prepareGuild(client,g);
     }
 
-    await client.user?.setPresence({ status: "online", activities: [{ name: "Sprechstunden.", type: "WATCHING" }], afk: false });
+    await client.user?.setPresence({ status: "online", activities: [{ name: "Sprechstunden.", type: ActivityType.Watching }], afk: false });
     // Bot is ready
     client.logger.ready({
         message: `"${client.user?.username}" is Ready! (${(Date.now() - client.initTimestamp) / 1000}s)`,

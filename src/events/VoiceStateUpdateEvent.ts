@@ -1,5 +1,5 @@
 import { ExecuteEvent } from "../../typings";
-import { Collection, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Collection, ActionRow, Embed, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, APIMessageActionRowComponent } from "discord.js";
 import GuildSchema from "../models/guilds";
 import { VoiceChannelDocument } from "../models/voice_channels";
 import { QueueDocument } from "../models/queues";
@@ -55,14 +55,11 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             client.queue_stays.get(newState.member!.id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.STAY);
                             await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), {
                                 title: "Queue System", text: "You stayed in the queue.", components: [
-                                    new MessageActionRow(
-                                        {
-                                            components:
-                                                [
-                                                    new MessageButton({ customId: "queue_refresh", label: "Show Queue Information", style: "PRIMARY" }),
-                                                    new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
-                                                ],
-                                        }),
+                                    new ActionRowBuilder<ButtonBuilder>()
+                                        .addComponents(
+                                            new ButtonBuilder({ customId: "queue_refresh", label: "Show Queue Information", style: ButtonStyle.Primary }),
+                                            new ButtonBuilder({ customId: "queue_leave", label: "Leave queue", style: ButtonStyle.Danger }),
+                                        ),
                                 ],
                             });
                         }
@@ -114,19 +111,25 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     };
                     // Interpolate String
                     const join_message = client.utils.general.interpolateString(queue.join_message, replacements);
+                    const row = new ActionRowBuilder<ButtonBuilder>({
+                        components:
+                            [
+                                new ButtonBuilder({ customId: "queue_refresh", label: "Refresh", style: ButtonStyle.Primary }),
+                                new ButtonBuilder({ customId: "queue_leave", label: "Leave queue", style: ButtonStyle.Danger }),
+                            ],
+                    });
                     try {
                         await newState.member?.send({
-                            embeds: [new MessageEmbed({ title: "Queue System", description: join_message, color: guild.me?.roles.highest.color || 0x7289da })],
-                            components: [
-                                new MessageActionRow(
+                            embeds: [
+                                new EmbedBuilder(
                                     {
-                                        components:
-                                            [
-                                                new MessageButton({ customId: "queue_refresh", label: "Refresh", style: "PRIMARY" }),
-                                                new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
-                                            ],
-                                    }),
+                                        title: "Queue System",
+                                        description: join_message,
+                                        color: guild.members.me?.roles.highest.color || 0x7289da,
+                                    },
+                                ),
                             ],
+                            components: [row],
                         });
                     } catch (error) {
                         console.log(error);
@@ -198,12 +201,12 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             title: "Queue System",
                             text: queue.getLeaveRoomMessage(member_id),
                             components: [
-                                new MessageActionRow(
+                                new ActionRowBuilder<ButtonBuilder>(
                                     {
                                         components:
                                             [
-                                                new MessageButton({ customId: "queue_stay", label: "Stay in Queue", style: "PRIMARY" }),
-                                                new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                                new ButtonBuilder({ customId: "queue_stay", label: "Stay in Queue", style: ButtonStyle.Primary }),
+                                                new ButtonBuilder({ customId: "queue_leave", label: "Leave queue", style: ButtonStyle.Danger }),
                                             ],
                                     }),
                             ],

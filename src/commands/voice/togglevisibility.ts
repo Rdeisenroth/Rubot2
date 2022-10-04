@@ -37,12 +37,12 @@ const command: Command = {
         // Check if Visible or invisible
         const overwrites = channel.permissionOverwrites.cache.get(g.roles.everyone.id);
         let hidden = false;
-        if (overwrites && overwrites.deny?.has("VIEW_CHANNEL")) {
+        if (overwrites && overwrites.deny?.has("ViewChannel")) {
             hidden = true;
         }
 
         // Change permissions for everyone
-        await channel.permissionOverwrites.edit(g.roles.everyone.id, { VIEW_CHANNEL: hidden });
+        await channel.permissionOverwrites.edit(g.roles.everyone.id, { ViewChannel: hidden });
 
         await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", `Your Channel was ${hidden ? "**unhidden**" : "**hidden**"}.`);
     },

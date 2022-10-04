@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -12,13 +12,13 @@ const command: Command = {
         {
             name: "queue",
             description: "The Queue",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "user",
             description: "The User to kick",
-            type: "USER",
+            type: ApplicationCommandOptionType.User,
             required: true,
         },
     ],
@@ -50,10 +50,11 @@ const command: Command = {
 
         const roomCount = await RoomSchema.getParticipantRoomCount(user);
 
-        const fields: EmbedFieldData[] = [
+        const fields: EmbedField[] = [
             {
                 name: "Total Rooms Participated",
                 value: `${roomCount}`,
+                inline: false,
             },
         ];
         await client.utils.embeds.SimpleEmbed(interaction, {

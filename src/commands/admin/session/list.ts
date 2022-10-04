@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -28,7 +28,7 @@ const command: Command = {
         const sessions = await SessionSchema.find({ guild: g.id, active: true });
         const sortedSessions = sessions.sort((x, y) => (+x.started_at) - (+y.started_at));
 
-        const fields: EmbedFieldData[] = [];
+        const fields: EmbedField[] = [];
         for (const e of sortedSessions) {
             const member = await g.members.fetch(e.user);
             const participants = await e.getParticipantAmount();
@@ -39,6 +39,7 @@ const command: Command = {
                     + `\n-rooms: ${e.getRoomAmount()}`
                     + `\n-participants:${participants}`
                     + `\n-queue:${queue?.name}`,
+                inline: false,
             });
         }
 

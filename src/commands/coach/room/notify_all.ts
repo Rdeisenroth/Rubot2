@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 
@@ -11,7 +11,7 @@ const command: Command = {
     options: [{
         name: "message",
         description: "The Message to brodcast",
-        type: "STRING",
+        type: ApplicationCommandOptionType.String,
         required: true,
     }],
     execute: async (client, interaction, args) => {

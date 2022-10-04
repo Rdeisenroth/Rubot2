@@ -1,4 +1,4 @@
-import { Collection, MessageEmbed } from "discord.js";
+import { Collection, EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
@@ -39,7 +39,7 @@ const command: ButtonInteraction = {
         let color = 0x7289da;
         try {
             const guild = client.guilds.cache.get(g._id);
-            color = guild?.me?.roles.highest.color ?? 0x7289da;
+            color = guild?.members.me?.roles.highest.color ?? 0x7289da;
             const member = guild?.members.cache.get(interaction.user.id);
             const vcData = await g.voice_channels.id(member?.voice.channelId);
             if (vcData?.queue?.equals(queue._id!)) {
@@ -55,7 +55,7 @@ const command: ButtonInteraction = {
         } catch (error) {
             console.log(error);
         }
-        await interaction.update({ embeds: [new MessageEmbed({ title: "Queue System", description: leave_msg, color: color })], components: [] });
+        await interaction.update({ embeds: [new EmbedBuilder({ title: "Queue System", description: leave_msg, color: color })], components: [] });
     },
 };
 

@@ -1,4 +1,4 @@
-import { DiscordAPIError, Message, MessageEmbed } from "discord.js";
+import { DiscordAPIError, Message, EmbedBuilder } from "discord.js";
 import * as discord from "discord.js";
 import { APIMessage } from "discord-api-types/v9";
 // : (message: Message, error: string, deleteinterval: number => Promise<Message>)
@@ -6,8 +6,8 @@ export const errorMessage = async (interaction: Message | discord.CommandInterac
     if (!interaction.channel) {
         throw new Error("Embed Requires a Channel");
     }
-    const embed = new MessageEmbed();
-    embed.setColor(interaction.guild?.me?.roles.highest.color ? interaction.guild.me.roles.highest.color || 0x7289da : 0x7289da);
+    const embed = new EmbedBuilder();
+    embed.setColor(interaction.guild?.members.me?.roles.highest.color ? interaction.guild.members.me.roles.highest.color || 0x7289da : 0x7289da);
     embed.setTitle(":x: __An Error Occured:__");
     embed.setDescription((error instanceof Error) ? `${error.message}` : `${error}`);
     const res = await interaction.reply({ embeds: [embed] });

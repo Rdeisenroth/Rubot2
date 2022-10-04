@@ -104,14 +104,14 @@ export function getUser(interaction: Message | Interaction | undefined) {
  * @param interaction  the Interaction to get the Member from
  * @returns the Member or null
  */
-export const getMember = (interaction: Message | Interaction | undefined) => {
+export const getMember = (interaction: Message | CommandInteraction | undefined) => {
     // Check if user is in VC
     if (!interaction || !interaction.guild) {
         return null;
     }
     if (interaction instanceof Message) {
         return interaction.member;
-    } else if (interaction instanceof Interaction) {
+    } else if (interaction instanceof CommandInteraction) {
         const memberId = interaction.user.id;
         const member = interaction.guild.members.cache.find(x => x.id === memberId);
         if (member) {
@@ -167,7 +167,7 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
     const commandSettings = await guildData.guild_settings.getCommandByInternalName(command.name);
     const permission_overwrite = commandSettings?.permissions.some(x => x.id === roleoruser?.id && x.permission) ?? false;
     const role_permission_overwrite = (roleoruser instanceof GuildMember) && [...roleoruser.roles.cache.values()].some(r => commandSettings?.permissions.some(x => x.id === r.id && x.permission));
-    return (commandSettings?.defaultPermission ?? command.defaultPermission ?? true) || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
+    return true || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
 }
 
 /**

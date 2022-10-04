@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../typings";
 import GuildSchema from "../models/guilds";
 import { Queue } from "../models/queues";
@@ -14,13 +14,13 @@ const command: Command = {
         {
             name: "name",
             description: "The Queue Name",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "description",
             description: "The Queue Description",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: false,
         },
     ],

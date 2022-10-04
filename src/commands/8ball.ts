@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { ApplicationCommandOptionType, ChatInputCommandInteraction } from "discord.js";
 import { Command } from "../../typings";
 
 /**
@@ -13,7 +13,7 @@ const command: Command = {
     options: [{
         name: "query",
         description: "The Query String",
-        type: "STRING",
+        type: ApplicationCommandOptionType.String,
         required: false,
     }],
     async execute(client, interaction, args) {
@@ -50,8 +50,8 @@ const command: Command = {
             "No. No, Absolutely not."], 4]];
         const eightballemoji = await client.emojis.cache.get("668488605068558337");
         const answerDirection = client.utils.general.getRandomEntryWithWeights(Answers);
-        const query = (interaction instanceof Interaction) ? interaction.options.getString("query", false) : args.join(" ");
-        await client.utils.embeds.SimpleEmbed(interaction!, "__8 Ball__", `${interaction instanceof Interaction && query ? "> " + query + "\n" : ""}${eightballemoji} ${await client.utils.general.getRandomEntry(answerDirection)}`);
+        const query = (interaction instanceof ChatInputCommandInteraction) ? interaction.options.getString("query", false) : args.join(" ");
+        await client.utils.embeds.SimpleEmbed(interaction!, "__8 Ball__", `${interaction instanceof ChatInputCommandInteraction && query ? "> " + query + "\n" : ""}${eightballemoji} ${await client.utils.general.getRandomEntry(answerDirection)}`);
     },
 };
 

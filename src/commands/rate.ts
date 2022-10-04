@@ -1,4 +1,4 @@
-import { Interaction, MessageEmbed } from "discord.js";
+import { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 
 /**
@@ -15,7 +15,7 @@ const command: Command = {
     options: [{
         name: "query",
         description: "The Thing to Rate",
-        type: "STRING",
+        type: ApplicationCommandOptionType.String,
         required: false,
     }],
     async execute(client, interaction, args) {
@@ -38,7 +38,7 @@ const command: Command = {
             break;
         }
         let customtext = "";
-        const query = (interaction instanceof Interaction) ? interaction.options.getString("query", false) : args.join(" ");
+        const query = (interaction instanceof ChatInputCommandInteraction) ? interaction.options.getString("query", false) : args.join(" ");
         /**
          * some rng manipulation ;)
          */
@@ -54,7 +54,7 @@ const command: Command = {
             break;
         }
         // await message.reply(`I rate \`${chosennumber}/10\``);
-        await client.utils.embeds.SimpleEmbed(interaction!, "__Rating System__", `${interaction instanceof Interaction && query ? "> " + query + "\n" : ""}I rate \`${chosennumber}/10\`${customtext}`);
+        await client.utils.embeds.SimpleEmbed(interaction!, "__Rating System__", `${interaction instanceof ChatInputCommandInteraction && query ? "> " + query + "\n" : ""}I rate \`${chosennumber}/10\`${customtext}`);
     },
 };
 

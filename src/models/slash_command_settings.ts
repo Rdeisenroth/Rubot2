@@ -1,7 +1,6 @@
 import SlashCommandPermissionSchema, { SlashCommandPermission, SlashCommandPermissionDocument } from "./slash_command_permission";
-import { ApplicationCommandPermissionData, ApplicationCommandPermissionType, OverwriteData, PermissionString, Snowflake } from "discord.js";
-import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums";
 import mongoose from "mongoose";
+import { PermissionResolvable } from "discord.js";
 
 export interface SlashCommandSettings {
     /**
@@ -19,7 +18,7 @@ export interface SlashCommandSettings {
     /**
      * The Default Command Permission overwrite
      */
-    defaultPermission?: boolean,
+    defaultPermission?: PermissionResolvable,
     /**
      * If the command should be completely removed from the slash command List
      */
@@ -59,15 +58,16 @@ const SlashCommandSettingsSchema = new mongoose.Schema<SlashCommandSettingsDocum
         default: [],
     }],
     permissions: [SlashCommandPermissionSchema],
-    defaultPermission: {
-        type: Boolean,
-        required: false,
-    },
+    //     defaultPermission: {
+    //         type: String,
+    //         required: false,
+    //     },
 });
 
-export interface SlashCommandSettingsDocument extends SlashCommandSettings, mongoose.Document<mongoose.Types.ObjectId> {
+export interface SlashCommandSettingsDocument extends SlashCommandSettings, mongoose.Document < mongoose.Types.ObjectId > {
     aliases: mongoose.Types.Array<string>,
     permissions: mongoose.Types.DocumentArray<SlashCommandPermissionDocument>,
+    // defaultPermission: string,
     /**
      * Gets postable Permission objects off the settings
      */

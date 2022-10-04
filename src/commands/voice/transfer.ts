@@ -1,4 +1,4 @@
-import { GuildMember, Message } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, Message } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 import { VoiceChannelDocument } from "../../models/voice_channels";
@@ -12,7 +12,7 @@ const command: Command = {
     options: [{
         name: "member",
         description: "The new Owner",
-        type: "USER",
+        type: ApplicationCommandOptionType.User,
         required: true,
     }],
     category: "Miscellaneous",
@@ -54,7 +54,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to transfer the Ownership.");
         }
 
-        const newOwner = interaction.options.getMember("member", true);
+        const newOwner = interaction.options.getMember("member");
 
         if (!(newOwner instanceof GuildMember)) {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have to specify a valid Member.");
@@ -76,8 +76,8 @@ const command: Command = {
         await guildData!.save();
 
         // Ensure both new and Old owner are permitted
-        await channel.permissionOverwrites.edit(oldOwnerID, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
-        await channel.permissionOverwrites.edit(newOwner.id, { "VIEW_CHANNEL": true, "CONNECT": true, "SPEAK": true });
+        await channel.permissionOverwrites.edit(oldOwnerID, { "ViewChannel": true, "Connect": true, "Speak": true });
+        await channel.permissionOverwrites.edit(newOwner.id, { "ViewChannel": true, "Connect": true, "Speak": true });
 
         await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", `The ownershif of **${channel.name}** was transfered to ${newOwner}. The Old owner is still Permitted to join.`);
     },

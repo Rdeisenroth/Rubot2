@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
@@ -14,13 +14,13 @@ const command: Command = {
         {
             name: "queue",
             description: "The Queue to join",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "intent",
             description: "The Intent",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: false,
         },
     ],

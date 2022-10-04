@@ -1,4 +1,4 @@
-import { GuildChannel, Message } from "discord.js";
+import { ApplicationCommandOptionType, GuildChannel, Message } from "discord.js";
 import { Command } from "../../typings";
 import GuildSchema from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
@@ -14,19 +14,19 @@ const command: Command = {
         {
             name: "channel",
             description: "The Channel to be the Waiting Room",
-            type: "CHANNEL",
+            type: ApplicationCommandOptionType.Channel,
             required: true,
         },
         {
             name: "queue",
             description: "A valid queue",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "supervisor",
             description: "A Supervisor Role",
-            type: "ROLE",
+            type: ApplicationCommandOptionType.Role,
             required: true,
         },
     ],

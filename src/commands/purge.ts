@@ -1,4 +1,4 @@
-import { Message, TextChannel } from "discord.js";
+import { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
 import { Command } from "../../typings";
 
 /**
@@ -13,7 +13,7 @@ const command: Command = {
     options: [{
         name: "amount",
         description: "The Amount of Messages to Delete (default is 1)",
-        type: "INTEGER",
+        type: ApplicationCommandOptionType.Integer,
         required: false,
     }],
     defaultPermission: false,

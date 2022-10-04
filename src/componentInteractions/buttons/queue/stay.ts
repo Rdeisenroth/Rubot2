@@ -1,4 +1,4 @@
-import { Collection, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
 import GuildSchema, { GuildDocument } from "../../../models/guilds";
 import { QueueDocument } from "../../../models/queues";
@@ -37,24 +37,24 @@ const command: ButtonInteraction = {
         let color = 0x7289da;
         try {
             const guild = client.guilds.cache.get(g._id);
-            color = guild?.me?.roles.highest.color ?? 0x7289da;
+            color = guild?.members.me?.roles.highest.color ?? 0x7289da;
             const member = guild?.members.cache.get(interaction.user.id);
             await member?.voice.disconnect();
         } catch (error) {
             console.log(error);
         }
         await interaction.update({
-            embeds: [new MessageEmbed({
+            embeds: [new EmbedBuilder({
                 title: "Queue System",
                 description: "You stayed in the queue.",
                 color: color,
             })],
             components: [
-                new MessageActionRow(
+                new ActionRowBuilder<ButtonBuilder>(
                     {
                         components:
                             [
-                                new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                new ButtonBuilder({ customId: "queue_leave", label: "Leave queue", style: ButtonStyle.Danger }),
                             ],
                     }),
             ],
