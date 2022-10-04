@@ -1,8 +1,7 @@
-import { ApplicationCommandPermissionData, ApplicationCommandPermissionType, OverwriteData, PermissionString, Snowflake } from "discord.js";
-import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums";
+import { ApplicationCommandPermissionType } from "discord.js";
 import mongoose from "mongoose";
 
-export interface SlashCommandPermission extends ApplicationCommandPermissionData {
+export interface SlashCommandPermission {
     /**
      * The User or Role ID
      */
@@ -10,7 +9,7 @@ export interface SlashCommandPermission extends ApplicationCommandPermissionData
     /**
      * The ID Type (Role or User)
      */
-    type: ApplicationCommandPermissionTypes;
+    type: ApplicationCommandPermissionType;
     /**
      * Whether to permit or not permit the User Or Role
      */

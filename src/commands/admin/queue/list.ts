@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -12,13 +12,13 @@ const command: Command = {
         {
             name: "queue",
             description: "The Queue",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "amount",
             description: "The Amount of Entries to display (this option will soon be replaced with navigation buttons)",
-            type: "INTEGER",
+            type: ApplicationCommandOptionType.Integer,
             required: false,
         },
     ],
@@ -45,7 +45,7 @@ const command: Command = {
 
         // await g.members.fetch();
 
-        const fields: EmbedFieldData[] = [];
+        const fields: EmbedField[] = [];
         for (const e of queueData.getSortedEntries(10)) {
             const position = queueData.getPosition(e.discord_id) + 1;
             const joined_at = `<t:${Math.round((+e.joinedAt) / 1000)}:f>`;
@@ -57,6 +57,7 @@ const command: Command = {
                     + `\n-Position: ${position}`
                     + `\n-joined at: ${joined_at}`
                     + (intent ? `\n-intent: ${intent}` : ""),
+                inline: false,
             });
         }
 

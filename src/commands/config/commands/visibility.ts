@@ -1,5 +1,5 @@
 import { SlashCommandSettings } from "./../../../models/slash_command_settings";
-import { Message } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -15,13 +15,13 @@ const command: Command = {
         {
             name: "original-name",
             description: "The Original Command Name (before any renaming)",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "visible",
             description: "Whether the command should be visible or disabled (will be invisible for EVERYONE on the Server)",
-            type: "BOOLEAN",
+            type: ApplicationCommandOptionType.Boolean,
             required: true,
         },
     ],

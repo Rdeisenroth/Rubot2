@@ -1,4 +1,4 @@
-import { EmbedFieldData, GuildMember, Message, User } from "discord.js";
+import { EmbedField, GuildMember, Message, User } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -33,7 +33,7 @@ const command: Command = {
 
         
 
-        const fields: EmbedFieldData[] = [];
+        const fields: EmbedField[] = [];
         for (const e of sortedSessions) {
             // Set inactive
             e.active = false;

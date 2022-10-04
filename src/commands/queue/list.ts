@@ -1,5 +1,5 @@
 import { QueueDocument } from "./../../models/queues";
-import { Message, EmbedFieldData } from "discord.js";
+import { Message } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 
@@ -25,7 +25,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
 
-        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Queue List", fields: guildData.queues.toObject<QueueDocument[]>().map(x => { return { name: x.name + (x.locked ? " (locked)" : ""), value: x.description ?? "" }; }) });
+        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Queue List", fields: guildData.queues.toObject<QueueDocument[]>().map(x => { return { name: x.name + (x.locked ? " (locked)" : ""), value: x.description ?? "", inline: false }; }) });
 
         // client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`)
     },

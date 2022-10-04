@@ -1,5 +1,5 @@
 import { SlashCommandPermission } from "./../../../models/slash_command_permission";
-import { Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 
@@ -13,19 +13,19 @@ const command: Command = {
         {
             name: "original-name",
             description: "a command Name(original) or a category wrapped in [], or \\* for all available commands",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "roleoruser",
             description: "A mentionable role or user whose permission should be changed",
-            type: "MENTIONABLE",
+            type: ApplicationCommandOptionType.Mentionable,
             required: true,
         },
         {
             name: "can-execute",
             description: "If true the role or user can execute the given command",
-            type: "BOOLEAN",
+            type: ApplicationCommandOptionType.Boolean,
             required: true,
         },
     ],

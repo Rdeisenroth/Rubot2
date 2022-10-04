@@ -1,4 +1,4 @@
-import { Guild, GuildMember, OverwriteData, PremiumTier } from "discord.js";
+import { ChannelType, Guild, GuildMember, GuildPremiumTier, OverwriteData } from "discord.js";
 import { Bot } from "../bot";
 import GuildSchema from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
@@ -15,8 +15,8 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
 
     permoverrides.push(
         {
-            id: guild.me!.id,
-            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"], // Fix a bug where i cannot move Members without admin Access
+            id: guild.members.me!.id,
+            allow: ["ViewChannel", "Connect", "Speak", "Stream", "MoveMembers", "ManageChannels", "DeafenMembers", "MuteMembers"], // Fix a bug where i cannot move Members without admin Access
         },
     );
 
@@ -25,7 +25,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
         if (await guild.roles.fetch(i) || await guild.members.fetch(i)) {
             permoverrides.push({
                 id: i,
-                allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MOVE_MEMBERS", "MANAGE_CHANNELS", "DEAFEN_MEMBERS", "MUTE_MEMBERS"],
+                allow: ["ViewChannel", "Connect", "Speak", "Stream", "MoveMembers", "ManageChannels", "DeafenMembers", "MuteMembers"],
             });
         }
     }
@@ -34,7 +34,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     if (options.lock_initially) {
         permoverrides.push({
             id: guild.roles.everyone.id,
-            deny: ["CONNECT", "SPEAK"],
+            deny: ["Connect", "Speak"],
         });
     }
 
@@ -42,24 +42,25 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     if (options.hide_initially) {
         permoverrides.push({
             id: guild.roles.everyone.id,
-            deny: ["VIEW_CHANNEL"],
+            deny: ["ViewChannel"],
         });
     }
 
     // TODO: Error Handling
 
 
-    const bitrates: { [name in PremiumTier]: number } = {
-        "NONE": 96000,     // Unboosted
-        "TIER_1": 128000,  // Boost Level 1
-        "TIER_2": 256000,  // Boost Level 2
-        "TIER_3": 384000,   // Boost Level 3
+    const bitrates: { [name in GuildPremiumTier]: number } = {
+        "0": 96000,     // Unboosted
+        "1": 128000,  // Boost Level 1
+        "2": 256000,  // Boost Level 2
+        "3": 384000,   // Boost Level 3
     };
 
 
     // Create new Voice Channel
-    const createdVC = await guild.channels.create(options.name, {
-        type: "GUILD_VOICE",
+    const createdVC = await guild.channels.create({
+        name: options.name,
+        type: ChannelType.GuildVoice,
         permissionOverwrites: permoverrides,
         parent: options.parent,
         userLimit: options.max_users,
@@ -108,7 +109,7 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
     // }
     spawner.permission_overwrites.push({
         id: member.id,
-        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM", "MANAGE_CHANNELS", "KICK_MEMBERS"],
+        allow: ["ViewChannel", "Connect", "Speak", "Stream", "ManageChannels", "KickMembers"],
     });
 
     spawner.name = name;

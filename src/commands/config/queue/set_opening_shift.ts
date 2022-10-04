@@ -1,6 +1,6 @@
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "../../../models/slash_command_permission";
-import { Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
@@ -15,13 +15,13 @@ const command: Command = {
         {
             name: "queue",
             description: "The name of the Queue to add a schedule to",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: "shift",
             description: "The shift in ms (unset = 0)",
-            type: "NUMBER",
+            type: ApplicationCommandOptionType.Number,
             required: true,
         },
     ],

@@ -200,7 +200,7 @@ GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: B
             name: cmdSettings?.name ?? c.name,
             description: cmdSettings?.description ?? c.description,
             options: c.options,
-            defaultPermission: cmdSettings?.defaultPermission ?? c.defaultPermission,
+            //defaultPermission: cmdSettings?.defaultPermission ?? c.defaultPermission,
         };
         // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
         if (c.name === "help") {
@@ -226,7 +226,7 @@ GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: B
         //             // Bot owner
         //             {
         //                 id: client.ownerID!,
-        //                 type: "USER",
+        //                 type: ApplicationCommandOptionType.User,
         //                 permission: true,
         //             },
         //         ],

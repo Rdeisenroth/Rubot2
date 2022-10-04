@@ -1,4 +1,4 @@
-import { Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
 import UserSchema, { User } from "../../models/users";
@@ -18,7 +18,7 @@ const command: Command = {
         {
             name: "encryptionstring",
             description: "The String to encrypt",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],

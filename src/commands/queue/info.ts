@@ -1,4 +1,4 @@
-import { Message, EmbedFieldData } from "discord.js";
+import { Message, EmbedField } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 
@@ -39,7 +39,7 @@ const command: Command = {
                     { name: "❯ Description", value: `${queueData.description}` },
                     { name: "❯ Active Entries", value: `${queueData.entries.length}` },
                     { name: "❯ Your Position", value: queuePosition < 0 ? "You are not in the Queue" : `${queuePosition + 1}/${queueData.entries.length}` },
-                ] as EmbedFieldData[],
+                ] as EmbedField[],
             empheral: true,
         });
 

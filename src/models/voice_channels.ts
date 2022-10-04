@@ -145,13 +145,13 @@ VoiceChannelSchema.method<VoiceChannelDocument>("syncPermissions", async functio
     lockOverwrite = lockOverwrite ?? this.locked;
     const actual_permissions = channel.permissionOverwrites.cache.get(roleId ?? channel.guild.roles.everyone.id);
     if (!actual_permissions
-        || (lockOverwrite && !(actual_permissions.allow.has("VIEW_CHANNEL") && actual_permissions.deny.has("CONNECT")))
-        || (!lockOverwrite && !(actual_permissions.allow.has("VIEW_CHANNEL") && actual_permissions.allow.has("CONNECT")))
-        || (!this.queue && !actual_permissions.allow.has("SPEAK"))
-        || (this.queue && !actual_permissions.deny.has("SPEAK"))
+        || (lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.deny.has("Connect")))
+        || (!lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.allow.has("Connect")))
+        || (!this.queue && !actual_permissions.allow.has("Speak"))
+        || (this.queue && !actual_permissions.deny.has("Speak"))
     ) {
         // Update roles
-        await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "VIEW_CHANNEL": true, "CONNECT": !lockOverwrite, "SPEAK": !this.queue });
+        await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "ViewChannel": true, "Connect": !lockOverwrite, "Speak": !this.queue });
         return true;
     } else {
         return false;

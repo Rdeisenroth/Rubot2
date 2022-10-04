@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import moment from "moment";
 import { ButtonInteraction } from "../../../../typings";
 import GuildSchema, { Guild, GuildDocument } from "../../../models/guilds";
@@ -48,15 +48,15 @@ const command: ButtonInteraction = {
                     {
                         embeds:
                             [
-                                new MessageEmbed({ title: "Queue System", description: join_message, color: interaction.guild?.me?.roles.highest.color || 0x7289da }),
+                                new EmbedBuilder({ title: "Queue System", description: join_message, color: interaction.guild?.members.me?.roles.highest.color || 0x7289da }),
                             ],
                         components: [
-                            new MessageActionRow(
+                            new ActionRowBuilder<ButtonBuilder>(
                                 {
                                     components:
                                         [
-                                            new MessageButton({ customId: "queue_refresh", label: "Refresh", style: "PRIMARY" }),
-                                            new MessageButton({ customId: "queue_leave", label: "Leave queue", style: "DANGER" }),
+                                            new ButtonBuilder({ customId: "queue_refresh", label: "Refresh", style: ButtonStyle.Primary }),
+                                            new ButtonBuilder({ customId: "queue_leave", label: "Leave queue", style: ButtonStyle.Danger }),
                                         ],
                                 }),
                         ],
@@ -69,7 +69,7 @@ const command: ButtonInteraction = {
                 {
                     embeds:
                         [
-                            new MessageEmbed({ title: "Queue System", description: `--${queue.name}--\nPosition:${(queue as QueueDocument).getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.me?.roles.highest.color || 0x7289da }),
+                            new EmbedBuilder({ title: "Queue System", description: `--${queue.name}--\nPosition:${(queue as QueueDocument).getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.members.me?.roles.highest.color || 0x7289da }),
                         ],
                     components: [],
                 });

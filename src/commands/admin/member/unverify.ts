@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -17,13 +17,13 @@ const command: Command = {
         {
             name: "user",
             description: "The User to unverify",
-            type: "USER",
+            type: ApplicationCommandOptionType.User,
             required: true,
         },
         {
             name: "reason",
             description: "a reason",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],
@@ -38,7 +38,7 @@ const command: Command = {
         }
         await interaction.deferReply({ ephemeral: true });
         let user = interaction.options.getUser("user", true);
-        const reason = interaction.options.getString("reason", true);
+        const reason = interaction.options.getString("reason");
         user = await user.fetch();
         const userData = await UserSchema.findById(user.id);
 
@@ -72,13 +72,13 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System", text: "Cannot DM User", empheral: true });
         }
 
-        const fields: EmbedFieldData[] = [
+        const fields: EmbedField[] = [
             // { name: "Verified", value: `${userData.tu_id != ""}` },
         ];
         if (userData.tu_id) {
             fields.push(
-                { name: ">Previous TU-ID", value: `${old_tu_id}` },
-                { name: ">Previous Moodle-ID", value: `${old_moodle_id}` },
+                { name: ">Previous TU-ID", value: `${old_tu_id}`, inline: false },
+                { name: ">Previous Moodle-ID", value: `${old_moodle_id}`, inline: false },
             );
         }
 

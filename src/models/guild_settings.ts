@@ -1,6 +1,5 @@
 import DBRoleSchema, { DBRole, DBRoleDocument } from "./bot_roles";
 import SlashCommandSettingsSchema, { SlashCommandSettings, SlashCommandSettingsDocument } from "./slash_command_settings";
-import { ApplicationCommandPermissionData } from "discord.js";
 import mongoose from "mongoose";
 
 /**

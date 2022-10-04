@@ -1,5 +1,5 @@
 import UserSchema, { User } from "./../models/users";
-import { GuildMember, Interaction, Message, MessageEmbed } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, Interaction, Message } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 import { verify_secret } from "../../config.json";
 import * as crypto from "crypto";
@@ -17,7 +17,7 @@ const command: Command = {
     options: [{
         name: "token-string",
         description: "The Token String",
-        type: "STRING",
+        type: ApplicationCommandOptionType.String,
         required: true,
     }],
     async execute(client, interaction, args) {

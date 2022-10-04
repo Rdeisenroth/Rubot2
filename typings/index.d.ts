@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedFieldData, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment, BaseApplicationCommandOptionsData } from "discord.js";
+import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedField, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment, BaseApplicationCommandOptionsData, ChatInputCommandInteraction } from "discord.js";
 import { Arguments } from "yargs-parser";
 import { Bot } from "../src/bot";
 import mongoose from "mongoose";
@@ -62,7 +62,7 @@ export type BotConfig = {
     /**
      * the Mongo DB Connection URL
      */
-    mongodb_connection_url: string;
+    mongodb_Connection_url: string;
     /**
      * The Client secret for verifying Users
      */
@@ -98,7 +98,7 @@ export interface RunCommand {
         /**
          * The Message that called for the command
          */
-        interaction?: Message | CommandInteraction,
+        interaction?: Message | ChatInputCommandInteraction,
         /**
          * The Command Arguments
          */
@@ -307,7 +307,7 @@ export type SimpleEmbedOptions = {
     /**
      * The Fields of the Embed
      */
-    fields?: EmbedFieldData[],
+    fields?: EmbedField[],
     /**
      * If the Message should only be visible for the reciever (only works for CommandInteractions)
      */

@@ -1,4 +1,4 @@
-import { ChannelTypes } from "discord.js/typings/enums";
+import { TextChannelType } from "discord.js";
 import mongoose from "mongoose";
 
 /**
@@ -12,7 +12,7 @@ export interface Channel {
     /**
      * The Channel Type
      */
-    channel_type: ChannelTypes,
+    channel_type: TextChannelType,
     /**
      * Whether the Channel is being managed by or relevant to the bot
      */

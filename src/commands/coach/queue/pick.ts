@@ -1,6 +1,6 @@
 import EventSchema, { Event as EVT, eventType } from "../../../models/events";
 import { PermissionOverwriteData } from "../../../models/permission_overwrite_data";
-import ChannelType, { Message } from "discord.js";
+import ChannelType, { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
@@ -15,13 +15,13 @@ const command: Command = {
         {
             name: "member",
             description: "A Member of the queue",
-            type: "USER",
+            type: ApplicationCommandOptionType.User,
             required: true,
         },
         // {
         //     name: "current",
         //     description: "Add to current Room?",
-        //     type: "BOOLEAN",
+        //     type: ApplicationCommandOptionType.Boolean,
         //     required: true,
         // },
     ],
@@ -94,7 +94,7 @@ const command: Command = {
                     permission_overwrites: [
                         {
                             id: pickedUser.id,
-                            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                            allow: ["ViewChannel", "Connect", "Speak", "Stream"],
                         } as PermissionOverwriteData,
                     ],
                     max_users: 5,
@@ -112,7 +112,7 @@ const command: Command = {
                 spawner.permission_overwrites = [
                     {
                         id: pickedUser.id,
-                        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                        allow: ["ViewChannel", "Connect", "Speak", "Stream"],
                     } as PermissionOverwriteData,
                 ];
             }

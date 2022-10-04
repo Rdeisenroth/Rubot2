@@ -1,4 +1,4 @@
-import { CategoryChannel, GuildChannel, Message, VoiceChannel as dvc } from "discord.js";
+import { ApplicationCommandOptionType, CategoryChannel, GuildChannel, Message, VoiceChannel as dvc } from "discord.js";
 import { Command } from "../../typings";
 import GuildSchema from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
@@ -15,13 +15,13 @@ const command: Command = {
     options: [{
         name: "spawner",
         description: "the voice Channel to set as Spawner",
-        type: "CHANNEL",
+        type: ApplicationCommandOptionType.Channel,
         required: true,
     },
     {
         name: "parent",
         description: "The Parent(Category) Channel to spawn the Channels In",
-        type: "CHANNEL",
+        type: ApplicationCommandOptionType.Channel,
         required: false,
     }],
     execute: async (client, interaction, args) => {
@@ -81,7 +81,7 @@ const command: Command = {
                         spawner: {
                             owner: member.id,
                             supervisor_roles: [],
-                            permission_overwrites: [{ id: interaction!.guild!.me!.id, allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "MOVE_MEMBERS", "MANAGE_CHANNELS"] }],
+                            permission_overwrites: [{ id: interaction!.guild!.members.me!.id, allow: ["ViewChannel", "Connect", "Speak", "MoveMembers", "ManageChannels"] }],
                             max_users: 5,
                             parent: parent_id,
                         },

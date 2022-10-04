@@ -1,4 +1,4 @@
-import { Client, Collection, TextChannel, VoiceChannel } from "discord.js";
+import { Client, Collection, Partials, TextChannel, VoiceChannel } from "discord.js";
 import consola, { Consola } from "consola";
 import cron, { CronJob } from "cron";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
@@ -37,22 +37,23 @@ export class Bot extends Client {
     public constructor() {
         super({
             intents: [
-                "DIRECT_MESSAGES",
-                "DIRECT_MESSAGE_REACTIONS",
-                "DIRECT_MESSAGE_TYPING",
-                "GUILDS",
-                "GUILD_BANS",
-                "GUILD_EMOJIS_AND_STICKERS",
-                "GUILD_INTEGRATIONS",
-                "GUILD_INVITES",
-                "GUILD_MEMBERS",
-                "GUILD_MESSAGES",
-                "GUILD_MESSAGE_REACTIONS",
-                "GUILD_MESSAGE_TYPING",
-                // "GUILD_PRESENCES",
-                "GUILD_VOICE_STATES"],
+                "DirectMessages",
+                "DirectMessageReactions",
+                "DirectMessageTyping",
+                "Guilds",
+                "GuildBans",
+                "GuildEmojisAndStickers",
+                "GuildIntegrations",
+                "GuildInvites",
+                "GuildMembers",
+                "GuildMessages",
+                "GuildMessageReactions",
+                "GuildMessageTyping",
+                // "GuildPresences",
+                "GuildVoiceStates",
+            ],
             partials: [
-                "CHANNEL",
+                Partials.Channel,
             ],
         });
     }
@@ -129,8 +130,8 @@ export class Bot extends Client {
         }
 
         // Connect to db
-        this.database = await mongoose.connect(config.mongodb_connection_url, {});
-        this.logger.info("connected to DB!!");
+        this.database = await mongoose.connect(config.mongodb_Connection_url, {});
+        this.logger.info("Connected to DB!!");
 
         // Event Files
         this.logger.info("Loading Events...");

@@ -56,7 +56,7 @@ const command: Command = {
         channelData.set("locked", true);
         await guildData!.save();
         
-        await channel.permissionOverwrites.edit(g.roles.everyone.id, { "CONNECT": false, "SPEAK": false });
+        await channel.permissionOverwrites.edit(g.roles.everyone.id, { "Connect": false, "Speak": false });
 
         await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "Your Channel was **locked**.");
     },

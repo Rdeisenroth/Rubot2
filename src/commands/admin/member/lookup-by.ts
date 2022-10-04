@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
@@ -18,7 +18,7 @@ const command: Command = {
         {
             name: "type",
             description: "The query type",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
             choices: [
                 {
@@ -42,7 +42,7 @@ const command: Command = {
         {
             name: "query",
             description: "The User to check",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],
@@ -87,14 +87,14 @@ const command: Command = {
 
         const user = await client.users.fetch(userData._id);
 
-        const fields: EmbedFieldData[] = [
-            { name: "Verified", value: `${(userData.tu_id && typeof userData.tu_id === "string" && userData.tu_id.length > 0) ? true : false}` },
+        const fields: EmbedField[] = [
+            { name: "Verified", value: `${(userData.tu_id && typeof userData.tu_id === "string" && userData.tu_id.length > 0) ? true : false}`, inline: false },
         ];
         if (userData.tu_id) {
             fields.push(
-                { name: "❯ TU-ID", value: `${userData.tu_id}` },
-                { name: "❯ Moodle-ID", value: `${userData.moodle_id}` },
-                { name: "❯ Link", value: `https://moodle.informatik.tu-darmstadt.de/user/view.php?id=${userData.moodle_id}&course=1088` },
+                { name: "❯ TU-ID", value: `${userData.tu_id}`, inline:false },
+                { name: "❯ Moodle-ID", value: `${userData.moodle_id}`, inline:false },
+                { name: "❯ Link", value: `https://moodle.informatik.tu-darmstadt.de/user/view.php?id=${userData.moodle_id}&course=1088`, inline:false },
             );
         }
 

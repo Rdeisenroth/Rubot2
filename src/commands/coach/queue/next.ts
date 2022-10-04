@@ -1,6 +1,6 @@
 import EventSchema, { Event as EVT, eventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
-import ChannelType, { Message, TextChannel } from "discord.js";
+import ChannelType, { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
@@ -14,7 +14,7 @@ const command: Command = {
     options: [{
         name: "amount",
         description: "The Amount of Entries to put into the Room",
-        type: "INTEGER",
+        type: ApplicationCommandOptionType.Integer,
         required: false,
     }],
     guildOnly: true,
@@ -79,7 +79,7 @@ const command: Command = {
                     ...entries.map(x => {
                         return {
                             id: x.discord_id,
-                            allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                            allow: ["ViewChannel", "Connect", "Speak", "Stream"],
                         } as PermissionOverwriteData;
                     }),
                 ],
@@ -100,7 +100,7 @@ const command: Command = {
                 ...entries.map(x => {
                     return {
                         id: x.discord_id,
-                        allow: ["VIEW_CHANNEL", "CONNECT", "SPEAK", "STREAM"],
+                        allow: ["ViewChannel", "Connect", "Speak", "Stream"],
                     } as PermissionOverwriteData;
                 }),
             ];

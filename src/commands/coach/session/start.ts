@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
@@ -15,7 +15,7 @@ const command: Command = {
         {
             name: "queue",
             description: "The Queue linked to the session",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             required: false,
         },
     ],

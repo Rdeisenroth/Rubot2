@@ -1,4 +1,4 @@
-import { Interaction, Message, MessageEmbed } from "discord.js";
+import { ChatInputCommandInteraction, Interaction, Message, EmbedBuilder } from "discord.js";
 import { Command, RunCommand } from "../../typings";
 import { APIMessage } from "discord-api-types/v9";
 
@@ -19,19 +19,19 @@ const command: Command = {
         // let response = choices[Math.floor(Math.random() * choices.length)];
         const res = await interaction.reply({ content: "Pinging..." });
         let m: any;
-        if (interaction instanceof Interaction) {
+        if (interaction instanceof ChatInputCommandInteraction) {
             m = await interaction.fetchReply();
         } else {
             m = res as Message;
         }
         const messageTimestamp = m instanceof Message ? m.createdTimestamp : Date.parse(m.timestamp);
         const ping = messageTimestamp - interaction.createdTimestamp;
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle("__Response Times__")
-            .setColor(interaction!.guild?.me?.roles.highest.color || 0x7289da)
-            .addField("Bot Latency:", ":hourglass_flowing_sand:" + ping + "ms", true)
-            .addField("API Latency:", ":hourglass_flowing_sand:" + Math.round(client.ws.ping) + "ms", true);
-        if (interaction instanceof Interaction) {
+            .setColor(interaction!.guild?.members.me?.roles.highest.color || 0x7289da)
+            .addFields({name:"Bot Latency:", value:":hourglass_flowing_sand:" + ping + "ms", inline:true})
+            .addFields({name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(client.ws.ping) + "ms", inline:true});
+        if (interaction instanceof ChatInputCommandInteraction) {
             await interaction.editReply({ content: "Pong.", embeds: [embed] });
         } else {
             await (m as Message).edit({ content: "Pong.", embeds: [embed] });

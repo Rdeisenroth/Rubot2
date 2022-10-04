@@ -1,5 +1,5 @@
 import { Command, ExecuteEvent } from "../../typings";
-import { Collection, CommandInteractionOption } from "discord.js";
+import { ChatInputCommandInteraction, Collection, CommandInteractionOption } from "discord.js";
 export const name = "interactionCreate";
 import GuildSchema from "../models/guilds";
 
@@ -63,7 +63,7 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
             // while(commandPromise instanceof Promise){
             //     commandPromise = await commandPromise
             // }
-            await command.execute(client, interaction, []); // We'll handle Args within the Command
+            await command.execute(client, interaction as ChatInputCommandInteraction, []); // We'll handle Args within the Command
         } catch (error) {
             console.error(error);
             interaction.reply({ content: `Oh no, command ${commandName} had an error while executing :(\nI will look into this as soon as possible!` });

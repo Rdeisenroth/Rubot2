@@ -1,4 +1,4 @@
-import { GuildMember, Message } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, Message } from "discord.js";
 import { Command } from "../../../typings";
 import GuildSchema from "../../models/guilds";
 import { VoiceChannelDocument } from "../../models/voice_channels";
@@ -12,7 +12,7 @@ const command: Command = {
     options: [{
         name: "member",
         description: "The member to Kick",
-        type: "USER",
+        type: ApplicationCommandOptionType.User,
         required: true,
     }],
     category: "Miscellaneous",
@@ -54,7 +54,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have no Permission to Kick a Member.");
         }
 
-        const kickMember = interaction.options.getMember("member", true);
+        const kickMember = interaction.options.getMember("member");
 
         if (!(kickMember instanceof GuildMember)) {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "You have to specify a valid Member.");
