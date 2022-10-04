@@ -1,15 +1,13 @@
 import { DBRoleDocument, InternalRoles, RoleScopes } from "./../models/bot_roles";
-import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, Role, RoleResolvable, User, UserResolvable } from "discord.js";
+import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, RoleResolvable, UserResolvable } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
 import { promisify } from "util";
 import GuildSchema from "../models/guilds";
 import glob from "glob";
-import guilds from "../models/guilds";
 import { Bot } from "../bot";
 const globPromise = promisify(glob);
-import * as crypto from "crypto";
-import { dm_only_verify, dm_verify_guild, verify_secret } from "../../config.json";
+import { verify_secret } from "../../config.json";
 import UserSchema from "../models/users";
 import * as cryptojs from "crypto-js";
 

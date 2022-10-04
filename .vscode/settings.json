@@ -60,6 +60,12 @@
                         "default": false,
                         "description": "Whether to only listen for verification Messages in DM Channels (globally)"
                     },
+                    "disable_dm": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether to disable DM Channels (globally)"
+                    },
+                    }
                     "dm_verify_guild": {
                         "type": "string",
                         "default": "<guild-id>",

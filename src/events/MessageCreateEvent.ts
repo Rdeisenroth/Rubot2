@@ -1,7 +1,7 @@
 import { ExecuteEvent } from "../../typings";
 import { Collection, Guild, GuildMember, Message } from "discord.js";
 export const name = "messageCreate";
-import { dm_only_verify, dm_verify_guild, verify_secret } from "../../config.json";
+import { dm_only_verify, disable_dm, dm_verify_guild, verify_secret } from "../../config.json";
 import * as crypto from "crypto";
 import UserSchema from "../models/users";
 
@@ -12,8 +12,13 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
     if (message.author.id === client.user?.id) {
         return;
     }
-    if (!message.guild && dm_only_verify) {
-        return await client.utils.general.verifyUser(message, message.content);
+    if (!message.guild) {
+        if (disable_dm) {
+            return;
+        }
+        if (dm_only_verify) {
+            return await client.utils.general.verifyUser(message, message.content);
+        }
     } else {
 
         /**
