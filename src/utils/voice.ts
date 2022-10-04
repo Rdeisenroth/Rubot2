@@ -113,5 +113,6 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
     });
 
     spawner.name = name;
+    spawner.owner = member.id;
     return await createManagedVC(member.guild, spawner as VoiceChannelCreateOptions);
 }
