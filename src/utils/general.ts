@@ -213,7 +213,13 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     // let content = (replyable instanceof Message) ? replyable.cleanContent : replyable.options.;
     console.log(`Verifying User ${author.tag} with token: ${tokenstring}`);
     const token = tokenstring.trim();
-    const decrypted = decryptText(token);
+    let decrypted: string;
+    try {
+        decrypted = decryptText(token);
+    } catch (error) {
+        console.log(`Failed Verifying User ${author.tag} with message: Token is not valid.`);
+        return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "Token is not valid.", empheral: true });
+    }
 
     // Token-Format: <server_id>|<version_id>|<tu_id>|<moodle_id>|<internal_role_names>
     // get token parts using name capturing regex groups
