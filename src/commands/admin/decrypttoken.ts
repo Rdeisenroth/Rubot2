@@ -31,8 +31,13 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-        const decrypted = client.utils.general.decryptText(interaction.options.getString("token", true));
-        return client.utils.embeds.SimpleEmbed(interaction, { title: "Decrypted Text", text: `decrypted: ${decrypted}\ndecrypted: ${decrypted}`, empheral:true});
+        let decrypted: string;
+        try {
+            decrypted = client.utils.general.decryptText(interaction.options.getString("token", true));
+        } catch (error) {
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Token is not valid.", empheral: true });
+        }
+        return client.utils.embeds.SimpleEmbed(interaction, { title: "Decrypted Text", text: `decrypted: ${decrypted}`, empheral:true});
     },
 };
 
