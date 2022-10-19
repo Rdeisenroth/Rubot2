@@ -1,0 +1,42 @@
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
+import { Command } from "../../../typings";
+import "moment-duration-format";
+import UserSchema, { User } from "../../models/users";
+import GuildSchema from "../../models/guilds";
+import { DBRole, DBRoleDocument, InternalRoles, RoleScopes } from "../../models/bot_roles";
+import { Types } from "mongoose";
+
+
+
+/**
+ * The Command Definition
+ */
+const command: Command = {
+    name: "decrypttoken",
+    guildOnly: false,
+    options: [
+        {
+            name: "token",
+            description: "The String to decrypt",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+        },
+    ],
+    description: "Temp Command that decrypts a given String.",
+    async execute(client, interaction, args) {
+        if (!interaction || !interaction.guild) {
+            return;
+        }
+        if (interaction instanceof Message) {
+            client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
+            return;
+        }
+        const decrypted = client.utils.general.decryptText(interaction.options.getString("token", true));
+        return client.utils.embeds.SimpleEmbed(interaction, { title: "Decrypted Text", text: `decrypted: ${decrypted}\ndecrypted: ${decrypted}`, empheral:true});
+    },
+};
+
+/**
+ * Exporting the Command using CommonJS
+ */
+module.exports = command;
