@@ -132,6 +132,10 @@ export class QueueSpan {
                 +match.groups!.hour2,
                 +match.groups!.minute2,
             ),
+            undefined,
+            undefined,
+            match.groups?.startDate ? new Date(match.groups!.startDate) : undefined,
+            match.groups?.endDate ? new Date(match.groups!.endDate) : undefined,
         );
     }
 
