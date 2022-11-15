@@ -150,7 +150,7 @@ const command: Command = {
                     } catch (error) {
                         if (queueData.text_channel) {
                             const c = await g.channels.fetch(queueData.text_channel);
-                            await client.utils.embeds.SimpleEmbed(c as TextChannel, "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
+                            await client.utils.embeds.SimpleEmbed(c as TextChannel, { title: "Coaching system", text: `You found a Coach, ${user}.\nPlease Join ${room} if you are not automatically moved.`, deleteinterval: 60000});
                         }
                     }
                 } catch (error) {
