@@ -84,6 +84,10 @@ export interface Queue {
      * The Entries of the Queue
      */
     entries: QueueEntry[],
+    /**
+     * The callback functions for all subscribers
+     */
+    callbackFunctions: {(): void}[]
 }
 
 /**
@@ -290,6 +294,11 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
      */
     isEmpty(): boolean,
     /**
+     * Notifies the user with the specified discord id when a user joins the previously empty queue
+     * @param callback_function The function that gets called in this case
+     */
+    notifyOnJoinWhenEmpty(callback_function: () => void): void,
+    /**
      * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command
      */
     lock(): Promise<void>;
@@ -317,6 +326,11 @@ export interface QueueModel extends mongoose.Model<QueueDocument> {
 QueueSchema.method<QueueDocument>("join", async function (entry: QueueEntry) {
     if (this.entries.find(x => x.discord_id === entry.discord_id)) {
         throw new Error("Dublicate Entry");
+    }
+    if (this.isEmpty()) {
+        this.callbackFunctions.forEach(callbackFunction => {
+            callbackFunction();
+        });
     }
     this.entries.push(entry);
     await this.$parent()?.save();
@@ -445,6 +459,10 @@ QueueSchema.method<QueueDocument>("toggleLock", async function () {
 
 QueueSchema.method<QueueDocument>("getWaitingRooms", function (guild: GuildDocument) {
     return guild.voice_channels?.filter(x => x.queue?.equals(this._id!)) ?? [];
+});
+
+QueueSchema.method<QueueDocument>("notifyOnJoinWhenEmpty", function (callback_function:() => void) {
+    this.callbackFunctions.push(callback_function);
 });
 
 // Default export

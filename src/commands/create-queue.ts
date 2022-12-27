@@ -56,6 +56,7 @@ const command: Command = {
             leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
             entries: [],
             opening_times: [],
+            callbackFunctions: [],
         };
         guildData.queues.push(queue);
         await guildData.save();
