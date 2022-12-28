@@ -4,9 +4,9 @@ import GuildSchema from "../../../models/guilds";
 import UserSchema from "../../../models/users";
 
 const command: Command = {
-    name: "subscribe",
-    description: "Get a notification if a user joins the previously empty queue.",
-    aliases: ["sub"],
+    name: "unsubscribe",
+    description: "Stop receiving notifications if a user joins the previously empty queue.",
+    aliases: ["unsub"],
     guildOnly: true,
     execute: async (client, interaction, args) => {
         if (!interaction) {
@@ -48,14 +48,14 @@ const command: Command = {
         }
 
         // nofity coach when a new user joins the empty queue
-        if (queueData.subscribeOnJoinWhenEmpty(user.id, async () => await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", "A user joined the queue.")))
+        if (queueData.unsubscribeOnJoinWhenEmpty(user.id))
         {
             // Inform user about the success
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Success: You will now get a notification if a user joins the previously empty queue.", empheral: true });
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Success: You will now no longer receive notifications if a user joins the previously empty queue.", empheral: true });
         }
         else {
             // Inform user about the failure
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Failure: You should already get a notification if a user joins the previously empty queue.", empheral: true });         
+            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Failure: You should have already received no notifications when a user joined the previously empty queue.", empheral: true });         
         }
     },
 };

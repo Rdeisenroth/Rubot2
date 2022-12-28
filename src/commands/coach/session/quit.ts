@@ -35,8 +35,12 @@ const command: Command = {
 
         //TODO: Terminate Rooms
 
+        // Unsubscribe if previously subscribed
+        const queueData = guildData.queues.id(coachingSession.queue);
+        queueData?.unsubscribeOnJoinWhenEmpty(user.id);
+
         // Set inactive
-        coachingSession.active = false;
+        coachingSession.active = false;    
         coachingSession.ended_at = Date.now().toString();
         coachingSession.end_certain = true;
         await coachingSession.save();

@@ -87,7 +87,7 @@ export interface Queue {
     /**
      * The callback functions for all subscribers
      */
-    callbackFunctions: {(): void}[]
+    callbackFunctions: Map<string, () => void>
 }
 
 /**
@@ -294,10 +294,17 @@ export interface QueueDocument extends Queue, mongoose.Document<mongoose.Types.O
      */
     isEmpty(): boolean,
     /**
-     * Notifies the user with the specified discord id when a user joins the previously empty queue
-     * @param callback_function The function that gets called in this case
+     * Calls the callback-function passed as a parameter when a user joins the previously empty queue.
+     * The callback function will be associated with the passed discord id.
+     * @param discord_id The discord id / user associated with the callback function.
+     * @param callback_function The function that is called in the notification case.
      */
-    notifyOnJoinWhenEmpty(callback_function: () => void): void,
+    subscribeOnJoinWhenEmpty(discord_id: string, callback_function: () => void): boolean,
+    /**
+     * Cancels the notification of the user with the specified discord id when a user joins the previously empty queue.
+     * @param discord_id The discord id / user associated with the callback function.
+     */
+    unsubscribeOnJoinWhenEmpty(discord_id: string): boolean,
     /**
      * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command
      */
@@ -461,8 +468,20 @@ QueueSchema.method<QueueDocument>("getWaitingRooms", function (guild: GuildDocum
     return guild.voice_channels?.filter(x => x.queue?.equals(this._id!)) ?? [];
 });
 
-QueueSchema.method<QueueDocument>("notifyOnJoinWhenEmpty", function (callback_function:() => void) {
-    this.callbackFunctions.push(callback_function);
+QueueSchema.method<QueueDocument>("subscribeOnJoinWhenEmpty", function (discord_id: string, callback_function:() => void): boolean {
+    if (this.callbackFunctions.has(discord_id)){
+        return false;
+    }
+    this.callbackFunctions.set(discord_id, callback_function);
+    return true;
+});
+
+QueueSchema.method<QueueDocument>("unsubscribeOnJoinWhenEmpty", function (discord_id: string): boolean {
+    if (!this.callbackFunctions.has(discord_id)){
+        return false;
+    }
+    this.callbackFunctions.delete(discord_id);
+    return true;
 });
 
 // Default export
