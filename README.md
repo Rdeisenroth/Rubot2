@@ -1,7 +1,8 @@
 # Rubot2
+[![Build](https://github.com/Rdeisenroth/Rubot2/actions/workflows/build.yml/badge.svg)](https://github.com/Rdeisenroth/Rubot2/actions/workflows/build.yml)
 ![GitHub top language](https://img.shields.io/github/languages/top/Rdeisenroth/Rubot2?logo=Github)
 ![GitHub repo size](https://img.shields.io/github/repo-size/Rdeisenroth/Rubot2?color=success&logo=Github)
-![Commands](https://img.shields.io/badge/Commands-8-orange?logo=Discord&logoColor=ffffff)
+![Commands](https://img.shields.io/badge/Commands-77-orange?logo=Discord&logoColor=ffffff)
 
 a general Purpose Discord Bot
 # Setup
