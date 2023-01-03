@@ -83,7 +83,7 @@ const command: Command = {
 
             // Get Room Spawner
 
-            let spawner: VoiceChannelSpawner | undefined = queueData.room_spawner;
+            let spawner: VoiceChannelSpawner | undefined = queueData.room_spawner?.toObject();
             const queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue == queue);
             const queue_channel = g.channels.cache.get(queue_channel_data?._id ?? "");
             const member = client.utils.general.getMember(interaction)!;
@@ -100,6 +100,7 @@ const command: Command = {
                     max_users: 5,
                     parent: queue_channel?.parentId ?? undefined,
                     lock_initially: true,
+                    hide_initially: true,
                     name: `${member.displayName}'s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`,
                 } as VoiceChannelSpawner;
                 console.log(spawner.parent);
@@ -135,11 +136,13 @@ const command: Command = {
 
             // Notify Match(es)
             try {
+                const guildData = (await GuildSchema.findById(g.id))!;
+                const queueData = guildData.queues.id(queue)!;
                 const user = await client.users.fetch(queueEntry.discord_id);
-                console.log("coach queue next: Matches: Notify User");
+                console.log("coach queue pick: Matches: Notify User");
                 // Notify user
                 await client.utils.embeds.SimpleEmbed((await user.createDM()), "Coaching system", `You found a Coach.\nPlease Join ${room} if you are not automatically moved.`);
-                console.log("coach queue next: Matches: Remove User from Queue");
+                console.log("coach queue pick: Matches: Remove User from Queue");
                 // remove from queue
                 queueData.entries.remove({ _id: queueEntry._id });
                 await guildData.save();
@@ -174,7 +177,11 @@ const command: Command = {
                 // Ignore Errors
             }
             await roomData.save();
-            return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `Done. Please Join ${room} if you are not automatically moved.`, empheral: true });
+            return await client.utils.embeds.SimpleEmbed(interaction, {
+                title: "Coaching System",
+                text: `Done. Please Join ${room} if you are not automatically moved.\nYour Participant is ${pickedUser}`,
+                empheral: true,
+            });
             // } else {
 
             // }
