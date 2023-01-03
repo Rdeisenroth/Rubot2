@@ -1,5 +1,5 @@
+import { ConfigHandler } from "./handlers/configHandler";
 import * as cryptojs from "crypto-js";
-import { verify_secret } from "../config.json";
 import { InternalRoles } from "./models/bot_roles";
 import { parse } from "csv-parse";
 import * as fs from "fs";
@@ -11,7 +11,7 @@ import * as path from "path";
  * @returns the encrypted Text
  */
 export function encryptText(text: string) {
-    return cryptojs.AES.encrypt(text, verify_secret).toString();
+    return cryptojs.AES.encrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString();
 }
 
 /**
@@ -20,7 +20,7 @@ export function encryptText(text: string) {
  * @returns the decrypted Text
  */
 export function decryptText(text: string) {
-    return cryptojs.AES.decrypt(text, verify_secret).toString(cryptojs.enc.Utf8);
+    return cryptojs.AES.decrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString(cryptojs.enc.Utf8);
 }
 
 /**

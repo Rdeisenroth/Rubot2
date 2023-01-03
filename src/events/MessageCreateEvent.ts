@@ -1,7 +1,6 @@
 import { ExecuteEvent } from "../../typings";
 import { Collection, Guild, GuildMember, Message } from "discord.js";
 export const name = "messageCreate";
-import { dm_only_verify, disable_dm, dm_verify_guild, verify_secret } from "../../config.json";
 import * as crypto from "crypto";
 import UserSchema from "../models/users";
 
@@ -13,10 +12,10 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         return;
     }
     if (!message.guild) {
-        if (disable_dm) {
+        if (client.config.get("disable_dm")) {
             return;
         }
-        if (dm_only_verify) {
+        if (client.config.get("dm_only_verify")) {
             return await client.utils.general.verifyUser(message, message.content);
         }
     } else {
@@ -26,11 +25,11 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
          */
         const cooldowns = client.cooldowns;
 
-        const prefix = client.prefix;
+        const prefix = client.config.get("prefix");
 
         if (message.content.toLowerCase() == `<@!${client.user!.id}> prefix`) {
-            // message.reply(`The Bot Prefix is:\n\`${client.prefix}\``);
-            client.utils.embeds.SimpleEmbed(message, "The Prefix for this Channel is:", client.prefix);
+            // message.reply(`The Bot Prefix is:\n\`${client.config.get("prefix")}\``);
+            client.utils.embeds.SimpleEmbed(message, "The Prefix for this Channel is:", client.config.get("prefix"));
         }
 
         // no need to continue if message does not start with a Prefix
@@ -78,7 +77,7 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         if (timestamps.has(message.author.id)) {
             const expirationTime = timestamps.get(message.author.id)! + cooldownAmount;
 
-            if (now < expirationTime && message.author.id != client.ownerID) {
+            if (now < expirationTime && message.author.id != client.config.get("ownerID")) {
                 const timeLeft = (expirationTime - now) / 1000;
                 await client.utils.errors.errorMessage(message, `please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command again.`);
                 return;

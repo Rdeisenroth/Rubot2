@@ -1,3 +1,4 @@
+import { ConfigHandler } from "./handlers/configHandler";
 import { Client, Collection, Partials, TextChannel, VoiceChannel } from "discord.js";
 import consola, { Consola } from "consola";
 import cron, { CronJob } from "cron";
@@ -26,9 +27,7 @@ export class Bot extends Client {
      * @memberof Bot
      */
     public queue_stays: Collection<string, Collection<string, utils.general.QueueStayOptions>> = new Collection();
-    public ownerID?: string;
-    public prefix = "!";
-    public version = "0.0";
+    public config = ConfigHandler.getInstance();
     public utils = utils;
     public parser = parser;
     public database = mongoose;
@@ -62,13 +61,9 @@ export class Bot extends Client {
      * Starts the Bot
      * @param config The bot Configuration
      */
-    public async start(config: BotConfig): Promise<void> {
+    public async start(): Promise<void> {
         this.logger.info("starting Bot...");
-        // Read config
-        this.ownerID = config.ownerID;
-        this.prefix = config.prefix;
-        this.version = config.version;
-        this.login(config.token).catch((e) => this.logger.error(e));
+        this.login(this.config.get("token")).catch((e) => this.logger.error(e));
 
         // Commands
         this.logger.info("Loading Commands...");
@@ -130,7 +125,7 @@ export class Bot extends Client {
         }
 
         // Connect to db
-        this.database = await mongoose.connect(config.mongodb_Connection_url, {});
+        this.database = await mongoose.connect(this.config.get("mongodb_Connection_url"), {});
         this.logger.info("Connected to DB!!");
 
         // Event Files

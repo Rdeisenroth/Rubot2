@@ -46,19 +46,19 @@ export type BotConfig = {
     /**
      * the Mysql Host
      */
-    mysqlhost: string;
+    mysqlhost?: string;
     /**
      * the Mysql User
      */
-    mysqluser: string;
+    mysqluser?: string;
     /**
      * the Mysql Password
      */
-    mysqlpassword: string;
+    mysqlpassword?: string;
     /**
      * the Name of the Main MySQL Database / Schema of the Bot
      */
-    main_schema_name: string;
+    main_schema_name?: string;
     /**
      * the Mongo DB Connection URL
      */
@@ -67,6 +67,14 @@ export type BotConfig = {
      * The Client secret for verifying Users
      */
     verify_secret: string;
+    /**
+     * Whether to completely command execution in DMs (default: false)
+     */
+    disable_dm?: string;
+    /**
+     * Whether DMs should only be used for Verification (default: false)
+     */
+    dm_only_verify?: string;
 };
 
 export abstract class ClientEventListener<K extends keyof ClientEvents> {

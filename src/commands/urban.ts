@@ -52,13 +52,13 @@ const command: Command = {
         } else {
             const tempMode = args.shift();
             if (!tempMode || !["search", "random"].includes(args.shift()!)) {
-                return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix}urban <search|random> (query)\``);
+                return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.config.get("prefix")}urban <search|random> (query)\``);
             }
             mode = tempMode;
             query = args.join(" ");
         }
         if (mode == "search" && !query) {
-            return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix}urban <search|random> (query)\``);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.config.get("prefix")}urban <search|random> (query)\``);
         }
         const image = "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg";
         const search = mode == "search" ? await urban.define(query!) : await urban.random();

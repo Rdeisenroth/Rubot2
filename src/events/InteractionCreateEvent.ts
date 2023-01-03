@@ -40,7 +40,7 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
         if (timestamps.has(interaction.user.id)) {
             const expirationTime = timestamps.get(interaction.user.id)! + cooldownAmount;
 
-            if (now < expirationTime && interaction.user.id != client.ownerID) {
+            if (now < expirationTime && interaction.user.id != client.config.get("ownerID")) {
                 const timeLeft = (expirationTime - now) / 1000;
                 await interaction.reply({ content: `please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command again.`, ephemeral: true });
                 return;

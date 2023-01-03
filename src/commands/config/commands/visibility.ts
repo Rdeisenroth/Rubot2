@@ -3,7 +3,6 @@ import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
 import GuildSchema from "../../../models/guilds";
-// import {name as cfgCmdName} from "../../config";
 
 const command: Command = {
     name: "visibility",

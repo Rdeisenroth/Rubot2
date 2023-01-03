@@ -225,7 +225,7 @@ GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: B
         //             ...cmdSettings?.getPostablePermissions() ?? [],
         //             // Bot owner
         //             {
-        //                 id: client.ownerID!,
+        //                 id: client.config.get("ownerID")!,
         //                 type: ApplicationCommandOptionType.User,
         //                 permission: true,
         //             },

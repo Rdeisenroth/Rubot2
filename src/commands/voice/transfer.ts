@@ -18,8 +18,8 @@ const command: Command = {
     category: "Miscellaneous",
     guildOnly: true,
     execute: async (client, interaction, args) => {
-        //let owner = client.users.cache.find(m => m.id == client.ownerID);
-        // if (message?.author.id !== client.ownerID as String) {
+        //let owner = client.users.cache.find(m => m.id == client.config.get("ownerID"));
+        // if (message?.author.id !== client.config.get("ownerID") as String) {
         //     return await message?.reply(`You do not have permission to execute this command.`);
         // }
 

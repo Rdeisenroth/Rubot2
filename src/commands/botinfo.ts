@@ -17,7 +17,7 @@ const command: Command = {
         if (!interaction) {
             return;
         }
-        const owner = client.users.cache.find(m => m.id == client.ownerID);
+        const owner = client.users.cache.find(m => m.id == client.config.get("ownerID"));
         const embed = new EmbedBuilder();
         if (interaction.guild) {
             embed.setColor(interaction.guild.members.me!.roles.highest.color || 0x7289da);
@@ -32,7 +32,7 @@ const command: Command = {
             .addFields({ name: "❯ General Stats", value: `• Guilds: ${client.guilds.cache.size}\n• Channels: ${client.channels.cache.size}`, inline: true })
             .addFields({ name: "❯ Discord JS Version", value: `v${djsversion}`, inline: true })
             .addFields({ name: "❯ Node JS Version", value: `${process.version}`, inline: true })
-            .addFields({ name: "❯ Bot Version", value: `v${client.version}`, inline: true })
+            .addFields({ name: "❯ Bot Version", value: `v${client.config.get("version")}`, inline: true })
             .addFields({ name: "❯ Source", value: "[Github](https://github.com/Rdeisenroth/Rubot2)", inline: true })
             .setFooter({ text: `© 2021 ${owner?.tag}`, iconURL: owner?.displayAvatarURL() });
         return interaction.reply({ embeds: [embed] });

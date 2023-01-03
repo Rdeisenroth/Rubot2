@@ -20,7 +20,7 @@ const command: Command = {
     category: "Miscellaneous",
     execute: async (client, interaction, args) => {
         const commands = client.commands;
-        const prefix = client.prefix;
+        const prefix = client.config.get("prefix");
         let flags: yargsParser.Arguments;
         if (interaction instanceof Message) {
             flags = client.parser(args, { alias: { "showall": ["showinvis", "showinvisible", "all", "a"] }, boolean: ["showall"], default: { showall: false } });
@@ -28,7 +28,7 @@ const command: Command = {
             const commandArg = interaction?.options.getString("command", command.options![0].required);
             flags = { "_": commandArg ? [commandArg] : [], $0: "help" };
         }
-        const owner = client.users.cache.find(m => m.id == client.ownerID);
+        const owner = client.users.cache.find(m => m.id == client.config.get("ownerID"));
         const embed = new EmbedBuilder();
         if (interaction!.guild) {
             embed.setColor(interaction!.guild.members.me!.roles.highest.color || 0x7289da);

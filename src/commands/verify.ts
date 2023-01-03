@@ -1,7 +1,6 @@
 import UserSchema, { User } from "./../models/users";
 import { ApplicationCommandOptionType, GuildMember, Interaction, Message } from "discord.js";
 import { Command, RunCommand } from "../../typings";
-import { verify_secret } from "../../config.json";
 import * as crypto from "crypto";
 
 /**

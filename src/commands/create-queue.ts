@@ -34,9 +34,9 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-        const owner = client.users.cache.find(m => m.id == client.ownerID);
+        const owner = client.users.cache.find(m => m.id == client.config.get("ownerID"));
         const member = client.utils.general.getMember(interaction);
-        if (!member || member.id !== client.ownerID as string) {
+        if (!member || member.id !== client.config.get("ownerID") as string) {
             await interaction?.reply("You do not have permission to execute this command.");
             return;
         }

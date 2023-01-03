@@ -1,3 +1,4 @@
+import { ConfigHandler } from "./../handlers/configHandler";
 import { DBRoleDocument, InternalRoles, RoleScopes } from "./../models/bot_roles";
 import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, RoleResolvable, UserResolvable } from "discord.js";
 import moment from "moment";
@@ -7,7 +8,6 @@ import GuildSchema from "../models/guilds";
 import glob from "glob";
 import { Bot } from "../bot";
 const globPromise = promisify(glob);
-import { verify_secret } from "../../config.json";
 import UserSchema from "../models/users";
 import * as cryptojs from "crypto-js";
 
@@ -159,13 +159,13 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
     const roleoruser = g?.roles.resolve(mentionable as RoleResolvable) ?? g?.members.resolve(mentionable as GuildMemberResolvable) ?? client.users.resolve(mentionable as UserResolvable);
     if (!g) {
         // TODO: Permissions for Global Commands
-        return command.defaultPermission || roleoruser?.id === client.ownerID;
+        return command.defaultPermission || roleoruser?.id === client.config.get("ownerID");
     }
     const guildData = (await GuildSchema.findById(g.id))!;
     const commandSettings = await guildData.guild_settings.getCommandByInternalName(command.name);
     const permission_overwrite = commandSettings?.permissions.some(x => x.id === roleoruser?.id && x.permission) ?? false;
     const role_permission_overwrite = (roleoruser instanceof GuildMember) && [...roleoruser.roles.cache.values()].some(r => commandSettings?.permissions.some(x => x.id === r.id && x.permission));
-    return true || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.ownerID;
+    return true || permission_overwrite || role_permission_overwrite || roleoruser?.id === client.config.get("ownerID");
 }
 
 /**
@@ -174,7 +174,7 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
  * @returns the encrypted Text
  */
 export function encryptText(text: string) {
-    return cryptojs.AES.encrypt(text, verify_secret).toString();
+    return cryptojs.AES.encrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString();
 }
 
 /**
@@ -183,7 +183,7 @@ export function encryptText(text: string) {
  * @returns the decrypted Text
  */
 export function decryptText(text: string) {
-    return cryptojs.AES.decrypt(text, verify_secret).toString(cryptojs.enc.Utf8);
+    return cryptojs.AES.decrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString(cryptojs.enc.Utf8);
 }
 
 /**

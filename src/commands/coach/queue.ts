@@ -54,7 +54,7 @@ const command: SubcommandHandler = {
         let subcommand: string;
         if (interaction instanceof Message) {
             if (!args || !args[0]) {
-                return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
+                return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.config.get("prefix") + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
             }
             subcommand = args.shift()!.toLowerCase();
         } else if (interaction instanceof CommandInteraction) {
@@ -66,7 +66,7 @@ const command: SubcommandHandler = {
             }
             subcommand = scInteraction.resolved_subcommand.name;
         } else {
-            return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.prefix + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
+            return await client.utils.embeds.SimpleEmbed(interaction!, "Usage", `\`${client.config.get("prefix") + command.name} < subcommand > [args]\`\nThe following subcommands are Available:\n${command.subcommands.map(command => "❯ " + command.name).join("\n")}`);
         }
         const sc = command.subcommands.find(x => x.name == subcommand || (x.aliases != null && x.aliases.includes(subcommand)));
         if (!sc) {
