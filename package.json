@@ -7,6 +7,7 @@
   "scripts": {
     "start": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json; node dist/src/index.js",
     "build": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json",
+    "lint": "eslint --ext .ts src/",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest --detectOpenHandles"
   },

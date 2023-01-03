@@ -150,7 +150,7 @@ const command: Command = {
                     } catch (error) {
                         if (queueData.text_channel) {
                             const c = await g.channels.fetch(queueData.text_channel);
-                            await client.utils.embeds.SimpleEmbed(c as TextChannel, { title: "Coaching system", text: `You found a Coach, ${user}.\nPlease Join ${room} if you are not automatically moved.`, deleteinterval: 60000});
+                            await client.utils.embeds.SimpleEmbed(c as TextChannel, { title: "Coaching system", text: `You found a Coach, ${user}.\nPlease Join ${room} if you are not automatically moved.`, deleteinterval: 60000 });
                         }
                     }
                 } catch (error) {
@@ -181,7 +181,11 @@ const command: Command = {
             // Ignore Errors
         }
         await roomData.save();
-        return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `Done. Please Join ${room} if you are not automatically moved.`, empheral: true });
+        return await client.utils.embeds.SimpleEmbed(interaction, {
+            title: "Coaching System",
+            text: `Done. Please Join ${room} if you are not automatically moved.\nYour Participant(s) are: ${entries.map(x => `<@${x.discord_id}>`).join(", ")} `,
+            empheral: true,
+        });
     },
 };
 
