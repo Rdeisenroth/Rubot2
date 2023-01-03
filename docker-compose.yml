@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  rubot:
+    build: .
+    image: rubot:latest
+    container_name: Rubot
+    restart: unless-stopped
+    environment:
+      - TOKEN=${TOKEN}
+      - PREFIX=${PREFIX}
+      - OWNER_ID=${OWNER_ID}
+      - VERSION=${VERSION}
+      - CURRENT_SEASON=${CURRENT_SEASON}
+      - RLSTATS_API_KEY=${RLSTATS_API_KEY}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - STEAM_API_KEY=${STEAM_API_KEY}
+      - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MAIN_SCHEMA_NAME=${MAIN_SCHEMA_NAME}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      - MONGODB_CONNECTION_URL=${MONGODB_CONNECTION_URL}
+      - RLTRACKER_API_KEY=${RLTRACKER_API_KEY}
+      - VERIFY_SECRET=${VERIFY_SECRET}
+      - DISABLE_DM=${DISABLE_DM}
+      - DM_ONLY_VERIFY=${DM_ONLY_VERIFY}
+      - DM_VERIFY_GUILD=${DM_VERIFY_GUILD}

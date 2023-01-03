@@ -1,0 +1,5 @@
+version: '3.8'
+services:
+  rubot:
+    # Workaround for now to access the local mongodb instance
+    network_mode: host
