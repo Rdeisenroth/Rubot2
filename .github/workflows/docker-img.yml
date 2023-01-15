@@ -4,6 +4,10 @@ name: Build and publish container
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
   ghr_push:
