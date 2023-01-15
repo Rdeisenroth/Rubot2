@@ -12,10 +12,10 @@ export const execute: ExecuteEvent<"messageCreate"> = async (client, message) =>
         return;
     }
     if (!message.guild) {
-        if (client.config.get("disable_dm")) {
+        if (client.config.get("disable_dm") === "true") {
             return;
         }
-        if (client.config.get("dm_only_verify")) {
+        if (client.config.get("dm_only_verify") === "true") {
             return await client.utils.general.verifyUser(message, message.content);
         }
     } else {
