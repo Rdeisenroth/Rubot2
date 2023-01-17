@@ -105,7 +105,7 @@ const command: Command = {
                     },
                 );
             } else {
-                spawner.name = spawner.name ?? `${member.displayName}s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+                spawner.name = spawner.name ?? `${member.displayName}' ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
             }
             spawner.permission_overwrites = [
                 ...entries.map(x => {
