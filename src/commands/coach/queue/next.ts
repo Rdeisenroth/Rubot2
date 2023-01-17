@@ -95,7 +95,18 @@ const command: Command = {
         } else {
             spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
             spawner.owner = user.id;
-            spawner.name = `${member.displayName}s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+            if (spawner.name) {
+                spawner.name = client.utils.general.interpolateString(
+                    spawner.name,
+                    {
+                        "coach": member.displayName,
+                        "queue": queueData.name,
+                        "room_id": coachingSession.getRoomAmount() + 1,
+                    },
+                );
+            } else {
+                spawner.name = spawner.name ?? `${member.displayName}s ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+            }
             spawner.permission_overwrites = [
                 ...entries.map(x => {
                     return {
