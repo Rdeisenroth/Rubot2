@@ -48,7 +48,7 @@ type Student = {
 (() => {
     const csvFilePath = path.resolve(__dirname, "report.csv");
 
-    const headers = ["id_tu", "id_moodle", "first_access","name"];
+    const headers = ["id_tu", "id_moodle"];
 
     const fileContent = fs.readFileSync(csvFilePath, { encoding: "utf-8" });
 
@@ -62,7 +62,7 @@ type Student = {
         // {"moodleId":"1","token":"FOP-DiscordV1|guest|1#5630c38fb1ae39b1048e0cf802f4170dba8943f5e13510055357b3cb67a3bac1"}
         const newResult = result.map((student) => {
             const token = encryptTokenString(
-                "940632262272237568",
+                "968818197824417822",
                 "01",
                 student.id_tu,
                 student.id_moodle,
@@ -74,7 +74,7 @@ type Student = {
             };
         });
         console.log("Result", newResult);
-
+        
         // write result to result.json file
         fs.writeFileSync(path.resolve(__dirname, "result.json"), JSON.stringify(newResult, null, 4));
     });
