@@ -4,6 +4,9 @@ import { InternalRoles } from "./models/bot_roles";
 import { parse } from "csv-parse";
 import * as fs from "fs";
 import * as path from "path";
+import dotenv from "dotenv";
+// Load the .env File
+dotenv.config();
 
 /**
  * Encrypts a given Text
