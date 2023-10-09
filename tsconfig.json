@@ -12,7 +12,7 @@
         "types": [
             // add node as an option
             "node",
-            "reflect-metadata",
+            //"reflect-metadata",
             "jest"
         ],
         "skipLibCheck": true,

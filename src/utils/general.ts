@@ -7,7 +7,6 @@ import { promisify } from "util";
 import GuildSchema from "../models/guilds";
 import glob from "glob";
 import { Bot } from "../bot";
-const globPromise = promisify(glob);
 import UserSchema from "../models/users";
 import * as cryptojs from "crypto-js";
 

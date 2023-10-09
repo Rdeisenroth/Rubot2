@@ -1,9 +1,9 @@
 import { ConfigHandler } from "./handlers/configHandler";
 import { Client, Collection, Partials, TextChannel, VoiceChannel } from "discord.js";
-import consola, { Consola } from "consola";
+import consola, { ConsolaInstance } from "consola";
 import cron, { CronJob } from "cron";
 import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
-import glob from "glob";
+import glob from "glob-promise";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
@@ -11,11 +11,9 @@ import GuildSchema from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
-import G from "glob";
 import { QueueSpan } from "./models/queue_span";
-const globPromise = promisify(glob);
 export class Bot extends Client {
-    public logger: Consola = consola;
+    public logger: ConsolaInstance = consola;
     public commands: Collection<string, Command> = new Collection();
     public componentInteractions: { buttons: Collection<string, ButtonInteraction> } = { buttons: new Collection() };
     // public aliases: Collection<string,string> = new Collection();
@@ -32,7 +30,7 @@ export class Bot extends Client {
     public parser = parser;
     public database = mongoose;
     public readonly initTimestamp = Date.now();
-    public jobs: CronJob[] = [];
+    public jobs: CronJob<null,null>[] = [];
     public constructor() {
         super({
             intents: [
@@ -105,7 +103,7 @@ export class Bot extends Client {
         this.logger.info("Loading Interactions...");
         // TODO: Slect Menus
         const dirstring = `${__dirname}/componentInteractions/buttons`;
-        const files = (await globPromise(dirstring + "/**/*.{js,ts}"));
+        const files = (await glob(dirstring + "/**/*.{js,ts}"));
         // console.log("Files:" + JSON.stringify(files));
         //iterate over all the Interactions to store them in a collection
         for (const file of files) {
