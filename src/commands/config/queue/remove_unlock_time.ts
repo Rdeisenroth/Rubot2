@@ -2,8 +2,9 @@ import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
+import { WeekTimestamp } from "../../../models/week_timestamp";
 
 const command: Command = {
     name: "remove_unlock_time",
@@ -36,7 +37,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const queueSpanString = interaction.options.getString("schedule", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
@@ -47,14 +48,14 @@ const command: Command = {
         let queueSpan: QueueSpan;
         try {
             queueSpan = QueueSpan.fromString(queueSpanString);
-        } catch (error: any) {
-            client.utils.embeds.SimpleEmbed(interaction, "Server config", `:x: Error: could not parse the QueueSpan \`${queueSpanString}\`:\n ${error.message}`);
+        } catch (error: unknown) {
+            client.utils.embeds.SimpleEmbed(interaction, "Server config", `:x: Error: could not parse the QueueSpan \`${queueSpanString}\`:\n ${(error as {message:unknown}).message}`);
             return;
         }
         const match = queueData.opening_times.find(x => {
             const span = new QueueSpan(
-                new client.utils.general.WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
-                new client.utils.general.WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
+                new WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
+                new WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
                 x.openShift,
                 x.closeShift,
                 x.startDate,

@@ -1,16 +1,17 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import GuildSchema, { GuildDocument } from "../../../models/guilds";
-import { QueueDocument } from "../../../models/queues";
+import {GuildModel, Guild } from "../../../models/guilds";
+import { Queue } from "../../../models/queues";
+import { DocumentType } from "@typegoose/typegoose";
 
 const command: ButtonInteraction = {
     customID: "queue_stay",
     description: "stays in the current queue",
     cooldown: 2000,
     execute: async (client, interaction) => {
-        const guilds = await GuildSchema.find();
-        let g: GuildDocument | undefined;
-        let queue: QueueDocument | undefined;
+        const guilds = await GuildModel.find();
+        let g: DocumentType<Guild> | undefined;
+        let queue: DocumentType<Queue> | undefined;
         for (g of guilds) {
             if (!g.queues) {
                 continue;

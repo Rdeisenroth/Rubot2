@@ -1,129 +1,82 @@
-import mongoose from "mongoose";
-import RoomSchema from "./rooms";
-import { Channel } from "./text_channels";
-
+import {RoomModel} from "./rooms";
+import {DocumentType, getModelForClass, prop, mongoose} from "@typegoose/typegoose";
 export enum sessionRole {
     "participant" = "participant",
     "coach" = "coach",
     "supervisor" = "supervisor",
 }
 
-export interface Session extends Omit<Channel, "_id"> {
+export class Session {
     /**
      * Whether the Session is currently active
      */
-    active: boolean,
+    @prop({required: true})
+        active!: boolean;
     /**
      * The User that the Session belongs to
      */
-    user: string,
+    @prop({required: true})
+        user!: string;
     /**
      * A Guild that the Session belongs to
      */
-    guild?: string,
+    @prop()
+        guild?: string;
     /**
     * A Queue that is linked to the Session
     */
-    queue?: mongoose.Types.ObjectId,
+    @prop()
+        queue?: mongoose.Types.ObjectId;
     /**
      *  The Role that the user plays
      */
-    role: sessionRole,
+    @prop({required: true, enum: sessionRole})
+        role!: sessionRole;
     /**
      * The Start Timestamp
      */
-    started_at: string,
+    @prop()
+        started_at?: string;
     /**
      * The End Timestamp (Set when active==false)
      */
-    ended_at?: string,
+    @prop()
+        ended_at?: string;
     /**
      * Only set to true if session had a clean exit
      */
-    end_certain: boolean,
+    @prop({required: true})
+        end_certain!: boolean;
     /**
      * The Room IDs That Were Visited in the Session
      */
-    rooms: string[],
-}
+    @prop({required: true, type: () => [String], default: []})
+        rooms!: mongoose.Types.Array<string>;
 
-const SessionSchema = new mongoose.Schema<SessionDocument, SessionModel, Session>({
-    active: {
-        type: Boolean,
-        required: true,
-    },
-    user: {
-        type: String,
-        required: true,
-    },
-    guild: {
-        type: String,
-        required: false,
-    },
-    queue: {
-        type: String,
-        required: false,
-    },
-    role: {
-        type: String,
-        enum: Object.keys(sessionRole),
-        required: true,
-    },
-    started_at: {
-        type: String,
-        required: false,
-    },
-    ended_at: {
-        type: String,
-        required: false,
-    },
-    end_certain: {
-        type: Boolean,
-        required: true,
-    },
-    rooms: [{
-        type: String,
-        required: true,
-        default: [],
-    }],
-});
-
-export interface SessionDocument extends Session, mongoose.Document<mongoose.Types.ObjectId> {
-    rooms: mongoose.Types.Array<string>,
     /**
      * Gets The Number of Rooms that were Visited in the Session
      */
-    getRoomAmount(): number,
+    public getRoomAmount(this: DocumentType<Session>): number {
+        return this.rooms.length;
+    }
+
     /**
      * Gets The Number of Participants met in the Session (assuming the Chanels Lifetime is within the Session)
      */
-    getParticipantAmount(): Promise<number>,
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SessionModel extends mongoose.Model<SessionDocument> {
-
-}
-
-// --Methods--
-
-SessionSchema.method<SessionDocument>("getRoomAmount", function () {
-    return this.rooms.length;
-});
-
-SessionSchema.method<SessionDocument>("getParticipantAmount", async function () {
-    let amount = 0;
-    for (const r of this.rooms) {
-        const roomData = await RoomSchema.findById(r);
-        if (roomData) {
-            amount += (await roomData.getParticipants()).length;
+    public async getParticipantAmount(this: DocumentType<Session>): Promise<number> {
+        let amount = 0;
+        for (const r of this.rooms) {
+            const roomData = await RoomModel.findById(r);
+            if (roomData) {
+                amount += (await roomData.getParticipants()).length;
+            }
         }
+        return amount;
     }
-    return amount;
-});
-// SessionSchema.method('getParticipants', function () {
-//     return RoomSchema.f;
-// });
+}
 
-// Default export
-export default mongoose.model<SessionDocument, SessionModel>("Sessions", SessionSchema);
+export const SessionModel = getModelForClass(Session, {
+    schemaOptions: {
+        autoCreate: true,
+    },
+});

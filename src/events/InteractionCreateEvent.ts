@@ -1,7 +1,9 @@
 import { Command, ExecuteEvent } from "../../typings";
 import { ChatInputCommandInteraction, Collection, CommandInteractionOption } from "discord.js";
 export const name = "interactionCreate";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
+import { DocumentType, isDocument } from "@typegoose/typegoose";
+import { GuildSettings } from "../models/guild_settings";
 
 export const execute: ExecuteEvent<"interactionCreate"> = async (client, interaction) => {
 
@@ -16,7 +18,7 @@ export const execute: ExecuteEvent<"interactionCreate"> = async (client, interac
         let actualCommandName = commandName;
         if (interaction.guild) {
             const g = interaction.guild;
-            const guildData = (await GuildSchema.findById(g.id))!;
+            const guildData = (await GuildModel.findById(g.id))!;
             actualCommandName = guildData.guild_settings.getCommandByGuildName(commandName)?.internal_name ?? commandName;
         }
         const command = client.commands.get(actualCommandName) || client.commands.find(cmd => (cmd.aliases != undefined) && cmd.aliases.includes(actualCommandName));

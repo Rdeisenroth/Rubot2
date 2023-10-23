@@ -1,7 +1,9 @@
 import { ApplicationCommandOptionType, CategoryChannel, GuildChannel, Message, VoiceChannel as dvc } from "discord.js";
 import { Command } from "../../typings";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
+import { mongoose } from "@typegoose/typegoose";
 
 const command: Command = {
     name: "setjointocreate",
@@ -63,7 +65,7 @@ const command: Command = {
             parent_id = parent.id;
         }
 
-        const updated = await GuildSchema.updateOne(
+        const updated = await GuildModel.updateOne(
             { _id: g.id },
             {
                 $push: {
@@ -76,16 +78,16 @@ const command: Command = {
                         managed: true,
                         // blacklist_user_groups: [],
                         // whitelist_user_groups: [],
-                        permitted: [],
+                        permitted: new mongoose.Types.Array(),
                         afkhell: false,
                         spawner: {
                             owner: member.id,
-                            supervisor_roles: [],
+                            supervisor_roles: new mongoose.Types.Array(),
                             permission_overwrites: [{ id: interaction!.guild!.members.me!.id, allow: ["ViewChannel", "Connect", "Speak", "MoveMembers", "ManageChannels"] }],
                             max_users: 5,
                             parent: parent_id,
                         },
-                    } as VoiceChannel,
+                    } as FilterOutFunctionKeys<VoiceChannel>,
                 },
             },
             { upsert: true, setDefaultsOnInsert: true },

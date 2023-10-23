@@ -1,15 +1,17 @@
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { ChannelType, Guild, GuildMember, GuildPremiumTier, OverwriteData } from "discord.js";
 import { Bot } from "../bot";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
-import { VoiceChannelCreateOptions, VoiceChannelSpawner } from "../models/voice_channel_spawner";
+import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
+import { mongoose } from "@typegoose/typegoose";
 
 /**
  * Creates a managed Voice Channel Based on a Voice Channel Spawner
  * @param guild The Guild to create the Channel in
  * @param options The Options from the Voice Channel Spawner
  */
-export async function createManagedVC(guild: Guild, options: VoiceChannelCreateOptions) {
+export async function createManagedVC(guild: Guild, options: FilterOutFunctionKeys<VoiceChannelSpawner>) {
     // Channel Permissions
     const permoverrides: OverwriteData[] = options.permission_overwrites;
 
@@ -68,7 +70,7 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
     });
 
     // Create Database Entry
-    const guildData = (await GuildSchema.findById(guild.id))!;
+    const guildData = (await GuildModel.findById(guild.id))!;
     guildData.voice_channels.push({
         _id: createdVC.id,
         channel_type: 2,
@@ -77,11 +79,11 @@ export async function createManagedVC(guild: Guild, options: VoiceChannelCreateO
         managed: true,
         // blacklist_user_groups: [],
         // whitelist_user_groups: [],
-        permitted: [],
+        permitted: new mongoose.Types.Array(),
         afkhell: false,
         category: options.parent,
         temporary: true,
-    } as VoiceChannel);
+    } as FilterOutFunctionKeys<VoiceChannel>);
     await guildData.save();
     return createdVC;
 }
@@ -114,5 +116,5 @@ export async function createTempVC(member: GuildMember, spawner: VoiceChannelSpa
 
     spawner.name = name;
     spawner.owner = member.id;
-    return await createManagedVC(member.guild, spawner as VoiceChannelCreateOptions);
+    return await createManagedVC(member.guild, spawner);
 }

@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
 import { Command } from "../../../typings";
-import GuildSchema from "../../models/guilds";
-import { VoiceChannelDocument } from "../../models/voice_channels";
+import {GuildModel} from "../../models/guilds";
+import { VoiceChannel } from "../../models/voice_channels";
 
 const command: Command = {
     name: "close",
@@ -36,8 +36,8 @@ const command: Command = {
         }
 
         // Get Channel from DB
-        const guildData = (await GuildSchema.findById(g.id));
-        const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == channel!.id);
+        const guildData = (await GuildModel.findById(g.id));
+        const channelData = guildData!.voice_channels.find(x => x._id == channel!.id);
 
         if (!channelData?.temporary) {
             return await client.utils.embeds.SimpleEmbed(interaction!, "Temporary Voice Channel System", "The Voice Channel you are in is not a Temporary Voice Channel.");
@@ -67,7 +67,7 @@ const command: Command = {
         // try {
         //     await channel.delete();
         //     // remove DB entry
-        //     const updated = await GuildSchema.updateOne(
+        //     const updated = await GuildModel.updateOne(
         //         { _id: g.id },
         //         {
         //             $pull: {

@@ -1,14 +1,15 @@
 import { ConfigHandler } from "./../handlers/configHandler";
-import { DBRoleDocument, InternalRoles, RoleScopes } from "./../models/bot_roles";
+import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
 import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, RoleResolvable, UserResolvable } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
 import { promisify } from "util";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
 import glob from "glob";
 import { Bot } from "../bot";
-import UserSchema from "../models/users";
+import {UserModel} from "../models/users";
 import * as cryptojs from "crypto-js";
+import { DocumentType } from "@typegoose/typegoose";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -16,6 +17,7 @@ import * as cryptojs from "crypto-js";
  * @param variable the Variable to check
  * @returns
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isArraywithContent = (variable: any) => Array.isArray(variable) && (!!variable.length) && (variable.length > 0);
 
 /**
@@ -160,7 +162,7 @@ export async function hasPermission(client: Bot, mentionable: UserResolvable | R
         // TODO: Permissions for Global Commands
         return command.defaultPermission || roleoruser?.id === client.config.get("ownerID");
     }
-    const guildData = (await GuildSchema.findById(g.id))!;
+    const guildData = (await GuildModel.findById(g.id))!;
     const commandSettings = await guildData.guild_settings.getCommandByInternalName(command.name);
     const permission_overwrite = commandSettings?.permissions.some(x => x.id === roleoruser?.id && x.permission) ?? false;
     const role_permission_overwrite = (roleoruser instanceof GuildMember) && [...roleoruser.roles.cache.values()].some(r => commandSettings?.permissions.some(x => x.id === r.id && x.permission));
@@ -240,7 +242,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot. (Guild not found)`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot.", empheral: true });
     }
-    const dbGuild = await GuildSchema.findById(guild.id);
+    const dbGuild = await GuildModel.findById(guild.id);
     if (!dbGuild) {
         console.log(`Failed Verifying User ${author.tag} with message: This should not happen... Please Contact the owner of the Bot.`);
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Server Not Found", text: "This should not happen... Please Contact the owner of the Bot. (Database Server not found)", empheral: true });
@@ -253,17 +255,17 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
         return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "You are not a Member of the Guild.", empheral: true });
     }
 
-    let databaseUser = await UserSchema.findById(member.id);
+    let databaseUser = await UserModel.findById(member.id);
     if (!databaseUser) {
-        databaseUser = new UserSchema({ _id: member.id });
+        databaseUser = new UserModel({ _id: member.id });
         await databaseUser.save();
     }
     databaseUser.tu_id = tu_id;
     databaseUser.moodle_id = moodle_id;
-    const dbTokenRoles = [] as DBRoleDocument[];
+    const dbTokenRoles = [] as DocumentType<DBRole>[];
     // find roles
     internal_role_names.forEach(async x => {
-        const token_role = dbGuild.guild_settings.roles.find(r => r.internal_name.toLowerCase() === x.toLowerCase());
+        const token_role = dbGuild.guild_settings.roles?.find(r => r.internal_name.toLowerCase() === x.toLowerCase());
         if (!token_role) {
             console.log(`Failed Verifying User ${author.tag} with message: Role ${x} not found.`);
             return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: `Role ${x} not found.`, empheral: true });
@@ -275,7 +277,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     try {
         await databaseUser.save();
     } catch (error) {
-        if ((error as any).message?.includes("duplicate key")) {
+        if ((error as {message:string}).message?.includes("duplicate key")) {
             console.log(`User ${member.displayName} tried to valid but already used token with TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
             return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
         } else {
@@ -286,11 +288,11 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     console.log(`Linked ${member.displayName} to TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
 
     // faulty roles
-    const faulty_roles: DBRoleDocument[] = [];
+    const faulty_roles: DocumentType<DBRole>[] = [];
     // existing roles
-    const existing_roles: DBRoleDocument[] = [];
+    const existing_roles: DocumentType<DBRole>[] = [];
     // new roles
-    const new_roles: DBRoleDocument[] = [];
+    const new_roles: DocumentType<DBRole>[] = [];
     // Give Roles
     const guildRoles = await member.guild.roles.fetch();
     for (const role of dbTokenRoles) {
@@ -380,131 +382,4 @@ export enum QueueStayOptions {
      * Annotates user already left
      */
     LEFT,
-}
-
-export enum Weekday {
-    /**
-     * Sonntag
-     */
-    SUNDAY = 0,
-    /**
-     * Montag
-     */
-    MONDAY = 1,
-    /**
-     * Dienstag
-     */
-    TUESDAY = 2,
-    /**
-     * Mittwoch
-     */
-    WEDNESDAY = 3,
-    /**
-     * Donnerstag
-     */
-    THURSDAY = 4,
-    /**
-     * Freitag
-     */
-    FRIDAY = 5,
-    /**
-     * Samstag
-     */
-    SATURDAY = 6,
-}
-
-/**
- * A Timestamp of the queue
- */
-export class WeekTimestamp {
-
-    /**
-     * Creates a new WeekTimestamp
-     * @param weekday The current day of the week
-     * @param hour The current hour of the day
-     * @param minute The current minute of the hour
-     */
-    constructor(
-        /**
-         * The Day of the Week
-         */
-        public weekday: Weekday,
-        /**
-         * The Hour of the Day
-         */
-        public hour: number,
-        /**
-         * The Minute of the Hour
-         */
-        public minute: number,
-    ) {
-
-    }
-    /**
-     * returns the weektime in ms
-     * @returns The WeekTime in ms
-     */
-    public getTime(): number {
-        return this.minute * 1000 * 60 + this.hour * 1000 * 60 * 60 + this.weekday * 1000 * 60 * 60 * 24;
-    }
-
-    /**
-     * Returns a Relative Weekdate
-     * @param date The Date to convert
-     * @returns The created WeekTimestamp
-     */
-    public static fromDate(date: Date) {
-        return new WeekTimestamp(date.getDay(), date.getHours(), date.getMinutes());
-    }
-
-    /**
-     * Returns a Relative Weekdate from a given Time in ms
-     * @param number The Time elapsed since Sunday 00:00 in ms
-     * @returns The created WeekTimestamp
-     */
-    public static fromNumber(number: number) {
-        return new WeekTimestamp(Math.floor(number / 1000 / 60 / 60 / 24), Math.floor(number / 1000 / 60 / 60) % 24, Math.floor(number / 1000 / 60) % 60);
-    }
-
-    /**
-     * Returns a string representation of the WeekTimestamp.
-     * @param padWeekday Whether to pad the weekday to the length of the longest weekday name
-     * @returns The WeekTimestamp as String
-     * @example
-     * ```ts
-     * const weekTimestamp = new WeekTimestamp(Weekday.MONDAY, 12, 0);
-     * console.log(weekTimestamp.toString()); // "MONDAY 12:00"
-     * ```
-     */
-    public toString(padWeekday = false): string {
-        const weekdayString = padWeekday ? Weekday[this.weekday].padEnd(Object.keys(Weekday).reduce((a, b) => a.length > b.length ? a : b).length, " ") : Weekday[this.weekday];
-        return `${weekdayString} ${String(this.hour).padStart(2, "0")}:${String(this.minute).padStart(2, "0")}`;
-    }
-
-    /**
-     * Creates a new WeekTimestamp from a given string
-     * @param string The string to parse
-     * @returns The created WeekTimestamp
-     * @throws Throws an Error if the string is not a valid WeekTimestamp
-     * @example
-     * ```ts
-     * const weekTimestamp = WeekTimestamp.fromString("Monday 12:00");
-     * ```
-     */
-    public static fromString(str: string) {
-        const regex = /^(?<weekday>\d+) (?<hour>\d+):(?<minute>\d+)$/;
-        const match = regex.exec(str);
-        if (!match) {
-            throw new Error(`Invalid WeekTimestamp String: ${str}`);
-        }
-        return new WeekTimestamp(
-            Weekday[match.groups!.weekday.toUpperCase() as keyof typeof Weekday],
-            +match.groups!.hour,
-            +match.groups!.minute,
-        );
-    }
-
-    equals(other: WeekTimestamp): boolean {
-        return this.weekday === other.weekday && this.hour === other.hour && this.minute === other.minute;
-    }
 }

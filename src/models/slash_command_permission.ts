@@ -1,46 +1,20 @@
 import { ApplicationCommandPermissionType } from "discord.js";
-import mongoose from "mongoose";
+import { prop } from "@typegoose/typegoose";
 
-export interface SlashCommandPermission {
+export class SlashCommandPermission {
     /**
      * The User or Role ID
      */
-    id: string,
+    @prop({ required: true })
+        id!: string;
     /**
      * The ID Type (Role or User)
      */
-    type: ApplicationCommandPermissionType;
+    @prop({ required: true, enum: ApplicationCommandPermissionType, default: ApplicationCommandPermissionType.User })
+        type!: ApplicationCommandPermissionType;
     /**
      * Whether to permit or not permit the User Or Role
      */
-    permission: boolean;
+    @prop({ required: true })
+        permission!: boolean;
 }
-
-const SlashCommandPermissionSchema = new mongoose.Schema<SlashCommandPermissionDocument, SlashCommandPermissionModel, SlashCommandPermission>({
-    id: {
-        type: String,
-        required: true,
-    },
-    type: {
-        type: Number,
-        enum: [1, 2],
-        default: 2,
-        required: true,
-    },
-    permission: {
-        type: Boolean,
-        required: true,
-    },
-});
-
-export interface SlashCommandPermissionDocument extends SlashCommandPermission, Omit<mongoose.Document, "id"> {
-    
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SlashCommandPermissionModel extends mongoose.Model<SlashCommandPermissionDocument> {
-
-}
-
-// Default export
-export default SlashCommandPermissionSchema;

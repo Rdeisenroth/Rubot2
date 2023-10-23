@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, EmojiIdentifierResolvable, Message, EmbedBuilder } from "discord.js";
 import yargsParser from "yargs-parser";
 import { Command, RunCommand } from "../../typings";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
 
 
 const command: Command = {
@@ -41,7 +41,7 @@ const command: Command = {
             embed.setThumbnail(client.user.displayAvatarURL());
         }
 
-        const guildData = await GuildSchema.findById(interaction?.guildId ?? 0);
+        const guildData = await GuildModel.findById(interaction?.guildId ?? 0);
         const guildSettings = guildData?.guild_settings;
 
         /**

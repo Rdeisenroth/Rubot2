@@ -1,7 +1,7 @@
 import { SlashCommandPermission } from "./../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 
 const command: Command = {
     name: "permission",
@@ -40,7 +40,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
 
         const cmdName = interaction.options.getString("original-name", true);
         if (!client.commands.has(cmdName)) {

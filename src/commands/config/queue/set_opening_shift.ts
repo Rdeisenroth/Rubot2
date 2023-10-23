@@ -2,7 +2,7 @@ import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
 
 const command: Command = {
@@ -36,7 +36,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const openShift = interaction.options.getNumber("shift", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());

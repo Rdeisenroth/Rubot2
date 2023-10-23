@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import RoomSchema from "../../../models/rooms";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {RoomModel} from "../../../models/rooms";
 
 const command: Command = {
     name: "userrank",
@@ -35,7 +35,7 @@ const command: Command = {
         await interaction.deferReply();
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
@@ -49,16 +49,16 @@ const command: Command = {
         // await g.members.fetch();
 
         const fields: EmbedField[] = [];
-        const rooms = await RoomSchema.find({});
+        const rooms = await RoomModel.find({});
         for (const u of
             (
                 await Promise.all(
-                    (await UserSchema.find())
+                    (await UserModel.find())
                         .map(async (x, i, a) => {
                             console.log(`Processing User data of ${x._id} (${i}/${a.length})`);
                             return {
                                 _id: x._id,
-                                roomCount: await RoomSchema.getParticipantRoomCount(x._id, rooms),
+                                roomCount: await RoomModel.getParticipantRoomCount(x._id, rooms),
                             };
                         },
                         ))
@@ -67,7 +67,7 @@ const command: Command = {
         ) {
             // console.log(u._id);
             const member = await g.members.fetch(u._id);
-            const roomCount = await RoomSchema.getParticipantRoomCount(u._id);
+            const roomCount = await RoomModel.getParticipantRoomCount(u._id);
 
             fields.push({
                 name: member.displayName, value:

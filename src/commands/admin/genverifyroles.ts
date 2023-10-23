@@ -1,10 +1,10 @@
 import { Message, Role } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import UserSchema, { User } from "../../models/users";
-import GuildSchema from "../../models/guilds";
-import { DBRole, DBRoleDocument, InternalRoles, RoleScopes } from "../../models/bot_roles";
-import { Types } from "mongoose";
+import {UserModel, User } from "../../models/users";
+import {GuildModel} from "../../models/guilds";
+import { DBRole, InternalRoles, RoleScopes } from "../../models/bot_roles";
+import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
 
 
 
@@ -27,7 +27,7 @@ const command: Command = {
         const guild = interaction.guild;
         const roles = await interaction.guild.roles.fetch();
         const members = await interaction.guild.members.fetch();
-        const dbGuild = (await GuildSchema.findOne({ _id: guild.id }))!;
+        const dbGuild = (await GuildModel.findOne({ _id: guild.id }))!;
         const verifiedRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
         let dbVerifyRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.VERIFIED);
         const orgaRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "orga");
@@ -36,11 +36,13 @@ const command: Command = {
         let dbTutorRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.TUTOR);
 
         // Create the roles if they don't exist
-        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, ArraySubDocumentType<DBRole>, InternalRoles][])) {
             if (!r) continue;
             if (!dbr) {
                 console.log(`creating role ${irn}`);
-                if (!dbGuild.guild_settings.roles) dbGuild.guild_settings.roles = new Types.DocumentArray<DBRoleDocument>([]);
+                if (!dbGuild.guild_settings.roles) {
+                    dbGuild.guild_settings.roles = new mongoose.Types.DocumentArray([]);
+                }
                 dbGuild.guild_settings.roles.push({
                     internal_name: irn,
                     role_id: r.id,

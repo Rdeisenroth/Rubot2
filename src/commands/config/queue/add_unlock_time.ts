@@ -2,7 +2,7 @@ import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
 
 const command: Command = {
@@ -36,7 +36,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const queueSpanString = interaction.options.getString("schedule", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
@@ -47,8 +47,8 @@ const command: Command = {
         let queueSpan: QueueSpan;
         try {
             queueSpan = QueueSpan.fromString(queueSpanString);
-        } catch (error: any) {
-            client.utils.embeds.SimpleEmbed(interaction, "Server config", `:x: Error: could not parse the QueueSpan \`${queueSpanString}\`:\n ${error.message}`);
+        } catch (error: unknown) {
+            client.utils.embeds.SimpleEmbed(interaction, "Server config", `:x: Error: could not parse the QueueSpan \`${queueSpanString}\`:\n ${(error as {message:unknown}).message}`);
             return;
         }
         queueData.opening_times.push(queueSpan);

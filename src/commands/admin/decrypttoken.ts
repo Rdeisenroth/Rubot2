@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import UserSchema, { User } from "../../models/users";
-import GuildSchema from "../../models/guilds";
-import { DBRole, DBRoleDocument, InternalRoles, RoleScopes } from "../../models/bot_roles";
+import {UserModel, User } from "../../models/users";
+import {GuildModel} from "../../models/guilds";
+import { DBRole, InternalRoles, RoleScopes } from "../../models/bot_roles";
 import { Types } from "mongoose";
 
 

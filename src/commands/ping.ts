@@ -18,6 +18,7 @@ const command: Command = {
         // let choices = ["Is this really my ping, it's so high...", "Is it okay? I cant look", "I hope it isnt bad"]
         // let response = choices[Math.floor(Math.random() * choices.length)];
         const res = await interaction.reply({ content: "Pinging..." });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let m: any;
         if (interaction instanceof ChatInputCommandInteraction) {
             m = await interaction.fetchReply();

@@ -1,22 +1,22 @@
 import { ClientEventListener, ExecuteEvent, StringReplacements } from "../../typings";
 import { ApplicationCommandData, ApplicationCommandOptionChoiceData, Client, ClientEvents, Guild } from "discord.js";
-import GuildSchema from "../models/guilds";
-import UserSchema from "../models/users";
+import {GuildModel} from "../models/guilds";
+import {UserModel} from "../models/users";
 import { inspect } from "util";
 
 export const name = "guildMemberAdd";
 
 export const execute: ExecuteEvent<"guildMemberAdd"> = async (client, member) => {
     const guild = member.guild;
-    const guildData = await GuildSchema.findById(guild.id);
+    const guildData = await GuildModel.findById(guild.id);
     // Create User Entry
-    let databaseUser = await UserSchema.findById(member.id);
+    let databaseUser = await UserModel.findById(member.id);
     if (!databaseUser) {
-        databaseUser = new UserSchema({ _id: member.id });
+        databaseUser = new UserModel({ _id: member.id });
         await databaseUser.save();
     }
     // Give Roles
-    const guildRoles = databaseUser.server_roles.toObject<string[]>().flatMap(x => {
+    const guildRoles = databaseUser.server_roles.flatMap(x => {
         const role = member.guild.roles.resolve(x);
         if (role) {
             return [role];

@@ -1,5 +1,5 @@
-import { TextChannelType } from "discord.js";
-import mongoose from "mongoose";
+import { ChannelType, TextChannelType } from "discord.js";
+import {getModelForClass, prop} from "@typegoose/typegoose";
 
 /**
  * Database Representation of a Discord Channel
@@ -12,7 +12,7 @@ export interface Channel {
     /**
      * The Channel Type
      */
-    channel_type: TextChannelType,
+    channel_type: ChannelType,
     /**
      * Whether the Channel is being managed by or relevant to the bot
      */
@@ -27,65 +27,36 @@ export interface Channel {
     owner?: string,
 }
 
-export interface TextChannel extends Channel {
+export class TextChannel implements Channel {
+    @prop({required: true})
+        _id!: string;
+    @prop({ required: true, type: Number, enum: [ChannelType.DM, ChannelType.GroupDM, ChannelType.GuildAnnouncement, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread, ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildVoice, ChannelType.GuildStageVoice]})
+        channel_type!: TextChannelType;
+    @prop({ required: true })
+        managed!: boolean;
+    @prop()
+        category?: string | undefined;
+    @prop()
+        owner?: string | undefined;
     /**
      * Channel Specific Prefix, cuz why not? :D
      */
-    prefix?: string,
+    @prop()
+        prefix?: string;
     /**
      * If the Bot is enabled in this channel
      */
-    listen_for_commands: boolean,
+    @prop({ required: true })
+        listen_for_commands!: boolean;
     /**
      * WHETHER THE CHANNEL IS CAPS-ONLY
      */
-    rage_channel?: boolean,
+    @prop({default: false})
+        rage_channel?: boolean;
 }
 
-const TextChannelSchema = new mongoose.Schema<TextChannelDocument, TextChannelModel, TextChannel>({
-    channel_type: {
-        type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13],
-        required: true,
-    },
-    // whitelist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
-    // blacklist_user_groups: [{
-    //     type: String,
-    //     required: true
-    // }],
-    managed: {
-        type: Boolean,
-        required: true,
-    },
-    owner: {
-        type: String,
-        required: false,
-    },
-    prefix: {
-        type: String,
-        required: false,
-    },
-    listen_for_commands: {
-        type: Boolean,
-        required: true,
-    },
-    rage_channel: {
-        type: String,
-        required: false,
+export const TextChannelModel = getModelForClass(TextChannel, {
+    schemaOptions: {
+        autoCreate: false,
     },
 });
-
-export interface TextChannelDocument extends TextChannel, Omit<mongoose.Document, "_id"> {
-
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TextChannelModel extends mongoose.Model<TextChannelDocument> {
-
-}
-
-// Default export
-export default TextChannelSchema;

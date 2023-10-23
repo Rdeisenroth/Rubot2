@@ -1,10 +1,11 @@
 import { Message, Role } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import UserSchema, { User } from "../../models/users";
-import GuildSchema from "../../models/guilds";
-import { DBRole, DBRoleDocument, InternalRoles, RoleScopes } from "../../models/bot_roles";
+import {UserModel, User } from "../../models/users";
+import {GuildModel} from "../../models/guilds";
+import { DBRole, InternalRoles, RoleScopes } from "../../models/bot_roles";
 import { Types } from "mongoose";
+import { DocumentType } from "@typegoose/typegoose";
 
 
 
@@ -27,7 +28,7 @@ const command: Command = {
         const guild = interaction.guild;
         const roles = await interaction.guild.roles.fetch();
         const members = await interaction.guild.members.fetch();
-        const dbGuild = (await GuildSchema.findOne({ _id: guild.id }))!;
+        const dbGuild = (await GuildModel.findOne({ _id: guild.id }))!;
         const verifiedRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "verified");
         let dbVerifyRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.VERIFIED);
         const orgaRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "orga");
@@ -36,11 +37,11 @@ const command: Command = {
         let dbTutorRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.TUTOR);
 
         // Create the roles if they don't exist
-        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
             if (!r) continue;
             if (!dbr) {
                 console.log(`creating role ${irn}`);
-                if (!dbGuild.guild_settings.roles) dbGuild.guild_settings.roles = new Types.DocumentArray<DBRoleDocument>([]);
+                if (!dbGuild.guild_settings.roles) dbGuild.guild_settings.roles = new Types.DocumentArray([]);
                 dbGuild.guild_settings.roles.push({
                     internal_name: irn,
                     role_id: r.id,
@@ -59,16 +60,16 @@ const command: Command = {
             }
         }
 
-        const users = await UserSchema.find({});
+        const users = await UserModel.find({});
         let count = 0;
         for (const u of users) {
             console.log(`(${++count}/${users.length}) updating roles for user ${u.tu_id}`);
-            for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DBRoleDocument, InternalRoles][])) {
+            for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
                 if (!r || !dbr) continue;
                 if (members.get(u._id)?.roles.cache.has(r.id)) {
                     console.log(`${u.tu_id} has role ${irn}`);
-                    if (!u.token_roles) u.token_roles = new Types.Array<Types.ObjectId>();
-                    u.token_roles.push(dbr._id);
+                    if (!u.token_roles) u.token_roles = new Types.Array();
+                    u.token_roles.push(dbr);
                     await u.save();
                 }
             }

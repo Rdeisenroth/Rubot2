@@ -1,14 +1,13 @@
 import { ExecuteEvent } from "../../typings";
 import { Collection, ActionRow, Embed, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, APIMessageActionRowComponent } from "discord.js";
-import GuildSchema from "../models/guilds";
-import { VoiceChannelDocument } from "../models/voice_channels";
-import { QueueDocument } from "../models/queues";
+import {GuildModel} from "../models/guilds";
+import { VoiceChannel } from "../models/voice_channels";
+import { Queue } from "../models/queues";
 import { QueueEntry } from "../models/queue_entry";
-import moment from "moment";
 export const name = "voiceStateUpdate";
-import RoomSchema from "../models/rooms";
-import UserSchema from "../models/users";
-import EventSchema, { Event as EVT, eventType } from "../models/events";
+import {RoomModel} from "../models/rooms";
+import {UserModel} from "../models/users";
+import {EventModel, Event as EVT, eventType } from "../models/events";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;
@@ -20,9 +19,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
         const guild = newState.channel.guild;
 
         // Get Channel from DB
-        const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == newState.channelId!);
-        const roomData = (await RoomSchema.findById(newState.channelId));
+        const guildData = (await GuildModel.findById(guild.id));
+        const channelData = (guildData!.voice_channels).find(x => x._id == newState.channelId!);
+        const roomData = (await RoomModel.findById(newState.channelId));
         if (channelData) {
 
             // Check if Channel is Spawner
@@ -42,16 +41,16 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
 
                 console.log(`Created TEMP VC: ${createdVC.name} on ${guild.name}`);
             } else if (channelData.queue) {
-                const queueId = channelData.queue;
-                const queue = (guildData?.queues as QueueDocument[]).find(x => x._id?.equals(queueId));
+                const queueRef = channelData.queue;
+                const queue = guildData?.queues.find(x => x._id?.equals(queueRef));
                 if (!queue) {
-                    client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
+                    client.logger.error(`Referenced Queue was not found in Database: ${queueRef._id.toHexString()}`);
                     return;
                 }
                 let queueEntry: QueueEntry;
                 try {
                     if (queue.contains(newState.member!.id)) {
-                        if (client.queue_stays.get(newState.member!.id)?.get(queueId.toHexString()) === client.utils.general.QueueStayOptions.PENDING) {
+                        if (client.queue_stays.get(newState.member!.id)?.get(queueRef._id.toHexString()) === client.utils.general.QueueStayOptions.PENDING) {
                             client.queue_stays.get(newState.member!.id)!.set(queue._id!.toHexString(), client.utils.general.QueueStayOptions.STAY);
                             await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), {
                                 title: "Queue System", text: "You stayed in the queue.", components: [
@@ -65,7 +64,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         }
                         return;
                     }
-                    // let userData = await UserSchema.findById(newState.member!.id);
+                    // let userData = await UserModel.findById(newState.member!.id);
                     if (newState.member?.roles.cache.find(x => x.name.toLowerCase() === "tutor" || x.name.toLowerCase() === "orga")) {
                         return;
                     }
@@ -147,9 +146,9 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
         const guild = oldUserChannel.guild;
 
         // Get Channel from DB
-        const guildData = (await GuildSchema.findById(guild.id));
-        const channelData = (guildData!.voice_channels as VoiceChannelDocument[]).find(x => x._id == oldState.channelId!);
-        const roomData = (await RoomSchema.findById(oldState.channelId));
+        const guildData = (await GuildModel.findById(guild.id));
+        const channelData = guildData!.voice_channels.find(x => x._id == oldState.channelId!);
+        const roomData = (await RoomModel.findById(oldState.channelId));
         if (channelData) {
             if (channelData.temporary && oldUserChannel.members.size == 0) {
 
@@ -173,7 +172,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 // }
 
                 // remove DB entry
-                const updated = await GuildSchema.updateOne(
+                const updated = await GuildModel.updateOne(
                     { _id: guild.id },
                     {
                         $pull: {
@@ -185,10 +184,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 // console.log(updated);
                 console.log(`deleted TEMP VC: ${cName} on ${guild.name}`);
             } else if (channelData.queue) {
-                const queueId = channelData.queue;
-                const queue: QueueDocument | null | undefined = guildData?.queues.id(queueId);
+                const queueRef = channelData.queue;
+                const queue = guildData?.queues.id(queueRef);
                 if (!queue) {
-                    client.logger.error(`Referenced Queue was not found in Database: ${queueId.toHexString()}`);
+                    client.logger.error(`Referenced Queue was not found in Database: ${queueRef._id.toHexString()}`);
                     return;
                 }
                 const member = oldState.member!;

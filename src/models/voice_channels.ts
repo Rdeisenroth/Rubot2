@@ -1,179 +1,126 @@
+import { SubDocumentType, getModelForClass } from "@typegoose/typegoose";
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import mongoose from "mongoose";
-import { Bot } from "../bot";
 import { Channel } from "./text_channels";
-import VoiceChannelSpawnerSchema, { VoiceChannelSpawner, VoiceChannelSpawnerDocument } from "./voice_channel_spawner";
+import { VoiceChannelSpawner } from "./voice_channel_spawner";
 import * as djs from "discord.js";
+import { DocumentType, Ref, prop, mongoose } from "@typegoose/typegoose";
+import { Queue } from "./queues";
 
-export interface VoiceChannel extends Channel {
-    /**
-     * The Channel ID
-     */
-    _id: string,
+export class VoiceChannel implements Channel {
+    @prop({ required: true })
+        _id!: string;
+    @prop({ required: true, type: Number, enum: [0, 1, 2, 3, 4, 5, 6, 7] })
+        channel_type!: djs.ChannelType;
+    @prop({ required: true })
+        managed!: boolean;
+    @prop()
+        category?: string | undefined;
+    @prop()
+        owner?: string | undefined;
     /**
      * If the channel is an AFK-Hell (constantly plays a Song)
      */
-    afkhell?: boolean,
+    @prop({ default: false })
+        afkhell?: boolean;
     /**
      * The Song Link for AFK Hell
      */
-    song_link?: string,
+    @prop()
+        song_link?: string;
     /**
      * If the voice Channel is locked to a specific user group (used to keep track of lock icon)
      */
-    locked: boolean,
+    @prop({ required: true, default: false })
+        locked!: boolean;
     /**
      * The Permitted Users/Roles that can enter this channel
      */
-    permitted: string[],
+    @prop({ required: true, type: String, default: [] })
+        permitted!: mongoose.Types.Array<string>;
     /**
      * Makes the Channel a spawner Channel which creates a new channel for every joined member
      */
-    spawner?: VoiceChannelSpawner,
+    @prop({ required: false, type: () => VoiceChannelSpawner })
+        spawner?: SubDocumentType<VoiceChannelSpawner>;
     /**
      * The Channel Prefix
      */
-    prefix?: string,
+    @prop()
+        prefix?: string;
     /**
      * A Queue that is entered with joining this Channel
      */
-    queue?: mongoose.Types.ObjectId,
+    @prop({ ref: () => Queue })
+        queue?: Ref<Queue>;
     /**
      * If the VC is a Temporary Voice Channel
      */
-    temporary?: boolean,
+    @prop({ default: false })
+        temporary?: boolean;
     /**
      * The Channel Supervisor Roles/ User IDs
      */
-    supervisors?: string[],
-}
+    @prop({ type: String, default: [] })
+        supervisors?: mongoose.Types.Array<string>;
 
-const VoiceChannelSchema = new mongoose.Schema<VoiceChannelDocument, VoiceChannelModel, VoiceChannel>({
-    _id: {
-        type: String,
-        required: true,
-    },
-    channel_type: {
-        type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7],
-        required: true,
-    },
-    managed: {
-        type: Boolean,
-        required: true,
-    },
-    owner: {
-        type: String,
-        required: false,
-    },
-    prefix: {
-        type: String,
-        required: false,
-    },
-    category: {
-        type: String,
-        required: false,
-    },
-    afkhell: {
-        type: Boolean,
-        required: false,
-    },
-    song_link: {
-        type: String,
-        required: false,
-    },
-    locked: {
-        type: Boolean,
-        required: true,
-        default: false,
-    },
-    permitted: [{
-        type: String,
-        required: true,
-        default: [],
-    }],
-    spawner: {
-        type: VoiceChannelSpawnerSchema,
-        required: false,
-    },
-    queue: {
-        type: mongoose.Types.ObjectId,
-        required: false,
-    },
-    temporary: {
-        type: Boolean,
-        required: false,
-        default: false,
-    },
-    supervisors: [{
-        type: String,
-        required: false,
-        default: [],
-    }],
-});
-
-export interface VoiceChannelDocument extends VoiceChannel, Omit<mongoose.Document, "_id"> {
-    permitted: mongoose.Types.Array<string>,
-    spawner?: VoiceChannelSpawnerDocument,
-    supervisors?: mongoose.Types.Array<string>,
     /**
      * Locks the Voice Channel
+     * @param channel The Channel to lock
+     * @param roleId The @everyone Role ID
      */
-    lock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    public async lock(this: DocumentType<VoiceChannel>, channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void> {
+        this.locked = true;
+        await this.$parent()?.save();
+        await this.syncPermissions(channel, roleId);
+    }
+
     /**
      * Unlocks the Voice Channel
+     * @param channel The Channel to unlock
+     * @param roleId The @everyone Role ID
      */
-    unlock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    public async unlock(this: DocumentType<VoiceChannel>, channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void> {
+        this.locked = false;
+        await this.$parent()?.save();
+        await this.syncPermissions(channel, roleId);
+    }
+
     /**
      * Locks or Unlocks the Voice Channel (opposite State).
+     * @param channel The Channel to toggle
+     * @param roleId The @everyone Role ID
      */
-    toggleLock(channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void>;
+    public async toggleLock(this: DocumentType<VoiceChannel>, channel: djs.VoiceChannel, roleId?: string | undefined): Promise<void> {
+        this.locked ? await this.lock(channel, roleId) : await this.unlock(channel, roleId);
+        await this.$parent()?.save();
+    }
+
     /**
      * Sync The VC-Permissions with the Database
      * @param channel The Channel to Sync
-     * @param roleId The ROle ID
+     * @param roleId The @everyone Role ID
      * @returns true, if changes occured
      */
-    syncPermissions(channel: djs.VoiceChannel, roleId?: string | undefined, lockOverwrite?: boolean): Promise<boolean>;
-}
-
-export interface VoiceChannelModel extends mongoose.Model<VoiceChannelDocument> {
-
-}
-
-VoiceChannelSchema.method<VoiceChannelDocument>("syncPermissions", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake, lockOverwrite?: boolean) {
-    lockOverwrite = lockOverwrite ?? this.locked;
-    const actual_permissions = channel.permissionOverwrites.cache.get(roleId ?? channel.guild.roles.everyone.id);
-    if (!actual_permissions
-        || (lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.deny.has("Connect")))
-        || (!lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.allow.has("Connect")))
-        || (!this.queue && !actual_permissions.allow.has("Speak"))
-        || (this.queue && !actual_permissions.deny.has("Speak"))
-    ) {
-        // Update roles
-        await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "ViewChannel": true, "Connect": !lockOverwrite, "Speak": !this.queue });
-        return true;
-    } else {
-        return false;
+    public async syncPermissions(this: DocumentType<VoiceChannel>, channel: djs.VoiceChannel, roleId?: string | undefined, lockOverwrite?: boolean): Promise<boolean> {
+        lockOverwrite = lockOverwrite ?? this.locked;
+        const actual_permissions = channel.permissionOverwrites.cache.get(roleId ?? channel.guild.roles.everyone.id);
+        if (!actual_permissions
+            || (lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.deny.has("Connect")))
+            || (!lockOverwrite && !(actual_permissions.allow.has("ViewChannel") && actual_permissions.allow.has("Connect")))
+            || (!this.queue && !actual_permissions.allow.has("Speak"))
+            || (this.queue && !actual_permissions.deny.has("Speak"))
+        ) {
+            // Update roles
+            await channel.permissionOverwrites.edit(roleId ?? channel.guild.roles.everyone.id, { "ViewChannel": true, "Connect": !lockOverwrite, "Speak": !this.queue });
+            return true;
+        } else {
+            return false;
+        }
     }
-});
+}
 
-VoiceChannelSchema.method<VoiceChannelDocument>("lock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    this.locked = true;
-    await this.$parent()?.save();
-    await this.syncPermissions(channel, roleId);
+export const VoiceChannelModel = getModelForClass(VoiceChannel, {
+    schemaOptions: {
+        autoCreate: false,
+    },
 });
-
-VoiceChannelSchema.method<VoiceChannelDocument>("unlock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    this.locked = false;
-    await this.$parent()?.save();
-    await this.syncPermissions(channel, roleId);
-});
-
-VoiceChannelSchema.method<VoiceChannelDocument>("toggleLock", async function (channel: djs.VoiceChannel, roleId?: djs.Snowflake) {
-    this.locked ? await this.lock(channel, roleId) : await this.unlock(channel, roleId);
-    await this.$parent()?.save();
-});
-
-// Default export
-export default VoiceChannelSchema;
