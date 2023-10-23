@@ -62,7 +62,12 @@ export class Bot extends Client {
      */
     public async start(): Promise<void> {
         this.logger.info("starting Bot...");
-        this.login(this.config.get("token")).catch((e) => this.logger.error(e));
+        try {
+            await this.login(this.config.get("token"));
+        } catch (error) {
+            this.logger.error("Invalid token", error);
+            process.exit(1);
+        }
 
         // Commands
         this.logger.info("Loading Commands...");
@@ -188,6 +193,8 @@ export class Bot extends Client {
             }
         }, null, true, "America/Los_Angeles");
         queueGuardJob.start();
+
+        this.logger.ready(`Bot ${this.user?.displayName} is Ready!`);
 
         // public async createGuildCommand(data:any, guildId:string) {
         //     return await this.api.appl

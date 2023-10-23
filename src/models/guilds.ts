@@ -30,7 +30,7 @@ export class Guild {
     /**
      * The Settings for the Guild
      */
-    @prop({ required: true })
+    @prop({ required: true, type: () => GuildSettings })
         guild_settings!: SubDocumentType<GuildSettings>;
     /**
      * The Relevant Text Channels of the Guild

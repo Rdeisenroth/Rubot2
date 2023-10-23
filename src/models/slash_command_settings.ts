@@ -21,7 +21,7 @@ export class SlashCommandSettings {
      * The Default Command Permission overwrite
      */
     @prop({ required: false })
-        defaultPermission?: SubDocumentType<PermissionResolvable>;
+        defaultPermission?: PermissionResolvable;
     /**
      * If the command should be completely removed from the slash command List
      */

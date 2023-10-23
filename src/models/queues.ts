@@ -3,7 +3,8 @@ import { VoiceChannel } from "./voice_channels";
 import { QueueEntry } from "./queue_entry";
 import * as utils from "../utils/utils";
 import { StringReplacements } from "../../typings";
-import moment from "moment";
+import * as moment from "moment";
+import momentDurationFormatSetup from "moment-duration-format";
 import { QueueSpan } from "./queue_span";
 import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
@@ -65,7 +66,7 @@ export class Queue {
     /**
      * A Template for spawning in Rooms (if empty default template is used)
      */
-    @prop({ type: () => VoiceChannel })
+    @prop({ type: () => VoiceChannelSpawner })
         room_spawner?: SubDocumentType<VoiceChannelSpawner>;
     /**
      * A text Channel to use if dms are disabled
@@ -315,7 +316,7 @@ export class Queue {
      * Returns `true` if the Queue is Empty
      */
     public isEmpty(this: DocumentType<Queue>): boolean{
-        return !!this.entries.length;
+        return this.entries.length < 1;
     }
     /**
      * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command

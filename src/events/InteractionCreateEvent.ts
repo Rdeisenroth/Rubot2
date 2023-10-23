@@ -2,6 +2,8 @@ import { Command, ExecuteEvent } from "../../typings";
 import { ChatInputCommandInteraction, Collection, CommandInteractionOption } from "discord.js";
 export const name = "interactionCreate";
 import {GuildModel} from "../models/guilds";
+import { DocumentType, isDocument } from "@typegoose/typegoose";
+import { GuildSettings } from "../models/guild_settings";
 
 export const execute: ExecuteEvent<"interactionCreate"> = async (client, interaction) => {
 

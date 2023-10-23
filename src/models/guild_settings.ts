@@ -26,12 +26,12 @@ export class GuildSettings {
     /**
      * The Guild Specific command Settings
      */
-    @prop({ required: true, default: [], type: () => [SlashCommandSettings] })
+    @prop({ required: true, default: [], type: () => SlashCommandSettings })
         slashCommands!: mongoose.Types.DocumentArray<ArraySubDocumentType<SlashCommandSettings>>;
     /**
      * The Guild Specific role Settings
      */
-    @prop({ default: [], type: () => [DBRole] })
+    @prop({ default: [], type: () => DBRole })
         roles?: mongoose.Types.DocumentArray<ArraySubDocumentType<DBRole>>;
     /**
      * The User Account URL related to the guild
