@@ -1,11 +1,13 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema, { User, UserDocument } from "../../../models/users";
-import SessionSchema from "../../../models/sessions";
-import QueueSchema from "../../../models/queues";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel, User } from "../../../models/users";
+import {SessionModel} from "../../../models/sessions";
+import {QueueModel} from "../../../models/queues";
 import { FilterQuery } from "mongoose";
+import { DocumentType, mongoose } from "@typegoose/typegoose";
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 
 const command: Command = {
     name: "lookup-by",
@@ -58,17 +60,17 @@ const command: Command = {
         await interaction.deferReply({ ephemeral: true });
         const type = interaction.options.getString("type", true);
         const query = interaction.options.getString("query", true);
-        let userQuery: FilterQuery<UserDocument> = {};
-        let userData: (User & { _id: string; }) | undefined;
+        let userQuery: FilterQuery<DocumentType<User>> = {};
+        let userData: DocumentType<User> | null | undefined;
         if (type === "discord-tag") {
             const members = await interaction.guild?.members.fetch();
             const member = members?.find(x => x.user.tag === query);
-            userData = {
+            userData = new UserModel({
                 _id: member?.id ?? "",
-                server_roles: [],
-                sessions: [],
-                token_roles: [],
-            };
+                server_roles: new mongoose.Types.Array(),
+                sessions: new mongoose.Types.DocumentArray([]),
+                token_roles: new mongoose.Types.DocumentArray([]),
+            } as FilterOutFunctionKeys<User>);
         } else {
             if (type === "tu-id") {
                 userQuery = { tu_id: query };
@@ -77,7 +79,7 @@ const command: Command = {
             } else {
                 userQuery = { _id: query };
             }
-            userData = (await UserSchema.findOne(userQuery))?.toObject<User & { _id: string }>();
+            userData = await UserModel.findOne(userQuery);
         }
         // user = await user.fetch();
 

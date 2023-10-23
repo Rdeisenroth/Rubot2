@@ -1,7 +1,10 @@
+import { VoiceChannelModel } from "./../models/voice_channels";
 import { ApplicationCommandOptionType, GuildChannel, Message } from "discord.js";
 import { Command } from "../../typings";
-import GuildSchema from "../models/guilds";
+import {GuildModel} from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
+import { mongoose } from "@typegoose/typegoose";
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 
 const command: Command = {
     name: "setqueue",
@@ -51,7 +54,7 @@ const command: Command = {
         if (!(channel instanceof GuildChannel)) {
             return await client.utils.embeds.SimpleEmbed(interaction, "Voice Channel System", ":x: Channel is invalid.");
         }
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
         if (!queueData) {
@@ -62,15 +65,15 @@ const command: Command = {
         }
 
         const supervisor_role = interaction.options.getRole("supervisor", true);
-        const waitingroom_channel: VoiceChannel & { _id: string } = {
+        const waitingroom_channel = new VoiceChannelModel({
             _id: channel.id,
             channel_type: 2,
             locked: false,
             managed: true,
-            permitted: [],
+            permitted: new mongoose.Types.Array(),
             queue: queueData._id,
             supervisors: [supervisor_role.id],
-        };
+        } as FilterOutFunctionKeys<VoiceChannel>);
         guildData.voice_channels.push(waitingroom_channel);
         await guildData.save();
         await client.utils.embeds.SimpleEmbed(interaction, "Queue System", `:white_check_mark: The Queue was Linked to the Channel ${channel}.`);

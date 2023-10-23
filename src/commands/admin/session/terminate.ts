@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionType, EmbedField, GuildMember, Message, User } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import SessionSchema from "../../../models/sessions";
-import QueueSchema from "../../../models/queues";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {SessionModel} from "../../../models/sessions";
+import {QueueModel} from "../../../models/queues";
 
 const command: Command = {
     name: "terminate",
@@ -32,14 +32,14 @@ const command: Command = {
         }
         await interaction.deferReply();
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         let member = interaction.options.getUser("coach", true);
         member = await member.fetch();
         // if (!(member instanceof User)) {
         //     return await client.utils.embeds.SimpleEmbed(interaction, { title: "Session System", text: ":X: invalid User", empheral: true });
         // }
-        const sessions = await SessionSchema.find({ guild: g.id, active: true, user: member.id });
-        const sortedSessions = sessions.sort((x, y) => (+x.started_at) - (+y.started_at));
+        const sessions = await SessionModel.find({ guild: g.id, active: true, user: member.id });
+        const sortedSessions = sessions.sort((x, y) => (+x.started_at!) - (+y.started_at!));
 
         const dmChannel = await member.createDM();
 
@@ -54,7 +54,7 @@ const command: Command = {
             try {
                 await client.utils.embeds.SimpleEmbed(dmChannel, {
                     title: "Coaching System", text: "Your coaching Session was terminated by an administrator."
-                        + `\n\\> Total Time Spent: ${moment.duration((+e.ended_at!) - (+e.started_at)).format("d[d ]h[h ]m[m ]s.S[s]")}`
+                        + `\n\\> Total Time Spent: ${moment.duration((+e.ended_at!) - (+e.started_at!)).format("d[d ]h[h ]m[m ]s.S[s]")}`
                         + `\n\\> Channels visited: ${e.getRoomAmount()}`
                         + `\n\\> Participants: ${(await e.getParticipantAmount())}`,
                 });

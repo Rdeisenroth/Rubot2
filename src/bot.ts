@@ -7,11 +7,12 @@ import glob from "glob-promise";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
-import GuildSchema from "./models/guilds";
+import {GuildModel} from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
 import { QueueSpan } from "./models/queue_span";
+import { WeekTimestamp } from "./models/week_timestamp";
 export class Bot extends Client {
     public logger: ConsolaInstance = consola;
     public commands: Collection<string, Command> = new Collection();
@@ -130,6 +131,7 @@ export class Bot extends Client {
         this.logger.info("Loading Events...");
         const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
         await eventFiles.map(async (eventFile: string) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
             console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
             this.on(event.name, event.execute.bind(null, this));
@@ -139,7 +141,7 @@ export class Bot extends Client {
             for (const g of this.guilds.cache.values()) {
                 console.log(new Date().toLocaleString());
 
-                const guildData = await GuildSchema.findById(g.id);
+                const guildData = await GuildModel.findById(g.id);
                 if (!guildData) {
                     return;
                 }
@@ -149,8 +151,8 @@ export class Bot extends Client {
                     }
 
                     if (queueData.opening_times.map(x => new QueueSpan(
-                        new utils.general.WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
-                        new utils.general.WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
+                        new WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
+                        new WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
                         x.openShift,
                         x.closeShift,
                         x.startDate,

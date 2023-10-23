@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import RoomSchema from "../../../models/rooms";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {RoomModel} from "../../../models/rooms";
 
 const command: Command = {
     name: "userstats",
@@ -34,7 +34,7 @@ const command: Command = {
         await interaction.deferReply();
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
@@ -48,7 +48,7 @@ const command: Command = {
         let user = interaction.options.getUser("user", true);
         user = await user.fetch();
 
-        const roomCount = await RoomSchema.getParticipantRoomCount(user);
+        const roomCount = await RoomModel.getParticipantRoomCount(user);
 
         const fields: EmbedField[] = [
             {

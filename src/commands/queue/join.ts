@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../typings";
-import GuildSchema from "../../models/guilds";
-import UserSchema from "../../models/users";
+import {GuildModel} from "../../models/guilds";
+import {UserModel} from "../../models/users";
 
 const command: Command = {
     name: "join",
@@ -34,7 +34,7 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
@@ -55,7 +55,7 @@ const command: Command = {
         }
 
         // Check if Tutor Session active
-        const userData = await UserSchema.findById(user.id);
+        const userData = await UserModel.findById(user.id);
         if (await userData?.hasActiveSessions()) {
             await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You cannot join a queue with an active coaching session.", empheral: true });
             return;

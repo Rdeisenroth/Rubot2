@@ -1,10 +1,10 @@
 import { EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import SessionSchema from "../../../models/sessions";
-import QueueSchema from "../../../models/queues";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {SessionModel} from "../../../models/sessions";
+import {QueueModel} from "../../../models/queues";
 
 const command: Command = {
     name: "list",
@@ -24,9 +24,9 @@ const command: Command = {
         }
         await interaction.deferReply();
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id))!;
-        const sessions = await SessionSchema.find({ guild: g.id, active: true });
-        const sortedSessions = sessions.sort((x, y) => (+x.started_at) - (+y.started_at));
+        const guildData = (await GuildModel.findById(g.id))!;
+        const sessions = await SessionModel.find({ guild: g.id, active: true });
+        const sortedSessions = sessions.sort((x, y) => (+x.started_at!) - (+y.started_at!));
 
         const fields: EmbedField[] = [];
         for (const e of sortedSessions) {
@@ -35,7 +35,7 @@ const command: Command = {
             const queue = guildData.queues.id(e.queue);
             fields.push({
                 name: member.displayName, value:
-                    `-started_at: <t:${Math.round((+e.started_at) / 1000)}:f>`
+                    `-started_at: <t:${Math.round((+e.started_at!) / 1000)}:f>`
                     + `\n-rooms: ${e.getRoomAmount()}`
                     + `\n-participants:${participants}`
                     + `\n-queue:${queue?.name}`,

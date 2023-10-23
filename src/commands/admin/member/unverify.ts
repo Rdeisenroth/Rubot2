@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import SessionSchema from "../../../models/sessions";
-import QueueSchema from "../../../models/queues";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {SessionModel} from "../../../models/sessions";
+import {QueueModel} from "../../../models/queues";
 
 const command: Command = {
     name: "unverify",
@@ -40,7 +40,7 @@ const command: Command = {
         let user = interaction.options.getUser("user", true);
         const reason = interaction.options.getString("reason");
         user = await user.fetch();
-        const userData = await UserSchema.findById(user.id);
+        const userData = await UserModel.findById(user.id);
 
         if (!userData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System", text: `User ${user} not found in database.`, empheral: true });

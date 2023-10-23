@@ -1,11 +1,12 @@
-import EventSchema, { Event as EVT, eventType } from "./../../../models/events";
+import {EventModel, Event as EVT, eventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
 import ChannelType, { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
-import RoomSchema from "../../../models/rooms";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {RoomModel} from "../../../models/rooms";
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
+import { mongoose } from "@typegoose/typegoose";
 
 const command: Command = {
     name: "next",
@@ -33,13 +34,13 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
 
         const user = client.utils.general.getUser(interaction);
-        const userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
+        const userEntry = await UserModel.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
         // Check if User has Active Sessions
         const activeSessions = await userEntry.getActiveSessions();
         // We expect at most 1 active session per guild
@@ -93,7 +94,7 @@ const command: Command = {
             // queueData.set("room_spawner", spawner);
             // await guildData.save();
         } else {
-            spawner.supervisor_roles = spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []);
+            spawner.supervisor_roles = new mongoose.Types.Array(...spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []));
             spawner.owner = user.id;
             if (spawner.name) {
                 spawner.name = client.utils.general.interpolateString(
@@ -107,14 +108,14 @@ const command: Command = {
             } else {
                 spawner.name = spawner.name ?? `${member.displayName}' ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
             }
-            spawner.permission_overwrites = [
-                ...entries.map(x => {
+            spawner.permission_overwrites = new mongoose.Types.DocumentArray(
+                entries.map(x => {
                     return {
                         id: x.discord_id,
                         allow: ["ViewChannel", "Connect", "Speak", "Stream"],
                     } as PermissionOverwriteData;
                 }),
-            ];
+            );
         }
 
         // Spawn Room
@@ -127,7 +128,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Channel could not be created.", empheral: true });
         }
 
-        const roomData = await RoomSchema.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id });
+        const roomData = await RoomModel.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id });
         roomData.events.push({ emitted_by: "me", type: eventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
         // Update Coach Session
         coachingSession.rooms.push(roomData._id);
@@ -140,7 +141,7 @@ const command: Command = {
                 console.log("coach queue next: Matches: Notify User");
                 try {
                     // remove from queue
-                    const guildData = (await GuildSchema.findById(g.id))!;
+                    const guildData = (await GuildModel.findById(g.id))!;
                     const queueData = guildData.queues.id(queue)!;
                     queueData.entries.remove({ _id: e._id });
                     await guildData.save();
@@ -171,7 +172,7 @@ const command: Command = {
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
-                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}` } as EVT);
+                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}`, target:member.id } as EVT);
                     await member.voice.setChannel(room);
                 } catch (error) {
                     // Ignore Errors
@@ -187,7 +188,7 @@ const command: Command = {
         // Try to move Coach
         try {
             await member.voice.setChannel(room);
-            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)` } as EVT);
+            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)`, target:member.id } as EVT);
         } catch (error) {
             // Ignore Errors
         }

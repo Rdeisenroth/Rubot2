@@ -1,16 +1,13 @@
-import { ClientEventListener, ExecuteEvent } from "../../typings";
-import { ApplicationCommandData, ApplicationCommandOptionChoiceData, Client, ClientEvents, Guild } from "discord.js";
-import GuildSchema from "../models/guilds";
-import UserSchema from "../models/users";
-import { inspect } from "util";
+import { ExecuteEvent } from "../../typings";
+import {UserModel} from "../models/users";
 
 export const name = "guildMemberRemove";
 
 export const execute: ExecuteEvent<"guildMemberRemove"> = async (client, member) => {
     // Backup Server Roles
-    let databaseUser = await UserSchema.findById(member.id);
+    let databaseUser = await UserModel.findById(member.id);
     if (!databaseUser) {
-        databaseUser = new UserSchema({ _id: member.id });
+        databaseUser = new UserModel({ _id: member.id });
         await databaseUser.save();
     }
     databaseUser.server_roles.push(...member.roles.cache.keys());

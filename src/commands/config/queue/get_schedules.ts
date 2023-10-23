@@ -2,8 +2,9 @@ import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
+import { WeekTimestamp } from "../../../models/week_timestamp";
 
 const command: Command = {
     name: "get_schedules",
@@ -30,7 +31,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
         if (!queueData) {
@@ -43,8 +44,8 @@ const command: Command = {
             text += "\n\nThe following times are scheduled for `unlocking` the queue:";
             text += "\n```";
             for (const schedule of queueData.opening_times.map(x => new QueueSpan(
-                new client.utils.general.WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
-                new client.utils.general.WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
+                new WeekTimestamp(x.begin.weekday, x.begin.hour, x.begin.minute),
+                new WeekTimestamp(x.end.weekday, x.end.hour, x.end.minute),
                 x.openShift,
                 x.closeShift,
                 x.startDate,

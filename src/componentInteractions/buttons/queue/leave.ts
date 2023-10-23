@@ -1,16 +1,17 @@
 import { Collection, EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import GuildSchema, { GuildDocument } from "../../../models/guilds";
-import { QueueDocument } from "../../../models/queues";
+import { GuildModel, Guild } from "../../../models/guilds";
+import { Queue } from "../../../models/queues";
+import { DocumentType } from "@typegoose/typegoose";
 
 const command: ButtonInteraction = {
     customID: "queue_leave",
     description: "leave the current queue",
     cooldown: 2000,
     execute: async (client, interaction) => {
-        const guilds = await GuildSchema.find();
-        let g: GuildDocument | undefined;
-        let queue: QueueDocument | undefined;
+        const guilds = await GuildModel.find();
+        let g: DocumentType<Guild> | undefined;
+        let queue: DocumentType<Queue> | undefined;
         for (g of guilds) {
             if (!g.queues) {
                 continue;
@@ -42,7 +43,7 @@ const command: ButtonInteraction = {
             color = guild?.members.me?.roles.highest.color ?? 0x7289da;
             const member = guild?.members.cache.get(interaction.user.id);
             const vcData = await g.voice_channels.id(member?.voice.channelId);
-            if (vcData?.queue?.equals(queue._id!)) {
+            if (vcData?.queue?._id.equals(queue._id!)) {
                 await member!.voice.disconnect();
             }
             const roles = await guild?.roles.fetch();

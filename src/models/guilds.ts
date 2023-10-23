@@ -1,269 +1,202 @@
-// import mongoose from 'mongoose';
-import mongoose, { AnyKeys, AnyObject } from "mongoose";
 import { Bot } from "../bot";
-import GuildSettingsSchema, { GuildSettings, GuildSettingsDocument } from "./guild_settings";
-import QueueSchema, { Queue, QueueDocument } from "./queues";
-import TextChannelSchema, { TextChannel, TextChannelDocument } from "./text_channels";
-import VoiceChannelSchema, { VoiceChannel, VoiceChannelDocument } from "./voice_channels";
+import { Queue } from "./queues";
+import { TextChannel } from "./text_channels";
+import { VoiceChannel } from "./voice_channels";
 import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoiceData } from "discord.js";
+import { prop, getModelForClass, DocumentType, ReturnModelType, SubDocumentType, ArraySubDocumentType, mongoose } from "@typegoose/typegoose";
 import { Command, SubcommandHandler } from "../../typings";
+import { GuildSettings } from "./guild_settings";
 
 /**
  * A Guild from the Database
  */
-export interface Guild {
+export class Guild {
     /**
      * The Guild ID provided by Discord
      */
-    _id: string,
+    @prop({ required: true })
+        _id!: string;
     /**
      * The Name of the Guild
      */
-    name: string,
+    @prop({ required: true })
+        name!: string;
     /**
      * The Member Count (Makes it easier to sort Guilds by member counts)
      */
-    member_count: number,
+    @prop({ required: true, default: 0 })
+        member_count!: number;
     /**
      * The Settings for the Guild
      */
-    guild_settings: GuildSettings,
+    @prop({ required: true })
+        guild_settings!: SubDocumentType<GuildSettings>;
     /**
      * The Relevant Text Channels of the Guild
      */
-    text_channels: TextChannel[],
+    @prop({ required: true, default: [], type: () => [TextChannel] })
+        text_channels!: mongoose.Types.DocumentArray<ArraySubDocumentType<TextChannel>>;
     /**
      * The Relevant Voice Channels of the Guild
      */
-    voice_channels: VoiceChannel[],
+    @prop({ required: true, default: [], type: () => [VoiceChannel] })
+        voice_channels!: mongoose.Types.DocumentArray<ArraySubDocumentType<VoiceChannel>>;
     /**
      * The Queues of the Guild
      */
-    queues: Queue[],
+    @prop({ required: true, default: [], type: () => [Queue] })
+        queues!: mongoose.Types.DocumentArray<ArraySubDocumentType<Queue>>;
     /**
      * The Welcome Message Text
      */
-    welcome_text?: string,
+    @prop()
+        welcome_text?: string;
     /**
      * The Welcome Message Title
      */
-    welcome_title?: string,
-}
-
-/**
- * A Schema For storing and Managing Guilds
- */
-const GuildSchema = new mongoose.Schema<GuildDocument, GuildModel, Guild>({
-    _id: {
-        type: String,
-        required: true,
-    },
-    name: {
-        type: String,
-        required: true,
-    },
-    member_count: {
-        type: Number,
-        required: true,
-        default: 0,
-    },
-    guild_settings: {
-        type: GuildSettingsSchema,
-        required: true,
-    },
-    text_channels: [{
-        type: TextChannelSchema,
-        required: true,
-        default: [],
-    }],
-    voice_channels: [{
-        type: VoiceChannelSchema,
-        required: true,
-        default: [],
-    }],
-    queues: [{
-        type: QueueSchema,
-        required: true,
-        default: [],
-    }],
-    welcome_text: {
-        type: String,
-        required: false,
-    },
-    welcome_title: {
-        type: String,
-        required: false,
-    },
-});
-
-/**
- * A Guild Document as stored in the Database
- */
-export interface GuildDocument extends Guild, Omit<mongoose.Document, "_id"> {
-    // List getters or non model methods here
-    text_channels: mongoose.Types.DocumentArray<TextChannelDocument>,
-    voice_channels: mongoose.Types.DocumentArray<VoiceChannelDocument>,
-    guild_settings: GuildSettingsDocument,
-    queues: mongoose.Types.DocumentArray<QueueDocument>,
+    @prop()
+        welcome_title?: string;
     /**
      * Gets the actual guild object represented by this document from discord
      * @param client The Bot Client
      */
-    resolve(client: Bot): Promise<djs.Guild | null>,
+    public async resolve(this:DocumentType<Guild>, client: Bot): Promise<djs.Guild | null>{
+        return await client.guilds.resolve(this._id);
+    }
     /**
      * Posts the Slash Commands to the Guild (using set)
      * @param client The Bot Client
      */
-    postSlashCommands(client: Bot): Promise<void>,
+    public async postSlashCommands(this: DocumentType<Guild>, client: Bot): Promise<void>;
     /**
      * Posts the Slash Commands to the Guild (using set)
      * @param client The Bot Client
      * @param g The resolved guild (for speed improvement)
      */
-    postSlashCommands(client: Bot, g: djs.Guild): Promise<void>,
+    public async postSlashCommands(this: DocumentType<Guild>, client: Bot, g: djs.Guild): Promise<void>;
     /**
      * Posts the Slash Commands to the Guild (using set)
      * @param g The resolved guild (for speed improvement)
      */
-    postSlashCommands(client: Bot, g?: djs.Guild | null): Promise<void>,
+    public async postSlashCommands(this: DocumentType<Guild>, client: Bot, g?: djs.Guild | null): Promise<void>{
+        console.log("posting slash commands");
+        g = g ?? await this.resolve(client);
+        if (!g) {
+            throw new Error("Guild could not be resolved!");
+        }
+        // TODO: Per Guild Slash Command Config
+        const data: ApplicationCommandData[] = [];
+        // console.log([...client.commands.values()])
+        // console.log("posting slash commands");
+        for (const c of [...client.commands.values()]) {
+            // console.log("a"+ c);
+            // Check Database entry
+            const cmdSettings = this.guild_settings.getCommandByInternalName(c.name);
+            if (cmdSettings?.disabled) {
+                continue;
+            }
+            const commandData: ApplicationCommandData = {
+                name: cmdSettings?.name ?? c.name,
+                description: cmdSettings?.description ?? c.description,
+                options: c.options,
+                //defaultPermission: cmdSettings?.defaultPermission ?? c.defaultPermission,
+            };
+            // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
+            if (c.name === "help") {
+                const cmdChoices: ApplicationCommandOptionChoiceData[] = client.commands.map((val, key) => {
+                    return { name: key, value: key };
+                });
+                (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
+            }
+            data.push(commandData);
+            // TODO: Aliases
+        }
+        try {
+            const commands = await g.commands.set(data);
+            // // permissions
+            // const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
+            // for (const c of [...commands.values()]) {
+            //     const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
+            //     fullPermissions.push({
+            //         id: c.id,
+            //         permissions: [
+            //             // Overwrites von Settings
+            //             ...cmdSettings?.getPostablePermissions() ?? [],
+            //             // Bot owner
+            //             {
+            //                 id: client.config.get("ownerID")!,
+            //                 type: ApplicationCommandOptionType.User,
+            //                 permission: true,
+            //             },
+            //         ],
+            //     });
+            // }
+            // await g.commands.permissions.set({
+            //     fullPermissions: fullPermissions,
+            // });
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
     /**
      * Gets all Command Names to append to help Command
      * @param commands The Command Collection of the Guild
      */
-    getRecursiveCommandNames(commands: djs.Collection<string, Command>): ApplicationCommandOptionChoiceData[],
+    public getRecursiveCommandNames(this: DocumentType<Guild>, commands: djs.Collection<string, Command>): ApplicationCommandOptionChoiceData[]{
+        const data: ApplicationCommandOptionChoiceData[] = [];
+        commands.forEach((val, key) => {
+            data.push({ name: key, value: key });
+            if ((val as SubcommandHandler).subcommands) {
+                data.push(...this.getRecursiveCommandNames((val as SubcommandHandler).subcommands));
+            }
+        });
+        return data;
+    }
     /**
      * Gets the verivied Role
      * @param client The Bot Client
      * @param g The resolved guild (for speed improvement)
      */
-    getVerifiedRole(client: Bot, g?: djs.Guild | null | undefined): Promise<djs.Role | null>,
-}
+    public async getVerifiedRole(this: DocumentType<Guild>, client: Bot, g?: djs.Guild | null | undefined): Promise<djs.Role | null>{
+        g = g ?? (await this.resolve(client))!;
+        await g.roles.fetch();
+        return g.roles.cache.find(x => x.name.toLowerCase() === "verified") ?? null;
+    }
 
-/**
- * A Guild Model
- */
-export interface GuildModel extends mongoose.Model<GuildDocument> {
-    // List Model methods here
     /**
      * Processes A Guild by updating the database and posting Slash Commands
      * @param client The Bot Client
      * @param g the guild Object
      */
-    prepareGuild(client: Bot, g: djs.Guild): Promise<void>,
+    public static async prepareGuild(this: ReturnModelType<typeof Guild>, client: Bot, g: djs.Guild): Promise<void>{
+        console.log(`Processing guild "${g.name}" (${g.id})`);
+        let guildData: DocumentType<Guild> | null = await this.findById(g.id);
+        if (!guildData) {
+            const newGuildData = new GuildModel({
+                _id: g.id,
+                name: g.name,
+                member_count: g.memberCount,
+                guild_settings: {
+                    command_listen_mode: 1,
+                    prefix: "!",
+                    slashCommands: [],
+                },
+                text_channels: [],
+                voice_channels: [],
+                queues: [],
+            });
+            await newGuildData.save();
+            guildData = newGuildData;
+        }
+        // Post slash Commands
+        await guildData.postSlashCommands(client, g);
+    }
 }
 
-// --Methods--
-
-// TODO Find better Names so that they don't conflict with discordjs Interfaces
-
-GuildSchema.method<GuildDocument>("resolve", async function (client: Bot) {
-    return await client.guilds.resolve(this._id);
+export const GuildModel = getModelForClass(Guild, {
+    schemaOptions: {
+        autoCreate: true,
+    },
 });
-
-GuildSchema.method<GuildDocument>("getRecursiveCommandNames", function (commands: djs.Collection<string, Command>) {
-    const data: ApplicationCommandOptionChoiceData[] = [];
-    commands.forEach((val, key) => {
-        data.push({ name: key, value: key });
-        if ((val as SubcommandHandler).subcommands) {
-            data.push(...this.getRecursiveCommandNames((val as SubcommandHandler).subcommands));
-        }
-    });
-    return data;
-});
-
-GuildSchema.method<GuildDocument>("getVerifiedRole", async function (client: Bot, g?: djs.Guild | null) {
-    g = g ?? (await this.resolve(client))!;
-    await g.roles.fetch();
-    return g.roles.cache.find(x => x.name.toLowerCase() === "verified") ?? null;
-});
-
-
-GuildSchema.method<GuildDocument>("postSlashCommands", async function (client: Bot, g?: djs.Guild | null) {
-    console.log("posting slash commands");
-    g = g ?? await this.resolve(client);
-    if (!g) {
-        throw new Error("Guild could not be resolved!");
-    }
-    // TODO: Per Guild Slash Command Config
-    const data: ApplicationCommandData[] = [];
-    // console.log([...client.commands.values()])
-    // console.log("posting slash commands");
-    for (const c of [...client.commands.values()]) {
-        // console.log("a"+ c);
-        // Check Database entry
-        const cmdSettings = this.guild_settings.getCommandByInternalName(c.name);
-        if (cmdSettings?.disabled) {
-            continue;
-        }
-        const commandData: ApplicationCommandData = {
-            name: cmdSettings?.name ?? c.name,
-            description: cmdSettings?.description ?? c.description,
-            options: c.options,
-            //defaultPermission: cmdSettings?.defaultPermission ?? c.defaultPermission,
-        };
-        // Push Options to Help Commands (we do that here because all Commands are loaded at this point)
-        if (c.name === "help") {
-            const cmdChoices: ApplicationCommandOptionChoiceData[] = client.commands.map((val, key) => {
-                return { name: key, value: key };
-            });
-            (commandData.options![0] as djs.ApplicationCommandChoicesData).choices = cmdChoices;
-        }
-        data.push(commandData);
-        // TODO: Aliases
-    }
-    try {
-        const commands = await g.commands.set(data);
-        // // permissions
-        // const fullPermissions: djs.GuildApplicationCommandPermissionData[] = [];
-        // for (const c of [...commands.values()]) {
-        //     const cmdSettings = this.guild_settings.getCommandByGuildName(c.name);
-        //     fullPermissions.push({
-        //         id: c.id,
-        //         permissions: [
-        //             // Overwrites von Settings
-        //             ...cmdSettings?.getPostablePermissions() ?? [],
-        //             // Bot owner
-        //             {
-        //                 id: client.config.get("ownerID")!,
-        //                 type: ApplicationCommandOptionType.User,
-        //                 permission: true,
-        //             },
-        //         ],
-        //     });
-        // }
-        // await g.commands.permissions.set({
-        //     fullPermissions: fullPermissions,
-        // });
-
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-GuildSchema.static("prepareGuild", async function (client: Bot, g: djs.Guild) {
-    console.log(`Processing guild "${g.name}" (${g.id})`);
-    let guildData: GuildDocument | null = await this.findById(g.id);
-    if (!guildData) {
-        const newGuildData = new this<AnyKeys<GuildDocument> & AnyObject>({
-            _id: g.id,
-            name: g.name,
-            member_count: g.memberCount,
-            guild_settings: {
-                command_listen_mode: 1,
-                prefix: "!",
-                slashCommands: [],
-            } as GuildSettings,
-            text_channels: [],
-            voice_channels: [],
-            queues: [],
-        });
-        await newGuildData.save();
-        guildData = newGuildData as unknown as GuildDocument;
-    }
-    // Post slash Commands
-    await guildData.postSlashCommands(client, g);
-});
-
-// Default export
-export default mongoose.model<GuildDocument, GuildModel>("Guilds", GuildSchema);

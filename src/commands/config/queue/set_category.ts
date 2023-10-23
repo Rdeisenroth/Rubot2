@@ -1,8 +1,10 @@
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { VoiceChannelSpawner } from "./../../../models/voice_channel_spawner";
 import { SlashCommandPermission } from "./../../../models/slash_command_permission";
 import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
+import { mongoose } from "@typegoose/typegoose";
 
 const command: Command = {
     name: "set_category",
@@ -35,7 +37,7 @@ const command: Command = {
         await interaction.deferReply();
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
         const queueName = interaction.options.getString("queue", true);
         const category = interaction.options.getChannel("category", true);
         const queueData = guildData.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
@@ -44,18 +46,18 @@ const command: Command = {
         }
 
         if (queueData.room_spawner) {
-            queueData.room_spawner.parent = category.id;
+            queueData.room_spawner.set("parent", category.id);
             queueData.room_spawner.max_users = 5;
             queueData.room_spawner.lock_initially = true;
             queueData.room_spawner.hide_initially = true;
         } else {
             queueData.set("room_spawner", {
-                permission_overwrites: [],
-                supervisor_roles: [],
+                permission_overwrites: new mongoose.Types.Array(),
+                supervisor_roles: new mongoose.Types.Array(),
                 parent: category.id,
                 max_users: 5,
                 lock_initially: true,
-            } as VoiceChannelSpawner);
+            } as FilterOutFunctionKeys<VoiceChannelSpawner>);
         }
         await guildData.save();
         await guildData.postSlashCommands(client, g);

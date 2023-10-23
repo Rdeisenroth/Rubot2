@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import { getModelForClass, prop } from "@typegoose/typegoose";
 
 export enum eventType {
     "create_channel" = "create_channel",
@@ -19,65 +19,36 @@ export enum eventType {
 /**
  * A Guild from the Database
  */
-export interface Event {
+export class Event {
     /**
      * The Unix Time Stamp of the Event
      */
-    timestamp: string,
+    @prop({required: true})
+        timestamp!: string;
     /**
      * The Event Type
      */
-    type: eventType,
+    @prop({required: true, enum: eventType, default: eventType.other})
+        type!: eventType;
     /**
      * Client ID or "me"
      */
-    emitted_by: string,
+    @prop({required: true})
+        emitted_by!: string;
     /**
      * A Target that was affected
      */
-    target?: string,
+    @prop({required: false})
+        target?: string;
     /**
      * The Reason why the Event was Emitted
      */
-    reason?: string,
+    @prop({required: false})
+        reason?: string;
 }
 
-/**
- * A Schema For storing and Managing Guilds
- */
-const EventSchema = new mongoose.Schema<EventDocument, EventModel, Event>({
-    timestamp: {
-        type: String,
-        required: true,
-    },
-    type: {
-        type: String,
-        enum: [...Object.keys(eventType)],
-        default: eventType.other,
-        required: true,
-    },
-    emitted_by: {
-        type: String,
-        required: true,
-    },
-    target: {
-        type: String,
-        required: false,
-    },
-    reason: {
-        type: String,
-        required: false,
+export const EventModel = getModelForClass(Event, {
+    schemaOptions: {
+        autoCreate: false,
     },
 });
-
-export interface EventDocument extends Event, mongoose.Document<mongoose.Types.ObjectId> {
-    // List getters or non model methods here
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EventModel extends mongoose.Model<EventDocument> {
-    // List Model methods here
-}
-
-// Default export
-export default EventSchema;

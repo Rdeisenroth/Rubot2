@@ -1,11 +1,49 @@
-import mongoose, { Mongoose } from "mongoose";
-import { WeekTimestamp, Weekday } from "../utils/general";
-import WeekTimestampSchema from "./week_timestamp";
+import { WeekTimestamp, Weekday } from "./week_timestamp";
+import { getModelForClass, prop } from "@typegoose/typegoose";
 
 /**
  * A Queue Span - A Weekly Timespan with a start- and End Date that can be used to automate Events every week
  */
 export class QueueSpan {
+    /**
+     * The Begin Timestamp
+     */
+    @prop({ required: true, type: WeekTimestamp })
+        begin!: WeekTimestamp;
+
+    /**
+     * The End Timestamp
+     */
+    @prop({ required: true, type: WeekTimestamp })
+        end!: WeekTimestamp;
+
+    /**
+     * Shift the Opening by X millixeconds
+     * @default 0
+     */
+    @prop({ required: true, default: 0 })
+        openShift!: number;
+
+    /**
+     * Shift the Closing by X milliseconds
+     * @default 0
+     */
+    @prop({ required: true, default: 0 })
+        closeShift!: number;
+
+    /**
+     * limit the span to after this date
+     */
+    @prop({ required: false })
+        startDate?: Date;
+
+    /**
+     * limit the span to before this date
+     * @default 0
+     */
+    @prop({ required: false })
+        endDate?: Date;
+
     /**
      * Creates a Queue Span (begin.getTime() must be smaller than end.getTime())
      * @param begin The Begin Timestamp
@@ -15,8 +53,13 @@ export class QueueSpan {
      * @param startDate limit the span to after this date
      * @param endDate limit the span to before this date
      */
-    constructor(public begin: WeekTimestamp, public end: WeekTimestamp, public openShift = 0, public closeShift = 0, public startDate?: Date, public endDate?: Date) {
-
+    constructor(begin: WeekTimestamp, end: WeekTimestamp, openShift = 0, closeShift = 0, startDate?: Date, endDate?: Date) {
+        this.begin = begin;
+        this.end = end;
+        this.openShift = openShift;
+        this.closeShift = closeShift;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     /**
@@ -144,48 +187,8 @@ export class QueueSpan {
     }
 }
 
-/**
- * A Schema of a Queue Entry
- */
-const QueueSpanSchema = new mongoose.Schema<QueueSpanDocument, QueueSpanModel, QueueSpan>({
-    begin: {
-        type: WeekTimestampSchema,
-        required: true,
-    },
-    end: {
-        type: WeekTimestampSchema,
-        required: true,
-    },
-    openShift: {
-        type: mongoose.Schema.Types.Number,
-        required: true,
-        default: 0,
-    },
-    closeShift: {
-        type: mongoose.Schema.Types.Number,
-        required: true,
-        default: 0,
-    },
-    startDate: {
-        type: mongoose.Schema.Types.Date,
-        required: false,
-    },
-    endDate: {
-        type: mongoose.Schema.Types.Date,
-        required: false,
+export const QueueSpanModel = getModelForClass(QueueSpan, {
+    schemaOptions: {
+        autoCreate: false,
     },
 });
-
-export interface QueueSpanDocument extends QueueSpan, Omit<mongoose.Document<mongoose.Types.ObjectId>,"equals"> {
-    // List getters or non model methods here
-}
-
-QueueSpanSchema.loadClass(QueueSpan);
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface QueueSpanModel extends mongoose.Model<QueueSpanDocument> {
-    // List Model methods here
-}
-
-// Default export
-export default QueueSpanSchema;

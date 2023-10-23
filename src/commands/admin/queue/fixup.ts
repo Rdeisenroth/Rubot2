@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, EmbedField, Message, Role } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
 
 const command: Command = {
     name: "fixup",
@@ -26,7 +26,7 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }
@@ -66,7 +66,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Active Session Role Members Could not be found.", empheral: true });
         }
         const user = client.utils.general.getUser(interaction);
-        const userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
+        const userEntry = await UserModel.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
         // Check if User has Active Sessions
         const activeSessions = await userEntry.getActiveSessions();
         const as_oldMemberCount = as_role_members.size;

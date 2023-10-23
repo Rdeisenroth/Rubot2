@@ -1,214 +1,180 @@
 import mongoose from "mongoose";
 import { EventDate } from "../../typings";
-import EventSchema, { Event, EventDocument, eventType } from "./events";
-import UserSchema from "./users";
+import { Event, eventType } from "./events";
+import { UserModel } from "./users";
 import { sessionRole } from "./sessions";
-import { Channel } from "./text_channels";
 import { Snowflake, User } from "discord.js";
 import { filterAsync } from "../utils/general";
+import { ArraySubDocumentType, DocumentType, ReturnModelType, getModelForClass, prop } from "@typegoose/typegoose";
 
-export interface Room extends Channel {
+export class Room {
     /**
      * The Channel ID provided by Discord
      */
-    _id: string,
+    @prop({ required: true })
+        _id!: string;
     /**
      * If the Channel exists, it's active
      */
-    active: boolean,
+    @prop({ required: true })
+        active!: boolean;
     /**
      * If Someone tampered with the Permissions/Name or Position of the Channel (or other Settings)
      */
-    tampered: boolean,
+    @prop({ required: true })
+        tampered!: boolean;
     /**
      *  Only set to true if session had a clean exit
      */
-    end_certain: boolean,
+    @prop({ required: true })
+        end_certain!: boolean;
     /**
      * The Guild The Room is in
      */
-    guild: string,
+    @prop({ required: true })
+        guild!: string;
     /**
      * The Events that happen in the Channel
      */
-    events: Event[],
-}
+    @prop({ required: true, type: () => [Event], default: [] })
+        events!: mongoose.Types.DocumentArray<ArraySubDocumentType<Event>>;
 
-const RoomSchema = new mongoose.Schema<RoomDocument, RoomModel, Room>({
-    _id: {
-        type: String,
-        required: true,
-    },
-    active: {
-        type: Boolean,
-        required: true,
-    },
-    tampered: {
-        type: Boolean,
-        required: true,
-    },
-    end_certain: {
-        type: Boolean,
-        required: true,
-    },
-    guild: {
-        type: String,
-        required: true,
-    },
-    events: [{
-        type: EventSchema,
-        required: true,
-        default: [],
-    }],
-});
-
-export interface RoomDocument extends Room, Omit<mongoose.Document, "_id"> {
-    events: mongoose.Types.DocumentArray<EventDocument>,
     /**
      * Collects All User IDs that joined The Channel at least Once
      */
-    getUsers(): string[],
+    public async getUsers(this: DocumentType<Room>): Promise<string[]> {
+        return (await RoomModel.aggregate<{ _id: string, count: number }>([
+            { $match: { _id: this._id } },
+            { $unwind: { path: "$events" } },
+            { $match: { "events.type": { $in: [eventType.user_join, eventType.move_member] } } },
+            { $group: { _id: { $cond: { if: { $eq: ["$events.type", eventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, count: { $sum: 1 } } },
+            { $match: { _id: { $ne: "NULL" }, count: { $gt: 0 } } },
+        ])).map(x => x._id);
+    }
+
     /**
      * Gets The First Time someone Joins and Their Discord ID
      */
-    getFirstJoinTimes(): EventDate[],
+    public async getFirstJoinTimes(this: DocumentType<Room>): Promise<EventDate[]> {
+        // We Assume that the Role Does not change During the Rooms Lifetime
+        return (await RoomModel.aggregate<{ _id: string, timestamp: string }>([
+            { $match: { _id: this._id } },
+            { $unwind: { path: "$events" } },
+            { $match: { "events.type": { $in: [eventType.user_join, eventType.move_member] } } },
+            { $group: { _id: { $cond: { if: { $eq: ["$events.type", eventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, timestamp: { $min: "$events.timestamp" } } },
+            { $match: { _id: { $ne: "NULL" } } },
+        ])).map(x => { return { target_id: x._id, timestamp: x.timestamp } as EventDate; });
+    }
+
     /**
      * Gets The Users with Their Roles at Join Date
      */
-    getUserRoles(): Promise<{
+    public async getUserRoles(this: DocumentType<Room>): Promise<{
         userID: string;
         role: sessionRole | null;
-    }[]>,
+    }[]> {
+        const users = await this.getFirstJoinTimes();
+        const userRoles: {
+            userID: string;
+            role: sessionRole | null;
+        }[] = [];
+        for (const user of users) {
+            const userModel = await UserModel.findById(user.target_id);
+            if (!userModel) {
+                userRoles.push({ userID: user.target_id, role: null });
+                continue;
+            }
+            const role = await userModel.getRole(this.guild, (+user.timestamp));
+            const b = {
+                userID: user.target_id,
+                role: role,
+            };
+            userRoles.push(b);
+        }
+        return userRoles;
+    }
+
     /**
      * Gets The Participants Of the Channel
      */
-    getParticipants(): Promise<string[]>,
+    public async getParticipants(this: DocumentType<Room>): Promise<string[]> {
+        const roles = await this.getUserRoles();
+        return roles.filter(x => x.role == sessionRole.participant || x.role == null).map(x => x.userID);
+    }
+
     /**
      * Returns true if a given user has joined this channel at least once
      * @param user The User ID to check
      */
-    wasVisitedBy(user: User | Snowflake): boolean,
+    public async wasVisitedBy(this: DocumentType<Room>, user: User | Snowflake): Promise<boolean> {
+        if (user instanceof User) {
+            user = user.id;
+        }
+        return (await this.getUsers()).includes(user);
+    }
+
     /**
      * Returns true if a given user has joined this channel as a Participant at least once
      * @param user The User ID to check
      */
-    wasParticipating(user: User | Snowflake): Promise<boolean>,
-}
+    public async wasParticipating(this: DocumentType<Room>, user: User | Snowflake): Promise<boolean> {
+        if (user instanceof User) {
+            user = user.id;
+        }
+        return (await this.getUserRoles()).some(x => x.userID === user && x.role != sessionRole.coach);
+    }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RoomModel extends mongoose.Model<RoomDocument> {
     /**
      * Gets the Rooms a User visited
-     * @param user The User ID to check
      */
-    getVisitedRooms(user: User | Snowflake): Promise<Room[]>,
+    public static async getVisitedRooms(this: ReturnModelType<typeof Room>, user: User | Snowflake): Promise<Room[]> {
+        if (user instanceof User) {
+            user = user.id;
+        }
+        // return (await this.find()).filter(x => x.wasVisitedBy(user)).map(x => x.toObject<Room>());
+        return this.find({
+            events: {
+                $elemMatch: {
+                    $or: [
+                        { type: eventType.user_join, emitted_by: user },
+                        { type: eventType.move_member, target: user },
+                    ],
+                },
+            },
+        });
+    }
+
     /**
      * Gets the Amount of Rooms a User visited
-     * @param user The User ID to check
      */
-    getRoomCount(user: User | Snowflake): Promise<number>,
+    public static async getRoomCount(this: ReturnModelType<typeof Room>, user: User | Snowflake): Promise<number> {
+        return (await RoomModel.getVisitedRooms(user)).length;
+    }
+
     /**
      * Gets the Rooms a User participated in
      * @param user The User ID to check
      * @param rooms All Rooms
      */
-    getParticipantRooms(user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]): Promise<Room[]>,
+    public static async getParticipantRooms(this: ReturnModelType<typeof Room>, user: User | Snowflake, rooms?: (DocumentType<Room> & { _id: string; })[]): Promise<Room[]> {
+        if (user instanceof User) {
+            user = user.id;
+        }
+        return (await filterAsync(rooms ?? await this.find(), async x => await x.wasParticipating(user))).map(x => x.toObject<Room>());
+    }
+
     /**
      * Gets the Amount of Rooms a User participated in
      * @param user The User ID to check
      * @param rooms All Rooms
      */
-    getParticipantRoomCount(user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]): Promise<number>,
+    public static async getParticipantRoomCount(this: ReturnModelType<typeof Room>, user: User | Snowflake, rooms?: (DocumentType<Room> & { _id: string; })[]): Promise<number> {
+        return (await this.getParticipantRooms(user, rooms)).length;
+    }
 }
 
-// --Methods--
-
-RoomSchema.method<RoomDocument>("getUsers", function () {
-    return [... new Set(this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => x.type === eventType.user_join ? x.emitted_by : x.target!))];
+export const RoomModel = getModelForClass(Room, {
+    schemaOptions: {
+        autoCreate: true,
+    },
 });
-
-RoomSchema.method<RoomDocument>("getUserRoles", async function () {
-    const users = this.getFirstJoinTimes();
-    const userRoles: {
-        userID: string;
-        role: sessionRole | null;
-    }[] = [];
-    for (const user of users) {
-        const userSchema = await UserSchema.findById(user.target_id);
-        if (!userSchema) {
-            userRoles.push({ userID: user.target_id, role: null });
-            continue;
-        }
-        const role = await userSchema.getRole(this.guild, (+user.timestamp));
-        const b = {
-            userID: user.target_id,
-            role: role,
-        };
-        userRoles.push(b);
-    }
-    return userRoles;
-
-    // Why the fuck does the below Code not Work??? Literally the Same >:(
-
-    // let userRoles = users.map(async (x) => {
-    //     let userSchema = await UserSchema.findById(x.target_id);
-    //     if(!userSchema) return { userID: x.target_id, role: null};
-    //     let role = await userSchema.getRole(this.guild, (+x.timestamp));
-    //     let b =  {
-    //         userID: x.target_id,
-    //         role: role,
-    //     }
-    //     return b;
-    // });
-    // let a = await userRoles;
-});
-
-RoomSchema.method<RoomDocument>("wasVisitedBy", function (user: User | Snowflake) {
-    if (user instanceof User) {
-        user = user.id;
-    }
-    return this.getUsers().includes(user);
-});
-
-RoomSchema.method<RoomDocument>("wasParticipating", async function (user: User | Snowflake) {
-    if (user instanceof User) {
-        user = user.id;
-    }
-    return (await this.getUserRoles()).some(x => x.userID === user && x.role != sessionRole.coach);
-});
-
-RoomSchema.method<RoomDocument>("getParticipants", async function () {
-    const roles = await this.getUserRoles();
-    return roles.filter(x => x.role == sessionRole.participant || x.role == null).map(x => x.userID);
-});
-
-RoomSchema.method<RoomDocument>("getFirstJoinTimes", function () {
-    // We Assume that the Role Does not change During the Rooms Lifetime
-    const eventDates = this.events.filter(x => [eventType.user_join, eventType.move_member].includes(x.type)).map(x => { return { timestamp: x.timestamp, target_id: (x.type === eventType.user_join ? x.emitted_by : x.target!), event_id: (x as EventDocument)._id } as EventDate; });
-    return eventDates.filter((x, pos) => eventDates.findIndex(y => y.target_id === x.target_id) === pos);
-});
-
-RoomSchema.static("getVisitedRooms", async function (user: User | Snowflake) {
-    if (user instanceof User) {
-        user = user.id;
-    }
-    return (await this.find()).filter(x => x.wasVisitedBy(user)).map(x => x.toObject<Room>());
-});
-
-RoomSchema.static("getRoomCount", async function (user: User | Snowflake) {
-    return (await this.getVisitedRooms(user)).length;
-});
-
-RoomSchema.static("getParticipantRooms", async function (user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]) {
-    if (user instanceof User) {
-        user = user.id;
-    }
-    return (await filterAsync(rooms ?? await this.find(), async x => await x.wasParticipating(user))).map(x => x.toObject<Room>());
-});
-
-RoomSchema.static("getParticipantRoomCount", async function (user: User | Snowflake, rooms?: (RoomDocument & { _id: string; })[]) {
-    return (await this.getParticipantRooms(user, rooms)).length;
-});
-
-// Default export
-export default mongoose.model<RoomDocument, RoomModel>("Rooms", RoomSchema);

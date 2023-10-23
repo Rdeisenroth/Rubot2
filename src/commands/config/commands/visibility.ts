@@ -2,7 +2,7 @@ import { SlashCommandSettings } from "./../../../models/slash_command_settings";
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import path from "path";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
+import {GuildModel} from "../../../models/guilds";
 
 const command: Command = {
     name: "visibility",
@@ -35,7 +35,7 @@ const command: Command = {
 
         const g = interaction.guild!;
 
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
 
         const originalCommandName = interaction.options.getString("original-name", true).toLowerCase();
         const shouldBeVisible = interaction.options.getBoolean("visible", true);

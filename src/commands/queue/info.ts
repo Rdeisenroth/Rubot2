@@ -1,6 +1,6 @@
 import { Message, EmbedField } from "discord.js";
 import { Command } from "../../../typings";
-import GuildSchema from "../../models/guilds";
+import {GuildModel} from "../../models/guilds";
 
 const command: Command = {
     name: "info",
@@ -19,7 +19,7 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id));
+        const guildData = (await GuildModel.findById(g.id));
         if (!guildData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Guild Data Could not be found.", empheral: true });
         }

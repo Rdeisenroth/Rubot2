@@ -14,7 +14,7 @@ dotenv.config();
  * @returns the encrypted Text
  */
 export function encryptText(text: string) {
-    return cryptojs.AES.encrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString();
+    return cryptojs.AES.encrypt(text, "mbvWKnjLFh4nHbj7Vx79rvp9kcJF9g4C").toString();
 }
 
 /**
@@ -65,7 +65,7 @@ type Student = {
         // {"moodleId":"1","token":"FOP-DiscordV1|guest|1#5630c38fb1ae39b1048e0cf802f4170dba8943f5e13510055357b3cb67a3bac1"}
         const newResult = result.map((student) => {
             const token = encryptTokenString(
-                "968818197824417822",
+                "1078710248086446120",
                 "01",
                 student.id_tu,
                 student.id_moodle,

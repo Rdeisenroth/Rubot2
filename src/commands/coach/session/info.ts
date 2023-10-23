@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import GuildSchema from "../../../models/guilds";
-import UserSchema from "../../../models/users";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
 
 const command: Command = {
     name: "info",
@@ -22,10 +22,10 @@ const command: Command = {
         }
 
         const g = interaction.guild!;
-        const guildData = (await GuildSchema.findById(g.id))!;
+        const guildData = (await GuildModel.findById(g.id))!;
 
         const user = client.utils.general.getUser(interaction);
-        const userEntry = await UserSchema.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
+        const userEntry = await UserModel.findOneAndUpdate({ _id: user.id }, { _id: user.id }, { new: true, upsert: true, setDefaultsOnInsert: true });
         // Check if User has Active Sessions
         const activeSessions = await userEntry.getActiveSessions();
         // We expect at most 1 active session per guild
@@ -36,7 +36,7 @@ const command: Command = {
 
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System", text: `
-        \\> Total Time Spent: ${moment.duration(Date.now() - (+coachingSession.started_at)).format("d[d ]h[h ]m[m ]s.S[s]")}
+        \\> Total Time Spent: ${moment.duration(Date.now() - (+coachingSession.started_at!)).format("d[d ]h[h ]m[m ]s.S[s]")}
         \n\\> Channels visited: ${coachingSession.getRoomAmount()}
         \n\\> Participants: ${(await coachingSession.getParticipantAmount())}
         `, empheral: true,

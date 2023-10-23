@@ -1,17 +1,18 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import moment from "moment";
 import { ButtonInteraction } from "../../../../typings";
-import GuildSchema, { Guild, GuildDocument } from "../../../models/guilds";
-import { Queue, QueueDocument } from "../../../models/queues";
+import { GuildModel, Guild } from "../../../models/guilds";
+import { Queue } from "../../../models/queues";
+import { DocumentType } from "@typegoose/typegoose";
 
 const command: ButtonInteraction = {
     customID: "queue_refresh",
     description: "refresh the current queue info",
     // cooldown: 30000,
     execute: async (client, interaction) => {
-        const guilds = await GuildSchema.find();
-        let g: GuildDocument | undefined;
-        let queue: QueueDocument | undefined;
+        const guilds = await GuildModel.find();
+        let g: DocumentType<Guild> | undefined;
+        let queue: DocumentType<Queue> | undefined;
         for (g of guilds) {
             if (!g.queues) {
                 continue;
@@ -69,7 +70,7 @@ const command: ButtonInteraction = {
                 {
                     embeds:
                         [
-                            new EmbedBuilder({ title: "Queue System", description: `--${queue.name}--\nPosition:${(queue as QueueDocument).getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.members.me?.roles.highest.color || 0x7289da }),
+                            new EmbedBuilder({ title: "Queue System", description: `--${queue.name}--\nPosition:${queue.getPosition(entry.discord_id) + 1}/${queue.entries.length}\nTime Spent: ${moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]")}`, color: client.guilds.cache.get((g as Guild & { _id: string })._id)?.members.me?.roles.highest.color || 0x7289da }),
                         ],
                     components: [],
                 });

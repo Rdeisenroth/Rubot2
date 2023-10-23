@@ -2,7 +2,7 @@ import { ExecuteEvent } from "../../typings";
 import { Collection, Guild, GuildMember, Message } from "discord.js";
 export const name = "messageCreate";
 import * as crypto from "crypto";
-import UserSchema from "../models/users";
+import {UserModel} from "../models/users";
 
 export const execute: ExecuteEvent<"messageCreate"> = async (client, message) => {
     if (message.partial) {
