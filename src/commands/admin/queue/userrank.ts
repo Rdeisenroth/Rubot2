@@ -66,14 +66,22 @@ const command: Command = {
                 .sort((x, y) => x.roomCount - y.roomCount).slice(0, 10)
         ) {
             // console.log(u._id);
-            const member = await g.members.fetch(u._id);
-            const roomCount = await RoomModel.getParticipantRoomCount(u._id);
-
-            fields.push({
-                name: member.displayName, value:
+            try {
+                const member = await g.members.fetch(u._id);
+                const roomCount = u.roomCount;
+                fields.push({
+                    name: member.displayName, value:
                     `-Sprechstunden Beigetreten: ${roomCount}`,
-                inline: false,
-            });
+                    inline: false,
+                });
+            } catch (error) {
+                client.logger.error(`could not get user details for ${u._id}`,error);
+                fields.push({
+                    name: u._id, value:
+                    `-Sprechstunden Beigetreten: ${u.roomCount}`,
+                    inline: false,
+                });
+            }
         }
 
         await client.utils.embeds.SimpleEmbed(interaction, {
