@@ -61,14 +61,6 @@ export class Bot extends Client {
      * @param config The bot Configuration
      */
     public async start(): Promise<void> {
-        this.logger.info("starting Bot...");
-        try {
-            await this.login(this.config.get("token"));
-        } catch (error) {
-            this.logger.error("Invalid token", error);
-            process.exit(1);
-        }
-
         // Commands
         this.logger.info("Loading Commands...");
         const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
@@ -193,6 +185,14 @@ export class Bot extends Client {
             }
         }, null, true, "America/Los_Angeles");
         queueGuardJob.start();
+
+        this.logger.info("starting Bot...");
+        try {
+            await this.login(this.config.get("token"));
+        } catch (error) {
+            this.logger.error("Invalid token", error);
+            process.exit(1);
+        }
 
         this.logger.ready(`Bot ${this.user?.displayName} is Ready!`);
 
