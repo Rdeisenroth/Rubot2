@@ -1,8 +1,7 @@
-import { ApplicationCommandOptionType, EmbedField, Message, Role } from "discord.js";
-import path from "path";
+import { ApplicationCommandOptionType, Message, Role } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
 
 const command: Command = {
     name: "fixup",

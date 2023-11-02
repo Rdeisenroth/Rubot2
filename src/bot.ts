@@ -1,13 +1,12 @@
 import { ConfigHandler } from "./handlers/configHandler";
 import { Client, Collection, Partials, TextChannel, VoiceChannel } from "discord.js";
 import consola, { ConsolaInstance } from "consola";
-import cron, { CronJob } from "cron";
-import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
+import { CronJob } from "cron";
+import { BotEvent, ButtonInteraction, Command } from "../typings";
 import glob from "glob-promise";
-import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
-import {GuildModel} from "./models/guilds";
+import { GuildModel } from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
@@ -31,7 +30,7 @@ export class Bot extends Client {
     public parser = parser;
     public database = mongoose;
     public readonly initTimestamp = Date.now();
-    public jobs: CronJob<null,null>[] = [];
+    public jobs: CronJob<null, null>[] = [];
     public constructor() {
         super({
             intents: [

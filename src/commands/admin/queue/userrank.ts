@@ -1,9 +1,8 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
-import path from "path";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {RoomModel} from "../../../models/rooms";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
+import { RoomModel } from "../../../models/rooms";
 
 const command: Command = {
     name: "userrank",
@@ -75,7 +74,7 @@ const command: Command = {
                     inline: false,
                 });
             } catch (error) {
-                client.logger.error(`could not get user details for ${u._id}`,error);
+                client.logger.error(`could not get user details for ${u._id}`, error);
                 fields.push({
                     name: u._id, value:
                     `-Sprechstunden Beigetreten: ${u.roomCount}`,

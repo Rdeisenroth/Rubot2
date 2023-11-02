@@ -1,7 +1,7 @@
 import { VoiceChannelModel } from "./../models/voice_channels";
 import { ApplicationCommandOptionType, GuildChannel, Message } from "discord.js";
 import { Command } from "../../typings";
-import {GuildModel} from "../models/guilds";
+import { GuildModel } from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
 import { mongoose } from "@typegoose/typegoose";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";

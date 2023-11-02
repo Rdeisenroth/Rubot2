@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
+import { GuildModel } from "../../../models/guilds";
 
 const command: Command = {
     name: "info",

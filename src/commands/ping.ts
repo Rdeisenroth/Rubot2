@@ -1,6 +1,5 @@
-import { ChatInputCommandInteraction, Interaction, Message, EmbedBuilder } from "discord.js";
-import { Command, RunCommand } from "../../typings";
-import { APIMessage } from "discord-api-types/v9";
+import { ChatInputCommandInteraction, Message, EmbedBuilder } from "discord.js";
+import { Command } from "../../typings";
 
 /**
  * The Command Definition
@@ -30,8 +29,8 @@ const command: Command = {
         const embed = new EmbedBuilder()
             .setTitle("__Response Times__")
             .setColor(interaction!.guild?.members.me?.roles.highest.color || 0x7289da)
-            .addFields({name:"Bot Latency:", value:":hourglass_flowing_sand:" + ping + "ms", inline:true})
-            .addFields({name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(client.ws.ping) + "ms", inline:true});
+            .addFields({ name:"Bot Latency:", value:":hourglass_flowing_sand:" + ping + "ms", inline:true })
+            .addFields({ name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(client.ws.ping) + "ms", inline:true });
         if (interaction instanceof ChatInputCommandInteraction) {
             await interaction.editReply({ content: "Pong.", embeds: [embed] });
         } else {

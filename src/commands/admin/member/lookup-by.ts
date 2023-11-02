@@ -1,10 +1,6 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
-import moment from "moment";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel, User } from "../../../models/users";
-import {SessionModel} from "../../../models/sessions";
-import {QueueModel} from "../../../models/queues";
+import { UserModel, User } from "../../../models/users";
 import { FilterQuery } from "mongoose";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";

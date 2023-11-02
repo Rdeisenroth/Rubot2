@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {SessionModel, sessionRole } from "../../../models/sessions";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
+import { SessionModel, sessionRole } from "../../../models/sessions";
 import { Queue } from "../../../models/queues";
 import { DocumentType } from "@typegoose/typegoose";
 

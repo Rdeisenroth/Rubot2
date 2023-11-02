@@ -1,7 +1,7 @@
 import { stripIndents } from "common-tags";
 import * as urban from "urban-dictionary";
-import { ApplicationCommandOptionType, ChatInputCommandInteraction, Interaction, Message, EmbedBuilder } from "discord.js";
-import { Command, RunCommand } from "../../typings";
+import { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { Command } from "../../typings";
 
 /**
  * The Command Definition

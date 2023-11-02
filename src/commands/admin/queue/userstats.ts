@@ -1,9 +1,7 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
-import path from "path";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {RoomModel} from "../../../models/rooms";
+import { GuildModel } from "../../../models/guilds";
+import { RoomModel } from "../../../models/rooms";
 
 const command: Command = {
     name: "userstats",

@@ -1,13 +1,10 @@
 import { ExecuteEvent } from "../../typings";
-import { Collection, ActionRow, Embed, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, APIMessageActionRowComponent } from "discord.js";
-import {GuildModel} from "../models/guilds";
-import { VoiceChannel } from "../models/voice_channels";
-import { Queue } from "../models/queues";
+import { Collection, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { GuildModel } from "../models/guilds";
 import { QueueEntry } from "../models/queue_entry";
 export const name = "voiceStateUpdate";
-import {RoomModel} from "../models/rooms";
-import {UserModel} from "../models/users";
-import {EventModel, Event as EVT, eventType } from "../models/events";
+import { RoomModel } from "../models/rooms";
+import { Event as EVT, eventType } from "../models/events";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;

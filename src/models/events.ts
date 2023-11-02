@@ -23,27 +23,27 @@ export class Event {
     /**
      * The Unix Time Stamp of the Event
      */
-    @prop({required: true})
+    @prop({ required: true })
         timestamp!: string;
     /**
      * The Event Type
      */
-    @prop({required: true, enum: eventType, default: eventType.other})
+    @prop({ required: true, enum: eventType, default: eventType.other })
         type!: eventType;
     /**
      * Client ID or "me"
      */
-    @prop({required: true})
+    @prop({ required: true })
         emitted_by!: string;
     /**
      * A Target that was affected
      */
-    @prop({required: false})
+    @prop({ required: false })
         target?: string;
     /**
      * The Reason why the Event was Emitted
      */
-    @prop({required: false})
+    @prop({ required: false })
         reason?: string;
 }
 

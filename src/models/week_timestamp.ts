@@ -39,7 +39,7 @@ export class WeekTimestamp {
     /**
      * The Day of the Week
      */
-    @prop({ required: true,enum: Weekday })
+    @prop({ required: true, enum: Weekday })
         weekday!: Weekday;
 
     /**

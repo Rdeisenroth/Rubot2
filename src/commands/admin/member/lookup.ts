@@ -1,10 +1,6 @@
-import { ApplicationCommandOptionType, EmbedData, EmbedField, Message } from "discord.js";
-import moment from "moment";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {SessionModel} from "../../../models/sessions";
-import {QueueModel} from "../../../models/queues";
+import { UserModel } from "../../../models/users";
 
 const command: Command = {
     name: "lookup",

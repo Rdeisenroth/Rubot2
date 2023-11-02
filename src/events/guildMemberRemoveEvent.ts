@@ -1,5 +1,5 @@
 import { ExecuteEvent } from "../../typings";
-import {UserModel} from "../models/users";
+import { UserModel } from "../models/users";
 
 export const name = "guildMemberRemove";
 

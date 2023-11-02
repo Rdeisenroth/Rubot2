@@ -28,7 +28,7 @@ const command: Command = {
         }
         const encrypted = client.utils.general.encryptText(interaction.options.getString("encryptionstring", true));
         const decrypted = client.utils.general.decryptText(encrypted);
-        return client.utils.embeds.SimpleEmbed(interaction, { title: "Encrypted+Decrypted Text", text: `encrypted: ${encrypted}\ndecrypted: ${decrypted}`, empheral:true});
+        return client.utils.embeds.SimpleEmbed(interaction, { title: "Encrypted+Decrypted Text", text: `encrypted: ${encrypted}\ndecrypted: ${decrypted}`, empheral:true });
     },
 };
 

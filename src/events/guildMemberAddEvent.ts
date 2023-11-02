@@ -1,8 +1,6 @@
-import { ClientEventListener, ExecuteEvent, StringReplacements } from "../../typings";
-import { ApplicationCommandData, ApplicationCommandOptionChoiceData, Client, ClientEvents, Guild } from "discord.js";
-import {GuildModel} from "../models/guilds";
-import {UserModel} from "../models/users";
-import { inspect } from "util";
+import { ExecuteEvent, StringReplacements } from "../../typings";
+import { GuildModel } from "../models/guilds";
+import { UserModel } from "../models/users";
 
 export const name = "guildMemberAdd";
 

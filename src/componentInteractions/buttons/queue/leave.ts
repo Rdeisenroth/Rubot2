@@ -1,4 +1,4 @@
-import { Collection, EmbedBuilder } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
 import { GuildModel, Guild } from "../../../models/guilds";
 import { Queue } from "../../../models/queues";

@@ -1,7 +1,7 @@
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { ChannelType, Guild, GuildMember, GuildPremiumTier, OverwriteData } from "discord.js";
 import { Bot } from "../bot";
-import {GuildModel} from "../models/guilds";
+import { GuildModel } from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
 import { VoiceChannelSpawner } from "../models/voice_channel_spawner";
 import { mongoose } from "@typegoose/typegoose";
