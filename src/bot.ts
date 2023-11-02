@@ -135,12 +135,12 @@ export class Bot extends Client {
         // Event Files
         this.logger.info("Loading Events...");
         const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
-        await eventFiles.map(async (eventFile: string) => {
+        await Promise.all(eventFiles.map(async (eventFile: string) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
             console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
             this.on(event.name, event.execute.bind(null, this));
-        });
+        }));
 
         const queueGuardJob = new CronJob("*/30 * * * * *", async () => {
             for (const g of this.guilds.cache.values()) {
