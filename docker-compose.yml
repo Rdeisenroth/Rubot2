@@ -19,8 +19,6 @@ services:
     build: .
     image: rubot:latest
     container_name: sprechi
-    env_file:
-      - stack.env # works with portainer
     environment:
       - TZ=Europe/Berlin
       - MONGODB_CONNECTION_URL=mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@db:27017/${MONGODB_DBNAME}?authSource=admin

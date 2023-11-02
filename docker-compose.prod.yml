@@ -16,7 +16,9 @@ services:
     #depends_on:
     #  db:
     #    condition: service_healthy
-        
+  sprechi:
+    env_file:
+      - stack.env # works with portainer      
 networks:
   proxy:
     external: true
