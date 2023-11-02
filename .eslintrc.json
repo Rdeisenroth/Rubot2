@@ -16,6 +16,17 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "object-curly-spacing": [
+            "warn",
+            "always"
+        ],
+        "comma-spacing": [
+            "warn",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
         "indent": [
             "error",
             4
