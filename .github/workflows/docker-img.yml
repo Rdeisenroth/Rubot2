@@ -1,4 +1,3 @@
-# shamelessly stolen from: https://github.com/CloudGoBrrr/server/blob/main/.github/workflows/main.yml
 name: Build and publish container
 
 on:
@@ -15,6 +14,7 @@ env:
 
 jobs:
   ghr_push:
+    name: Build and publish container
     runs-on: ubuntu-latest
 
     steps:
