@@ -1,13 +1,12 @@
 import { ConfigHandler } from "./handlers/configHandler";
 import { Client, Collection, Partials, TextChannel, VoiceChannel } from "discord.js";
 import consola, { ConsolaInstance } from "consola";
-import cron, { CronJob } from "cron";
-import { BotConfig, BotEvent, ButtonInteraction, Command } from "../typings";
+import { CronJob } from "cron";
+import { BotEvent, ButtonInteraction, Command } from "../typings";
 import glob from "glob-promise";
-import { promisify } from "util";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
-import {GuildModel} from "./models/guilds";
+import { GuildModel } from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
@@ -31,7 +30,7 @@ export class Bot extends Client {
     public parser = parser;
     public database = mongoose;
     public readonly initTimestamp = Date.now();
-    public jobs: CronJob<null,null>[] = [];
+    public jobs: CronJob<null, null>[] = [];
     public constructor() {
         super({
             intents: [
@@ -61,14 +60,6 @@ export class Bot extends Client {
      * @param config The bot Configuration
      */
     public async start(): Promise<void> {
-        this.logger.info("starting Bot...");
-        try {
-            await this.login(this.config.get("token"));
-        } catch (error) {
-            this.logger.error("Invalid token", error);
-            process.exit(1);
-        }
-
         // Commands
         this.logger.info("Loading Commands...");
         const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
@@ -135,12 +126,12 @@ export class Bot extends Client {
         // Event Files
         this.logger.info("Loading Events...");
         const eventFiles = fs.readdirSync(`${__dirname}/events`).filter(file => file.endsWith(".js") || file.endsWith("ts"));
-        await eventFiles.map(async (eventFile: string) => {
+        await Promise.all(eventFiles.map(async (eventFile: string) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const event = (await import(`${__dirname}/events/${eventFile}`)) as BotEvent<any>;
             console.log(`${JSON.stringify(event.name)} (./events/${eventFile})`);
             this.on(event.name, event.execute.bind(null, this));
-        });
+        }));
 
         const queueGuardJob = new CronJob("*/30 * * * * *", async () => {
             for (const g of this.guilds.cache.values()) {
@@ -193,6 +184,14 @@ export class Bot extends Client {
             }
         }, null, true, "America/Los_Angeles");
         queueGuardJob.start();
+
+        this.logger.info("starting Bot...");
+        try {
+            await this.login(this.config.get("token"));
+        } catch (error) {
+            this.logger.error("Invalid token", error);
+            process.exit(1);
+        }
 
         this.logger.ready(`Bot ${this.user?.displayName} is Ready!`);
 
