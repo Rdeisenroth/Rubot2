@@ -13,9 +13,21 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "unused-imports"
     ],
     "rules": {
+        "object-curly-spacing": [
+            "warn",
+            "always"
+        ],
+        "comma-spacing": [
+            "warn",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
         "indent": [
             "error",
             4
@@ -34,9 +46,12 @@
         ],
         "@typescript-eslint/no-non-null-assertion": "off",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": [
-            "warn"
-        ],
+        "@typescript-eslint/no-unused-vars": "off",
+		"unused-imports/no-unused-imports": "error",
+		"unused-imports/no-unused-vars": [
+			"warn",
+			{ "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+		],
         "prefer-const": "warn",
         "@typescript-eslint/no-empty-interface": [
             "warn",

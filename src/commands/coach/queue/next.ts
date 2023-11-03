@@ -1,10 +1,10 @@
-import {EventModel, Event as EVT, eventType } from "./../../../models/events";
+import { Event as EVT, eventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
 import ChannelType, { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {RoomModel} from "../../../models/rooms";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
+import { RoomModel } from "../../../models/rooms";
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { mongoose } from "@typegoose/typegoose";
 

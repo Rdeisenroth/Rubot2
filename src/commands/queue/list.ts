@@ -1,7 +1,6 @@
-import { Queue } from "./../../models/queues";
 import { Message } from "discord.js";
 import { Command } from "../../../typings";
-import {GuildModel} from "../../models/guilds";
+import { GuildModel } from "../../models/guilds";
 
 const command: Command = {
     name: "list",

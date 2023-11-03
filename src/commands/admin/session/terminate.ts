@@ -1,10 +1,8 @@
-import { ApplicationCommandOptionType, EmbedField, GuildMember, Message, User } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {SessionModel} from "../../../models/sessions";
-import {QueueModel} from "../../../models/queues";
+import { GuildModel } from "../../../models/guilds";
+import { SessionModel } from "../../../models/sessions";
 
 const command: Command = {
     name: "terminate",

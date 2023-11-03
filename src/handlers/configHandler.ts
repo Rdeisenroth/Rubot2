@@ -1,5 +1,4 @@
 import { BotConfig } from "../../typings";
-import dotenv from "dotenv";
 
 /**
  * This is a readonly data class that holds the config of the bot.

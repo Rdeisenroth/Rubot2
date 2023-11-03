@@ -1,6 +1,6 @@
 import { ExecuteEvent } from "../../typings";
 import { ActivityType, ApplicationCommandData } from "discord.js";
-import {GuildModel} from "../models/guilds";
+import { GuildModel } from "../models/guilds";
 
 export const execute: ExecuteEvent<"ready"> = async (client) => {
     // -- Setup Databases -- //
@@ -27,7 +27,7 @@ export const execute: ExecuteEvent<"ready"> = async (client) => {
     // Guilds
     client.logger.info("Processing Guilds");
     for (const g of [...client.guilds.cache.values()]) {
-        await GuildModel.prepareGuild(client,g);
+        await GuildModel.prepareGuild(client, g);
     }
 
     await client.user?.setPresence({ status: "online", activities: [{ name: "Sprechstunden.", type: ActivityType.Watching }], afk: false });

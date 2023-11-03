@@ -1,5 +1,5 @@
 import { ChannelType, TextChannelType } from "discord.js";
-import {getModelForClass, prop} from "@typegoose/typegoose";
+import { getModelForClass, prop } from "@typegoose/typegoose";
 
 /**
  * Database Representation of a Discord Channel
@@ -28,9 +28,9 @@ export interface Channel {
 }
 
 export class TextChannel implements Channel {
-    @prop({required: true})
+    @prop({ required: true })
         _id!: string;
-    @prop({ required: true, type: Number, enum: [ChannelType.DM, ChannelType.GroupDM, ChannelType.GuildAnnouncement, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread, ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildVoice, ChannelType.GuildStageVoice]})
+    @prop({ required: true, type: Number, enum: [ChannelType.DM, ChannelType.GroupDM, ChannelType.GuildAnnouncement, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread, ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildVoice, ChannelType.GuildStageVoice] })
         channel_type!: TextChannelType;
     @prop({ required: true })
         managed!: boolean;
@@ -51,7 +51,7 @@ export class TextChannel implements Channel {
     /**
      * WHETHER THE CHANNEL IS CAPS-ONLY
      */
-    @prop({default: false})
+    @prop({ default: false })
         rage_channel?: boolean;
 }
 

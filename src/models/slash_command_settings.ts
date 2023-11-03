@@ -1,11 +1,11 @@
 import { SlashCommandPermission } from "./slash_command_permission";
 import { PermissionResolvable } from "discord.js";
-import { ArraySubDocumentType, SubDocumentType, getModelForClass, prop, mongoose } from "@typegoose/typegoose";
+import { ArraySubDocumentType, getModelForClass, prop, mongoose } from "@typegoose/typegoose";
 export class SlashCommandSettings {
     /**
      * The original Command name used to retrieve it from the event handler
      */
-    @prop({ required: true,sparse: true })
+    @prop({ required: true, sparse: true })
         internal_name!: string;
     /**
      * The Command Name overwrite

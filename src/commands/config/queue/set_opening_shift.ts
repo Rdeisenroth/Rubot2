@@ -1,9 +1,6 @@
-import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
-import { SlashCommandPermission } from "../../../models/slash_command_permission";
-import { ApplicationCommandOptionType, Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import { QueueSpan } from "../../../models/queue_span";
+import { GuildModel } from "../../../models/guilds";
 
 const command: Command = {
     name: "set_opening_shift",

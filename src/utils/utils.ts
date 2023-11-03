@@ -9,7 +9,7 @@ import * as errors from "./errors";
 import * as general from "./general";
 import * as embeds from "./embeds";
 import * as voice from "./voice";
-export {errors, general, embeds, voice};
+export { errors, general, embeds, voice };
 // module.exports = { //TODO dynamically read new Util classes
 //     errors: require('./errors'),
 //     // functions: require('./functions'),

@@ -1,10 +1,7 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, AuditLogEvent, Collection, GuildAuditLogs, GuildAuditLogsEntry, Message } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, AuditLogEvent, Collection, GuildAuditLogsEntry, Message } from "discord.js";
 import { Command } from "../../../typings";
-import { version as djsversion } from "discord.js";
-import * as moment from "moment";
 import "moment-duration-format";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
-import { string } from "yargs";
 import { APIRole } from "discord-api-types/v9";
 
 
@@ -172,7 +169,7 @@ const command: Command = {
                 },
             },
         );
-        const attachment = new AttachmentBuilder(image, {name: "graph.png"});
+        const attachment = new AttachmentBuilder(image, { name: "graph.png" });
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Server Stats",
             text: "Server Information",

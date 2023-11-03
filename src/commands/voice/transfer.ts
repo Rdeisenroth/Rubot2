@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionType, GuildMember, Message } from "discord.js";
 import { Command } from "../../../typings";
-import {GuildModel} from "../../models/guilds";
-import { VoiceChannel } from "../../models/voice_channels";
+import { GuildModel } from "../../models/guilds";
 
 const command: Command = {
     name: "transfer",

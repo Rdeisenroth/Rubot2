@@ -1,10 +1,9 @@
 import { Message, Role } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import {UserModel, User } from "../../models/users";
-import {GuildModel} from "../../models/guilds";
+import { GuildModel } from "../../models/guilds";
 import { DBRole, InternalRoles, RoleScopes } from "../../models/bot_roles";
-import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
+import { ArraySubDocumentType, mongoose } from "@typegoose/typegoose";
 
 
 

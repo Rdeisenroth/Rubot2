@@ -4,7 +4,6 @@ import { QueueEntry } from "./queue_entry";
 import * as utils from "../utils/utils";
 import { StringReplacements } from "../../typings";
 import * as moment from "moment";
-import momentDurationFormatSetup from "moment-duration-format";
 import { QueueSpan } from "./queue_span";
 import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
@@ -146,7 +145,7 @@ export class Queue {
      * Returns true if the ID is contained in the queue
      * @param discord_id the Discord ID to check if it's contained
      */
-    public contains(this:DocumentType<Queue>,discord_id: string): boolean {
+    public contains(this:DocumentType<Queue>, discord_id: string): boolean {
         return this.entries.some(x => x.discord_id === discord_id);
     }
     /**

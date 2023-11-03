@@ -1,6 +1,5 @@
-import { DiscordAPIError, Message, EmbedBuilder } from "discord.js";
+import { Message, EmbedBuilder } from "discord.js";
 import * as discord from "discord.js";
-import { APIMessage } from "discord-api-types/v9";
 // : (message: Message, error: string, deleteinterval: number => Promise<Message>)
 export const errorMessage = async (interaction: Message | discord.CommandInteraction, error: string | Error, deleteinterval?: number) => {
     if (!interaction.channel) {

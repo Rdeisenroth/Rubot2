@@ -18,10 +18,10 @@ const sessions =
             active: true,
             user: "313753317484527616",
             guild: "604601483920408576",
-            queue: "queue_id",//optional
+            queue: "queue_id", //optional
             role: "coach", // participant|coach|supervisor
             started_at: "1629567410185",
-            ended_at: undefined,//Set when active=false
+            ended_at: undefined, //Set when active=false
             end_certain: false, // Only set to true if session had a clean exit
             rooms: ["626065226986553343", "626065222936553347"],
         },

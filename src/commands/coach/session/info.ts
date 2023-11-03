@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
 
 const command: Command = {
     name: "info",

@@ -1,5 +1,5 @@
-import {RoomModel} from "./rooms";
-import {DocumentType, getModelForClass, prop, mongoose} from "@typegoose/typegoose";
+import { RoomModel } from "./rooms";
+import { DocumentType, getModelForClass, prop, mongoose } from "@typegoose/typegoose";
 export enum sessionRole {
     "participant" = "participant",
     "coach" = "coach",
@@ -10,12 +10,12 @@ export class Session {
     /**
      * Whether the Session is currently active
      */
-    @prop({required: true})
+    @prop({ required: true })
         active!: boolean;
     /**
      * The User that the Session belongs to
      */
-    @prop({required: true})
+    @prop({ required: true })
         user!: string;
     /**
      * A Guild that the Session belongs to
@@ -30,7 +30,7 @@ export class Session {
     /**
      *  The Role that the user plays
      */
-    @prop({required: true, enum: sessionRole})
+    @prop({ required: true, enum: sessionRole })
         role!: sessionRole;
     /**
      * The Start Timestamp
@@ -45,12 +45,12 @@ export class Session {
     /**
      * Only set to true if session had a clean exit
      */
-    @prop({required: true})
+    @prop({ required: true })
         end_certain!: boolean;
     /**
      * The Room IDs That Were Visited in the Session
      */
-    @prop({required: true, type: () => [String], default: []})
+    @prop({ required: true, type: () => [String], default: [] })
         rooms!: mongoose.Types.Array<string>;
 
     /**

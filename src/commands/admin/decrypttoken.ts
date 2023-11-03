@@ -1,10 +1,6 @@
-import { ApplicationCommandOptionType, Message, Role } from "discord.js";
+import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import {UserModel, User } from "../../models/users";
-import {GuildModel} from "../../models/guilds";
-import { DBRole, InternalRoles, RoleScopes } from "../../models/bot_roles";
-import { Types } from "mongoose";
 
 
 
@@ -37,7 +33,7 @@ const command: Command = {
         } catch (error) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Verification System Error", text: "Token is not valid.", empheral: true });
         }
-        return client.utils.embeds.SimpleEmbed(interaction, { title: "Decrypted Text", text: `decrypted: ${decrypted}`, empheral:true});
+        return client.utils.embeds.SimpleEmbed(interaction, { title: "Decrypted Text", text: `decrypted: ${decrypted}`, empheral:true });
     },
 };
 

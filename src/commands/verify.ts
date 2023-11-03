@@ -1,7 +1,5 @@
-import { UserModel, User } from "./../models/users";
-import { ApplicationCommandOptionType, GuildMember, Interaction, Message } from "discord.js";
-import { Command, RunCommand } from "../../typings";
-import * as crypto from "crypto";
+import { ApplicationCommandOptionType, Message } from "discord.js";
+import { Command } from "../../typings";
 
 /**
  * The Command Definition

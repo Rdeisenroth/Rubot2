@@ -1,6 +1,4 @@
-import { ColorResolvable, CommandInteraction, DMChannel, Guild, GuildResolvable, Interaction, InteractionReplyOptions, Message, Embed, NewsChannel, PartialDMChannel, TextBasedChannel, TextChannel, ThreadChannel, UserResolvable, EmbedBuilder, InteractionResponse } from "discord.js";
-import { APIMessage } from "discord-api-types/v9";
-import * as utils from "./utils";
+import { CommandInteraction, DMChannel, Message, NewsChannel, TextChannel, ThreadChannel, EmbedBuilder, InteractionResponse } from "discord.js";
 import { SimpleEmbedOptions } from "../../typings";
 
 export async function SimpleEmbed(interaction: Message | CommandInteraction | DMChannel | TextChannel | NewsChannel | ThreadChannel, title: string, description: string): Promise<Message | null>;

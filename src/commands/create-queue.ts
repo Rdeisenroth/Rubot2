@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../typings";
-import {GuildModel} from "../models/guilds";
+import { GuildModel } from "../models/guilds";
 import { Queue } from "../models/queues";
 import { mongoose } from "@typegoose/typegoose";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";

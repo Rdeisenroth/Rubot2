@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, CategoryChannel, GuildChannel, Message, VoiceChannel as dvc } from "discord.js";
 import { Command } from "../../typings";
-import {GuildModel} from "../models/guilds";
+import { GuildModel } from "../models/guilds";
 import { VoiceChannel } from "../models/voice_channels";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { mongoose } from "@typegoose/typegoose";

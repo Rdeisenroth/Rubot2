@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { Command, RunCommand } from "../../typings";
+import { ApplicationCommandOptionType, ChatInputCommandInteraction } from "discord.js";
+import { Command } from "../../typings";
 
 /**
  * The Command Definition

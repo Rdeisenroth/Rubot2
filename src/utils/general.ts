@@ -3,11 +3,9 @@ import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
 import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, RoleResolvable, UserResolvable } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
-import { promisify } from "util";
-import {GuildModel} from "../models/guilds";
-import glob from "glob";
+import { GuildModel } from "../models/guilds";
 import { Bot } from "../bot";
-import {UserModel} from "../models/users";
+import { UserModel } from "../models/users";
 import * as cryptojs from "crypto-js";
 import { DocumentType } from "@typegoose/typegoose";
 

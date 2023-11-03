@@ -1,8 +1,6 @@
-import { SlashCommandSettings } from "./../../../models/slash_command_settings";
 import { ApplicationCommandOptionType, Message } from "discord.js";
-import path from "path";
 import { Command } from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
+import { GuildModel } from "../../../models/guilds";
 
 const command: Command = {
     name: "rename",

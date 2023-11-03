@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import {GuildModel, Guild } from "../../../models/guilds";
+import { GuildModel, Guild } from "../../../models/guilds";
 import { Queue } from "../../../models/queues";
 import { DocumentType } from "@typegoose/typegoose";
 
