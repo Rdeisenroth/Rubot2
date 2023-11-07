@@ -1,10 +1,14 @@
-import { ExecuteEvent } from "../../typings";
-import { Collection, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-import { GuildModel } from "../models/guilds";
-import { QueueEntry } from "../models/queue_entry";
+import {ExecuteEvent} from "../../typings";
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder} from "discord.js";
+import {GuildModel} from "../models/guilds";
+import {QueueEntry} from "../models/queue_entry";
+import {RoomModel} from "../models/rooms";
+import {Event as EVT, eventType} from "../models/events";
+import {manageJoinQueue} from "../utils/general";
+import QueueInfoService from "../service/queue-info/QueueInfoService";
+import {QueueEvent} from "../service/queue-info/model/QueueEvent";
+
 export const name = "voiceStateUpdate";
-import { RoomModel } from "../models/rooms";
-import { Event as EVT, eventType } from "../models/events";
 
 export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState, newState) => {
     const oldUserChannel = oldState.channel;
@@ -77,13 +81,10 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         importance: 1,
                     });
 
-                    const roles = await guild.roles.fetch();
-                    const waiting_role = roles.find(x => x.name.toLowerCase() === queue.name.toLowerCase() + "-waiting");
 
-                    const member = newState.member!;
-                    if (waiting_role && member && !member.roles.cache.has(waiting_role.id)) {
-                        member.roles.add(waiting_role);
-                    }
+                    if (guildData != null && newState.member!.user)
+                        await manageJoinQueue(guild, newState.member!.user, queue);
+
                 } catch (error) {
                     try {
                         await client.utils.embeds.SimpleEmbed(await newState.member!.createDM(), { title: "Queue System", text: `An error occurred: ${error}` });
@@ -228,6 +229,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                                 await member.roles.remove(waiting_role);
                             }
+                            await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE)
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
                                 text: leave_msg,
@@ -243,6 +245,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                             await member.roles.remove(waiting_role);
                         }
+                        await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE)
                         await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }
                 }

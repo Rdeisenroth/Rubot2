@@ -1,12 +1,14 @@
-import { Event as EVT, eventType } from "./../../../models/events";
-import { PermissionOverwriteData } from "./../../../models/permission_overwrite_data";
-import ChannelType, { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
-import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
-import { RoomModel } from "../../../models/rooms";
-import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
-import { mongoose } from "@typegoose/typegoose";
+import {Event as EVT, eventType} from "./../../../models/events";
+import {PermissionOverwriteData} from "../../../models/permission_overwrite_data";
+import ChannelType, {ApplicationCommandOptionType, Message, TextChannel} from "discord.js";
+import {Command} from "../../../../typings";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
+import {RoomModel} from "../../../models/rooms";
+import {VoiceChannelSpawner} from "../../../models/voice_channel_spawner";
+import {mongoose} from "@typegoose/typegoose";
+import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import {QueueEvent} from "../../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "next",
@@ -199,11 +201,15 @@ const command: Command = {
             // Ignore Errors
         }
         await roomData.save();
+
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.NEXT);
+
         return await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System",
             text: `Done. Please Join ${room} if you are not automatically moved.\nYour Participant(s) are: ${entries.map(x => `<@${x.discord_id}>`).join(", ")} `,
             empheral: true,
         });
+
     },
 };
 

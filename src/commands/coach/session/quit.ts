@@ -1,9 +1,12 @@
-import { Message } from "discord.js";
-import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
+import {Message} from "discord.js";
+import {Command} from "../../../../typings";
+import {GuildModel} from "../../../models/guilds";
+import {UserModel} from "../../../models/users";
 import moment from "moment";
-import { removeRoleFromUser } from "../../../utils/general";
+import {removeRoleFromUser} from "../../../utils/general";
+import {InternalRoles} from "../../../models/bot_roles";
+import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import {QueueEvent} from "../../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "quit",
@@ -34,7 +37,12 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You Have no Active Coaching Session.", empheral: true });
         }
 
-        await removeRoleFromUser(g, user, "active_session");
+        try {
+            await removeRoleFromUser(g, user, InternalRoles.ACTIVE_SESSION);
+        } catch(error) {
+            console.error('Could not remove role: ' + InternalRoles.ACTIVE_SESSION)
+            console.log(error)
+        }
 
         //TODO: Terminate Rooms
 
@@ -43,6 +51,11 @@ const command: Command = {
         coachingSession.ended_at = Date.now().toString();
         coachingSession.end_certain = true;
         await coachingSession.save();
+
+
+        const queueData = guildData.queues.find(queue => queue._id.toString() == coachingSession.queue)
+        if (queueData)
+            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.TUTOR_SESSION_QUIT);
 
         // Compute some Session Data
 

@@ -1,7 +1,8 @@
-import { ConfigHandler } from "./../handlers/configHandler";
-import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
+import {ConfigHandler} from "./../handlers/configHandler";
+import {DBRole, InternalRoles, RoleScopes} from "./../models/bot_roles";
 import ChannelType, {
     CommandInteraction,
+    Guild as DiscrodGuild,
     Guild,
     GuildMember,
     GuildMemberResolvable,
@@ -13,12 +14,15 @@ import ChannelType, {
     UserResolvable,
 } from "discord.js";
 import moment from "moment";
-import { Command, StringReplacements } from "../../typings";
-import { GuildModel } from "../models/guilds";
-import { Bot } from "../bot";
-import { UserModel } from "../models/users";
+import {Command, StringReplacements} from "../../typings";
+import {Guild as GuildDB, GuildModel} from "../models/guilds";
+import {Bot} from "../bot";
+import {UserModel} from "../models/users";
 import * as cryptojs from "crypto-js";
-import { DocumentType } from "@typegoose/typegoose";
+import {ArraySubDocumentType, DocumentType} from "@typegoose/typegoose";
+import {Queue} from "../models/queues";
+import QueueInfoService from "../service/queue-info/QueueInfoService";
+import {QueueEvent} from "../service/queue-info/model/QueueEvent";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -286,7 +290,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
     try {
         await databaseUser.save();
     } catch (error) {
-        if ((error as {message:string}).message?.includes("duplicate key")) {
+        if ((error as { message: string }).message?.includes("duplicate key")) {
             console.log(`User ${member.displayName} tried to valid but already used token with TU-ID: "${tu_id}", Moodle-ID: "${moodle_id}"`);
             return await client.utils.embeds.SimpleEmbed(replyable, { title: "Verification System Error", text: "You can only Link one Discord Account.", empheral: true });
         } else {
@@ -401,9 +405,14 @@ export enum QueueStayOptions {
  * @param user User to assign the role to
  * @param roleName name of the role
  */
-export async function assignRoleToUser(g: Guild, user: User, roleName: string) {
-    const roles = await g.roles.fetch();
-    const role = roles.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+export async function assignRoleToUser(g: Guild, user: User, roleName: InternalRoles) {
+    const dbGuild = await GuildModel.findById(g.id);
+    const dbRole = dbGuild?.guild_settings.roles?.find(r => r.internal_name === roleName);
+    if(!dbRole) {
+        console.error(`Could not find role: ${roleName} on guild: ${g.name}`);
+        return;
+    }
+    const role = g.roles.resolve(dbRole.role_id!);
     const member = g.members.resolve(user);
     if (role && member && !member.roles.cache.has(role.id)) {
         await member.roles.add(role);
@@ -418,13 +427,42 @@ export async function assignRoleToUser(g: Guild, user: User, roleName: string) {
  * @param user User to remove the role from
  * @param roleName name of the role
  */
-export async function removeRoleFromUser(g: Guild, user: User, roleName: string) {
-    const roles = await g.roles.fetch();
-    const role = roles.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+export async function removeRoleFromUser(g: Guild, user: User, roleName: InternalRoles) {
+    const dbGuild = await GuildModel.findById(g.id);
+    const dbRole = dbGuild?.guild_settings.roles?.find(r => r.internal_name === roleName);
+    if(!dbRole) {
+        console.error(`Could not find role: ${roleName} on guild: ${g.name}`);
+        return;
+    }
+    const role = g.roles.resolve(dbRole.role_id!);
     const member = g.members.resolve(user);
     if (role && member && member.roles.cache.has(role.id)) {
         await member.roles.remove(role);
     } else {
         console.error(`Could not remove role: ${roleName} from ${user.username} on guild: ${g.name}`);
     }
+}
+
+/**
+* assigns the waiting role and informs tutors that user has joined
+* @param g the guild of the queue
+* @param user the user that joined
+* @param queueData the queueData of the queue
+*/
+export async function manageJoinQueue(
+    g: DiscrodGuild,
+    user: User,
+    queueData: ArraySubDocumentType<Queue>,
+) {
+    const roles = await g.roles.fetch();
+    const waiting_role = roles.find(role => role.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
+
+    const member = g.members.resolve(user);
+    if (waiting_role && member && !member.roles.cache.has(waiting_role.id)) {
+        member.roles.add(waiting_role);
+    }
+
+   await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.JOIN)
+
+    // await member?.voice.disconnect();
 }

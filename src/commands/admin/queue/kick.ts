@@ -1,6 +1,8 @@
-import { ApplicationCommandOptionType, Message } from "discord.js";
-import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
+import {ApplicationCommandOptionType, Message} from "discord.js";
+import {Command} from "../../../../typings";
+import {GuildModel} from "../../../models/guilds";
+import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import {QueueEvent} from "../../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "kick",
@@ -78,6 +80,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `${error}`, empheral: true });
         }
 
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.KICK)
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System",
             text: `Kicked ${user} from the ${queueData.name}-Queue`,

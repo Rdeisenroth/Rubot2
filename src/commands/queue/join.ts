@@ -2,6 +2,8 @@ import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../typings";
 import { GuildModel } from "../../models/guilds";
 import { UserModel } from "../../models/users";
+import { manageJoinQueue } from "../../utils/general";
+
 
 const command: Command = {
     name: "join",
@@ -73,24 +75,19 @@ const command: Command = {
             intent: interaction.options.getString("intent") ?? undefined,
         });
 
-
         try {
-            const roles = await g.roles.fetch();
-            const waiting_role = roles.find(x => x.name.toLowerCase() === queueData.name.toLowerCase() + "-waiting");
-
-            const member = g.members.resolve(user);
-            if (waiting_role && member && !member.roles.cache.has(waiting_role.id)) {
-                member.roles.add(waiting_role);
-            }
-            // await member?.voice.disconnect();
+            await manageJoinQueue(g, user, queueData);
         } catch (error) {
             console.log(error);
         }
+
         await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: queueData.getJoinMessage(user.id), empheral: true });
 
         // await client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
+
     },
 };
+
 
 /**
  * Exporting the Command using CommonJS
