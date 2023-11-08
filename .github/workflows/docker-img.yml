@@ -8,6 +8,10 @@ on:
     branches:
       - main
       - master
+  pull_request:
+    branches:
+      - main
+      - master
 
 env:
   REGISTRY: ghcr.io
@@ -41,13 +45,19 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
           flavor: |
-            latest=true
+            # don't set latest flavor since it is handled by the raw latest tag
+            latest=false
           tags: |
+            # set tags for pushes to branches
             type=ref,event=branch
+            # set tags for pull requests
+            type=ref,event=pr
+            # set tags for releases
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}            
-
+            type=semver,pattern={{major}}
+            # set latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
