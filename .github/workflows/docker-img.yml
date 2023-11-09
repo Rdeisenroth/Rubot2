@@ -20,6 +20,9 @@ jobs:
   ghr_push:
     name: Build and publish container
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: checkout
