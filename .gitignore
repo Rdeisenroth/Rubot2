@@ -123,3 +123,4 @@ dist
 
 report*.csv
 result.json
+result.json.bak

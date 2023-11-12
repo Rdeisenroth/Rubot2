@@ -14,7 +14,7 @@ dotenv.config();
  * @returns the encrypted Text
  */
 export function encryptText(text: string) {
-    return cryptojs.AES.encrypt(text, "mbvWKnjLFh4nHbj7Vx79rvp9kcJF9g4C").toString();
+    return cryptojs.AES.encrypt(text, ConfigHandler.getInstance().get("verify_secret")).toString();
 }
 
 /**
@@ -55,6 +55,16 @@ type Student = {
 
     const fileContent = fs.readFileSync(csvFilePath, { encoding: "utf-8" });
 
+    // if result.json.bak exists, read it and save a list of all moodleIds
+    const oldResultFilePath = path.resolve(__dirname, "result.json.bak");
+    let oldMoodleIds: string[] = [];
+    if (fs.existsSync(oldResultFilePath)) {
+        const oldResultFileContent = fs.readFileSync(oldResultFilePath, { encoding: "utf-8" });
+        const oldResult: { moodleId: string; token: string; }[] = JSON.parse(oldResultFileContent);
+        oldMoodleIds = oldResult.map(x => x.moodleId);
+        console.log(`Skipping ${oldMoodleIds.length} moodleIds`);
+    }
+
     parse(fileContent, {
         delimiter: ",",
         columns: headers,
@@ -63,21 +73,25 @@ type Student = {
             console.error(error);
         }
         // {"moodleId":"1","token":"FOP-DiscordV1|guest|1#5630c38fb1ae39b1048e0cf802f4170dba8943f5e13510055357b3cb67a3bac1"}
-        const newResult = result.map((student) => {
-            const token = encryptTokenString(
-                "1078710248086446120",
-                "01",
-                student.id_tu,
-                student.id_moodle,
-                [InternalRoles.VERIFIED],
-            );
-            return {
-                moodleId: student.id_moodle,
-                token,
-            };
-        });
+        const newResult = result
+            .filter((student) => !isNaN(parseInt(student.id_moodle)))
+            .filter((student) => !oldMoodleIds.includes(student.id_moodle))
+            .map((student) => {
+                const token = encryptTokenString(
+                    "1078710248086446120",
+                    "01",
+                    student.id_tu,
+                    student.id_moodle,
+                    [InternalRoles.VERIFIED],
+                );
+                return {
+                    moodleId: student.id_moodle,
+                    token,
+                };
+            });
         console.log("Result", newResult);
-        
+        console.log(`Found ${newResult.length} new moodleIds`);
+
         // write result to result.json file
         fs.writeFileSync(path.resolve(__dirname, "result.json"), JSON.stringify(newResult, null, 4));
     });
