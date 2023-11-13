@@ -5,6 +5,7 @@ import { UserModel } from "../../../models/users";
 import { SessionModel, sessionRole } from "../../../models/sessions";
 import { Queue } from "../../../models/queues";
 import { DocumentType } from "@typegoose/typegoose";
+import {assignRoleToUser} from "../../../utils/general";
 
 const command: Command = {
     name: "start",
@@ -58,6 +59,9 @@ const command: Command = {
         const session = await SessionModel.create({ active: true, user: user.id, guild: g.id, queue: queueData._id, role: sessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
         userEntry.sessions.push(session._id);
         await userEntry.save();
+
+        await assignRoleToUser(g, user, 'active_session')
+
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
     },
 };

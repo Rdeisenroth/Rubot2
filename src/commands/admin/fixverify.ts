@@ -35,9 +35,11 @@ const command: Command = {
         let dbOrgaRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.SERVER_ADMIN);
         const tutorRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "tutor");
         let dbTutorRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.TUTOR);
+        const activeSessionRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "active_session");
+        let dbActiveSessionRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.ACTIVE_SESSION);
 
         // Create the roles if they don't exist
-        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
+        for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR], [activeSessionRole, dbActiveSessionRole, InternalRoles.ACTIVE_SESSION]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
             if (!r) continue;
             if (!dbr) {
                 console.log(`creating role ${irn}`);
@@ -56,6 +58,8 @@ const command: Command = {
                     dbOrgaRole = dbGuild.guild_settings.roles.find(x => x.role_id === r.id)!;
                 } else if(irn === InternalRoles.TUTOR) {
                     dbTutorRole = dbGuild.guild_settings.roles.find(x => x.role_id === r.id)!;
+                }  else if(irn === InternalRoles.ACTIVE_SESSION) {
+                dbActiveSessionRole = dbGuild.guild_settings.roles.find(x => x.role_id === r.id)!;
                 }
             }
         }
@@ -64,7 +68,7 @@ const command: Command = {
         let count = 0;
         for (const u of users) {
             console.log(`(${++count}/${users.length}) updating roles for user ${u.tu_id}`);
-            for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
+            for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR], [activeSessionRole, dbActiveSessionRole, InternalRoles.ACTIVE_SESSION]] as [Role, DocumentType<DBRole>, InternalRoles][])) {
                 if (!r || !dbr) continue;
                 if (members.get(u._id)?.roles.cache.has(r.id)) {
                     console.log(`${u.tu_id} has role ${irn}`);

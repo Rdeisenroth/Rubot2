@@ -1,6 +1,17 @@
 import { ConfigHandler } from "./../handlers/configHandler";
 import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
-import ChannelType, { CommandInteraction, Guild, GuildMember, GuildMemberResolvable, GuildResolvable, Interaction, Message, RoleResolvable, UserResolvable } from "discord.js";
+import ChannelType, {
+    CommandInteraction,
+    Guild,
+    GuildMember,
+    GuildMemberResolvable,
+    GuildResolvable,
+    Interaction,
+    Message,
+    RoleResolvable,
+    User,
+    UserResolvable
+} from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
 import { GuildModel } from "../models/guilds";
@@ -364,6 +375,8 @@ function checkArgument(value: unknown, name: string) {
 }
 
 
+
+
 /**
  * The Possible Annotations for queue Stayings
  */
@@ -380,4 +393,38 @@ export enum QueueStayOptions {
      * Annotates user already left
      */
     LEFT,
+}
+
+/**
+ * Assigns an existing role to a member of a guild.
+ * @param g Guild
+ * @param user User to assign the role to
+ * @param roleName name of the role
+ */
+export async function assignRoleToUser(g: Guild, user: User, roleName: string) {
+    const roles = await g.roles.fetch();
+    const role = roles.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+    const member = g.members.resolve(user);
+    if (role && member && !member.roles.cache.has(role.id)) {
+        await member.roles.add(role);
+    } else {
+        console.error(`Could not assign role: ${roleName} to ${user.username} on guild: ${g.name}`)
+    }
+}
+
+/**
+ * Removes the given role from a user
+ * @param g Guild
+ * @param user User to remove the role from
+ * @param roleName name of the role
+ */
+export async function removeRoleFromUser(g: Guild, user: User, roleName: string) {
+    const roles = await g.roles.fetch();
+    const role = roles.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+    const member = g.members.resolve(user);
+    if (role && member && member.roles.cache.has(role.id)) {
+        await member.roles.remove(role);
+    } else {
+        console.error(`Could not remove role: ${roleName} from ${user.username} on guild: ${g.name}`)
+    }
 }
