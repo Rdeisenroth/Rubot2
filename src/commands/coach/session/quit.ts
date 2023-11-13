@@ -3,6 +3,7 @@ import { Command } from "../../../../typings";
 import { GuildModel } from "../../../models/guilds";
 import { UserModel } from "../../../models/users";
 import moment from "moment";
+import {removeRoleFromUser} from "../../../utils/general";
 
 const command: Command = {
     name: "quit",
@@ -32,6 +33,8 @@ const command: Command = {
         if (!coachingSession) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You Have no Active Coaching Session.", empheral: true });
         }
+
+        await removeRoleFromUser(g, user, 'active_session')
 
         //TODO: Terminate Rooms
 
