@@ -23,7 +23,7 @@ const command: Command = {
             name: "description",
             description: "The Queue Description",
             type: ApplicationCommandOptionType.String,
-            required: false,
+            required: true,
         },
     ],
     guildOnly: true,
