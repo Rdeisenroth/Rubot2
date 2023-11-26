@@ -94,7 +94,7 @@ const command: Command = {
             // queueData.set("room_spawner", spawner);
             // await guildData.save();
         } else {
-            spawner.supervisor_roles = new mongoose.Types.Array(...spawner.supervisor_roles.concat(queue_channel_data?.supervisors ?? []));
+            spawner.supervisor_roles.push(...(queue_channel_data?.supervisors ?? []));
             spawner.owner = user.id;
             if (spawner.name) {
                 spawner.name = client.utils.general.interpolateString(
