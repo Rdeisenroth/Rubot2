@@ -7,6 +7,8 @@ import { ArraySubDocumentType, mongoose } from "@typegoose/typegoose";
 
 
 
+
+
 /**
  * The Command Definition
  */
@@ -36,8 +38,6 @@ const command: Command = {
         const activeSessionRole = interaction.guild.roles.cache.find(x => x.name.toLowerCase() === "active_session");
         let dbActiveSessionRole = dbGuild.guild_settings.roles?.find(x => x.internal_name === InternalRoles.ACTIVE_SESSION);
 
-
-
         // Create the roles if they don't exist
         for (const [r, dbr, irn] of ([[verifiedRole, dbVerifyRole, InternalRoles.VERIFIED], [orgaRole, dbOrgaRole, InternalRoles.SERVER_ADMIN], [tutorRole, dbTutorRole, InternalRoles.TUTOR], [activeSessionRole, dbActiveSessionRole, InternalRoles.ACTIVE_SESSION]] as [Role, ArraySubDocumentType<DBRole>, InternalRoles][])) {
             if (!r) continue;
@@ -65,6 +65,8 @@ const command: Command = {
                 }
             }
         }
+
+        await client.utils.embeds.SimpleEmbed(interaction, "Gen Verify Roles", "Done");
     },
 };
 
