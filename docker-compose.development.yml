@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  db:
+    image: mongo
+    container_name: sprechi-mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+      - MONGO_INITDB_DATABASE=$MONGODB_DBNAME
+    restart: unless-stopped
+    ports:
+      - 27017:27017
