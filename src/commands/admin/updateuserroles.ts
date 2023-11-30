@@ -13,7 +13,7 @@ import { ArraySubDocumentType } from "@typegoose/typegoose";
  * The Command Definition
  */
 const command: Command = {
-    name: "fixverify",
+    name: "updateuserroles",
     guildOnly: false,
     description: "This command updates the db roles for all users based on their guild roles.",
     async execute(client, interaction, args) {
@@ -56,7 +56,7 @@ const command: Command = {
             }
         }
 
-        await client.utils.embeds.SimpleEmbed(interaction, "Fix Verify", `Done. Updated ${updatedCount} DB-Roles.`);
+        await client.utils.embeds.SimpleEmbed(interaction, "Administration", `Done. Updated ${updatedCount} User-Roles in the DB.`);
     },
 };
 
