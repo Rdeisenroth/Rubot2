@@ -1,13 +1,13 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
-import { Command } from "../../typings";
-import { GuildModel } from "../models/guilds";
-import { Queue } from "../models/queues";
+import { Command } from "../../../../typings";
+import { GuildModel } from "../../../models/guilds";
+import { Queue } from "../../../models/queues";
 import { mongoose } from "@typegoose/typegoose";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 
 const command: Command = {
-    name: "create-queue",
-    description: "creates a queue",
+    name: "create",
+    description: "Creates a queue",
     aliases: ["cq"],
     usage: "[channel resolvable]",
     cooldown: 5,
