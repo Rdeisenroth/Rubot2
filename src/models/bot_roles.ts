@@ -10,6 +10,8 @@ export enum InternalRoles {
     BOT_ADMIN = "bot_admin",
 }
 
+export const InternalGuildRoles = [InternalRoles.SERVER_OWNER, InternalRoles.SERVER_ADMIN, InternalRoles.TUTOR, InternalRoles.VERIFIED, InternalRoles.ACTIVE_SESSION];
+
 export enum RoleScopes {
     GLOBAL = "global",
     SERVER = "server",
