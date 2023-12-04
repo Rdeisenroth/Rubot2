@@ -16,8 +16,8 @@
 5. Call the command `/admin genverifyroles` to generate the roles in the database.
 6. Create a new category, call it for example `Tutoring` and make it private but allow the `Tutor` role to see it.
 7. Create one voice channel in the category, for example `tutoring-waiting` and allow the `Verified` role to see it. The `Tutor` role should be able to see it already because it is in the same category.
-8. Call the command `/create-queue` and pass it the name for the queue and a description, for example `tutoring`. This will create a new queue in the database.
-9. Call the command `/setqueue` and pass it the name of the waiting channel, for example `tutoring-waiting` and the name of the queue, for example `tutoring` as well as the supervisor role, for example `Tutor`. This will set the waiting channel for the queue and the supervisor role.
+8. Call the command `/config queue create` and pass it the name for the queue and a description, for example `tutoring` and `the queue used to wait for tutoring`. This will create a new queue in the database.
+9. Call the command `/config queue set_waiting_room` and pass it the name of the waiting channel, for example `tutoring-waiting` and the name of the queue, for example `tutoring` as well as the supervisor role, for example `Tutor`. This will set the waiting channel for the queue and the supervisor role.
 10. Optionally rename the `coach` commands on the server to `tutor` by calling the command `/config commands rename` and passing it the old and new name of the command.
 
 ## Testing the Bot
