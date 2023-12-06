@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
+import { ApplicationCommandOptionType, EmbedField, GuildMember, Message } from "discord.js";
 import { Command } from "../../../../typings";
 import { GuildModel } from "../../../models/guilds";
 import { UserModel } from "../../../models/users";
@@ -54,9 +54,14 @@ const command: Command = {
             const position = queueData.getPosition(e.discord_id) + 1;
             const joined_at = `<t:${Math.round((+e.joinedAt) / 1000)}:f>`;
             const intent = e.intent;
-            const member = await g.members.fetch(e.discord_id);
+            let member: GuildMember | null;
+            try {
+                member = await g.members.fetch(e.discord_id);
+            } catch (error) {
+                member = null;
+            }
             fields.push({
-                name: member.displayName, value:
+                name: member?.displayName ?? "unknown", value:
                     `-Position: ${position}`
                     + `\n-joined at: ${joined_at}`
                     + (intent ? `\n-intent: ${intent}` : ""),
