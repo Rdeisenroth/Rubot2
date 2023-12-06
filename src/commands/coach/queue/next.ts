@@ -106,7 +106,7 @@ const command: Command = {
                     },
                 );
             } else {
-                spawner.name = spawner.name ?? `${member.displayName}' ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+                spawner.name = spawner.name ?? `${member.displayName}${member.displayName.endsWith("s")?"'":"s'"} ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
             }
             spawner.permission_overwrites = new mongoose.Types.DocumentArray(
                 entries.map(x => {
