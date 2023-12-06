@@ -57,6 +57,11 @@ const command: Command = {
         if (!queueData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
         }
+        const members = await g.members.fetch();
+
+        // check if user is still on the server
+        await queueData.kickNonServerMembers(g, members);
+
         if (queueData.isEmpty()) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Queue is Empty", empheral: true });
         }
@@ -65,6 +70,7 @@ const command: Command = {
         if (entries.length < (interaction.options.getInteger("amount") ?? 1)) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System Error", text: `There are less participants in the queue than requested.\n\\> Requested: ${interaction.options.getInteger("amount") ?? 1}\n\\> Available: ${entries.length}`, empheral: true });
         }
+
 
         // Get Room Spawner
 
@@ -106,7 +112,7 @@ const command: Command = {
                     },
                 );
             } else {
-                spawner.name = spawner.name ?? `${member.displayName}${member.displayName.endsWith("s")?"'":"s'"} ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
+                spawner.name = spawner.name ?? `${member.displayName}${member.displayName.endsWith("s") ? "'" : "s'"} ${queueData.name} Room ${coachingSession.getRoomAmount() + 1}`;
             }
             spawner.permission_overwrites = new mongoose.Types.DocumentArray(
                 entries.map(x => {
@@ -172,7 +178,7 @@ const command: Command = {
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
-                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}`, target:member.id } as EVT);
+                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}`, target: member.id } as EVT);
                     await member.voice.setChannel(room);
                 } catch (error) {
                     // Ignore Errors
@@ -188,7 +194,7 @@ const command: Command = {
         // Try to move Coach
         try {
             await member.voice.setChannel(room);
-            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)`, target:member.id } as EVT);
+            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)`, target: member.id } as EVT);
         } catch (error) {
             // Ignore Errors
         }

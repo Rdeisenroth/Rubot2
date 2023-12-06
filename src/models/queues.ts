@@ -7,6 +7,7 @@ import * as moment from "moment";
 import { QueueSpan } from "./queue_span";
 import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
+import * as djs from "discord.js";
 
 /**
  * A Queue from the Database
@@ -213,7 +214,8 @@ export class Queue {
                         "member_id": entry.discord_id,
                         "user": `<@${entry.discord_id}>`,
                         "pos": this.getPosition(entry.discord_id) + 1,
-                        "time_spent": moment.duration(Date.now() - (+entry.joinedAt)).format("d[d ]h[h ]m[m ]s.S[s]"),
+                        "time_spent": (moment.duration(Date.now() - (+entry.joinedAt)) as unknown as { format: (arg0: string) => string; })
+                            .format("d[d ]h[h ]m[m ]s.S[s]"),
                     };
                     for (const [key, value] of Object.entries(entryReplacements)) {
                         replacements[key] = value;
@@ -343,6 +345,26 @@ export class Queue {
      */
     public getWaitingRooms(this: DocumentType<Queue>, guild: Guild): DocumentType<VoiceChannel>[] {
         return guild.voice_channels?.filter(x => x.queue?._id.equals(this._id!)) ?? [];
+    }
+
+    /**
+     * Kicks all queue entries that are not in the server the queue is in
+     * @param this the Queue instance
+     * @param guild (optionally) the corresponding guild
+     */
+    public async kickNonServerMembers(this: DocumentType<Queue>, guild: djs.Guild, members?: Map<string, djs.GuildMember>) {
+        if (!members) {
+            members = await guild.members.fetch();
+        }
+        const entries = this.entries.filter(x => !members!.has(x.discord_id));
+        if (!entries.length) {
+            return [];
+        }
+        console.log(`Missing: ${entries.map(x => x.discord_id).join(", ")} queue entries on Guild. Removing from Queue.`);
+        for (const entry of entries) {
+            await this.leave(entry.discord_id);
+        }
+        return entries;
     }
 }
 

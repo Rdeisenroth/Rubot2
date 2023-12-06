@@ -66,6 +66,8 @@ const command: Command = {
         if (!queueData) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "Queue Could not be Found.", empheral: true });
         }
+
+        await queueData.kickNonServerMembers(g);
         if (queueData.isEmpty()) {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Queue is Empty", empheral: true });
         }
