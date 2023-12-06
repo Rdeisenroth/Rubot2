@@ -5,7 +5,7 @@ import { UserModel } from "../../../models/users";
 import { SessionModel, sessionRole } from "../../../models/sessions";
 import { Queue } from "../../../models/queues";
 import { DocumentType } from "@typegoose/typegoose";
-import {assignRoleToUser} from "../../../utils/general";
+import { assignRoleToUser } from "../../../utils/general";
 
 const command: Command = {
     name: "start",
@@ -60,7 +60,7 @@ const command: Command = {
         userEntry.sessions.push(session._id);
         await userEntry.save();
 
-        await assignRoleToUser(g, user, 'active_session')
+        await assignRoleToUser(g, user, "active_session");
 
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
     },

@@ -107,7 +107,7 @@ export class Queue {
      * Put an Entry into the Queue
      * @param entry The Queue Entry
      */
-    public async join(this: DocumentType<Queue>, entry: QueueEntry): Promise<QueueEntry>{
+    public async join(this: DocumentType<Queue>, entry: QueueEntry): Promise<QueueEntry> {
         if (this.entries.find(x => x.discord_id === entry.discord_id)) {
             throw new Error("Dublicate Entry");
         }
@@ -120,7 +120,7 @@ export class Queue {
      * Leaves the queue
      * @param discord_id The Discord ID of the entry
      */
-    public async leave(this: DocumentType<Queue>, discord_id: string): Promise<QueueEntry>{
+    public async leave(this: DocumentType<Queue>, discord_id: string): Promise<QueueEntry> {
         const entry = this.entries.find(x => x.discord_id === discord_id);
         if (!entry) {
             throw new Error("Not Found");
@@ -133,7 +133,7 @@ export class Queue {
      * Gets the Sorted Entries with the First ones being the ones with the highest Importance
      * @param limit How many entries should we get at most?
      */
-    public getSortedEntries(this: DocumentType<Queue>, limit?: number | undefined): DocumentType<QueueEntry>[]{
+    public getSortedEntries(this: DocumentType<Queue>, limit?: number | undefined): DocumentType<QueueEntry>[] {
         const entries = this.entries.sort((x, y) => {
             const x_importance = (Date.now() - (+x.joinedAt)) * (x.importance || 1);
             const y_importance = (Date.now() - (+y.joinedAt)) * (y.importance || 1);
@@ -145,7 +145,7 @@ export class Queue {
      * Returns true if the ID is contained in the queue
      * @param discord_id the Discord ID to check if it's contained
      */
-    public contains(this:DocumentType<Queue>, discord_id: string): boolean {
+    public contains(this: DocumentType<Queue>, discord_id: string): boolean {
         return this.entries.some(x => x.discord_id === discord_id);
     }
     /**
@@ -159,7 +159,7 @@ export class Queue {
      * Gets the Position in the Current Queue
      * @param discord_id the Discord ID of the entry
      */
-    public getPosition(this: DocumentType<Queue>, discord_id: string): number{
+    public getPosition(this: DocumentType<Queue>, discord_id: string): number {
         return this.getSortedEntries().findIndex(x => x.discord_id === discord_id);
     }
     /**
@@ -190,7 +190,7 @@ export class Queue {
      * @param string The String to Interpolate
      * @param entry_resolvable The Entry Resolvable
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string:string, entry_resolvable?: string | QueueEntry | undefined): string | null{
+    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry_resolvable?: string | QueueEntry | undefined): string | null {
         try {
             const replacements: StringReplacements = {
                 "limit": this.limit,
@@ -245,7 +245,7 @@ export class Queue {
      * Gets the leave Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getLeaveMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string{
+    public getLeaveMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
         const default_leave_message = "You left the Queue.";
         if (this.leave_message) {
             const leave_msg = this.interpolateQueueString(this.leave_message!, entry_resolvable);
@@ -273,7 +273,7 @@ export class Queue {
      * Gets the leave Room Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getLeaveRoomMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string{
+    public getLeaveRoomMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
         const default_leave_message = `You left the Room. Please confirm your stay or you will be removed from the queue after the Timeout of ${(this.disconnect_timeout ?? 0) / 1000}s.`;
         if (this.leave_room_message) {
             const leave_msg = this.interpolateQueueString(this.leave_room_message, entry_resolvable);
@@ -301,7 +301,7 @@ export class Queue {
      * Gets the leave Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getJoinMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string{
+    public getJoinMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
         const default_join_message = "You left the Queue.";
         if (this.join_message) {
             const join_msg = this.interpolateQueueString(this.join_message, entry_resolvable);
@@ -314,34 +314,34 @@ export class Queue {
     /**
      * Returns `true` if the Queue is Empty
      */
-    public isEmpty(this: DocumentType<Queue>): boolean{
+    public isEmpty(this: DocumentType<Queue>): boolean {
         return this.entries.length < 1;
     }
     /**
      * Locks the queue. This removes the voice Channel Permissions and disallows the queue from the /queue join command
      */
-    public async lock(this: DocumentType<Queue>): Promise<void>{
+    public async lock(this: DocumentType<Queue>): Promise<void> {
         this.locked = true;
         await this.$parent()?.save();
     }
     /**
      * Unlocks the queue. This restores the voice Channel Permissions and allows the queue from the /queue join command
      */
-    public async unlock(this: DocumentType<Queue>): Promise<void>{
+    public async unlock(this: DocumentType<Queue>): Promise<void> {
         this.locked = false;
         await this.$parent()?.save();
     }
     /**
      * Locks or Unlocks the queue (opposite State).
      */
-    public async toggleLock(this: DocumentType<Queue>): Promise<void>{
+    public async toggleLock(this: DocumentType<Queue>): Promise<void> {
         this.locked = !this.locked;
         await this.$parent()?.save();
     }
     /**
      * Resolves all Waiting rooms for the current Queue
      */
-    public getWaitingRooms(this: DocumentType<Queue>, guild: Guild): DocumentType<VoiceChannel>[]{
+    public getWaitingRooms(this: DocumentType<Queue>, guild: Guild): DocumentType<VoiceChannel>[] {
         return guild.voice_channels?.filter(x => x.queue?._id.equals(this._id!)) ?? [];
     }
 }

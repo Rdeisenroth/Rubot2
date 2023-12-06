@@ -10,7 +10,7 @@ import ChannelType, {
     Message,
     RoleResolvable,
     User,
-    UserResolvable
+    UserResolvable,
 } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
@@ -408,7 +408,7 @@ export async function assignRoleToUser(g: Guild, user: User, roleName: string) {
     if (role && member && !member.roles.cache.has(role.id)) {
         await member.roles.add(role);
     } else {
-        console.error(`Could not assign role: ${roleName} to ${user.username} on guild: ${g.name}`)
+        console.error(`Could not assign role: ${roleName} to ${user.username} on guild: ${g.name}`);
     }
 }
 
@@ -425,6 +425,6 @@ export async function removeRoleFromUser(g: Guild, user: User, roleName: string)
     if (role && member && member.roles.cache.has(role.id)) {
         await member.roles.remove(role);
     } else {
-        console.error(`Could not remove role: ${roleName} from ${user.username} on guild: ${g.name}`)
+        console.error(`Could not remove role: ${roleName} from ${user.username} on guild: ${g.name}`);
     }
 }
