@@ -13,7 +13,7 @@
 2. Go to the `Server Settings` and under `Roles` create a new role called `Admin` and give it the `Administrator` permission.
 3. Assign the `Admin` role to the bot.
 4. Also under `Roles` create three new roles called `Orga`, `Tutor`, and `Verified`, they don't need any permissions.
-5. Call the command `/admin genverifyroles` to generate the roles in the database.
+5. Call the command `/admin updatebotroles` to generate the roles in the database.
 6. Create a new category, call it for example `Tutoring` and make it private but allow the `Tutor` role to see it.
 7. Create one voice channel in the category, for example `tutoring-waiting` and allow the `Verified` role to see it. The `Tutor` role should be able to see it already because it is in the same category.
 8. Call the command `/config queue create` and pass it the name for the queue and a description, for example `tutoring` and `the queue used to wait for tutoring`. This will create a new queue in the database.
