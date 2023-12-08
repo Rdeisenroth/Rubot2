@@ -62,8 +62,9 @@ const command: Command = {
             }
             fields.push({
                 name: member?.displayName ?? "unknown", value:
-                    `-Position: ${position}`
-                    + `\n-joined at: ${joined_at}`
+                `-Mention: ${member ?? "unknown"}`
+                + `\n-Position: ${position}`
+                + `\n-joined at: ${joined_at}`
                     + (intent ? `\n-intent: ${intent}` : ""),
                 inline: false,
             });
