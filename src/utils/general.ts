@@ -1,5 +1,5 @@
-import {ConfigHandler} from "./../handlers/configHandler";
-import {DBRole, InternalRoles, RoleScopes} from "./../models/bot_roles";
+import { ConfigHandler } from "./../handlers/configHandler";
+import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
 import ChannelType, {
     CommandInteraction,
     Guild as DiscrodGuild,
@@ -14,15 +14,15 @@ import ChannelType, {
     UserResolvable,
 } from "discord.js";
 import moment from "moment";
-import {Command, StringReplacements} from "../../typings";
-import {Guild as GuildDB, GuildModel} from "../models/guilds";
-import {Bot} from "../bot";
-import {UserModel} from "../models/users";
+import { Command, StringReplacements } from "../../typings";
+import { GuildModel } from "../models/guilds";
+import { Bot } from "../bot";
+import { UserModel } from "../models/users";
 import * as cryptojs from "crypto-js";
-import {ArraySubDocumentType, DocumentType} from "@typegoose/typegoose";
-import {Queue} from "../models/queues";
+import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
+import { Queue } from "../models/queues";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
-import {QueueEvent} from "../service/queue-info/model/QueueEvent";
+import { QueueEvent } from "../service/queue-info/model/QueueEvent";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -462,7 +462,7 @@ export async function manageJoinQueue(
         member.roles.add(waiting_role);
     }
 
-   await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.JOIN)
+    await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.JOIN);
 
     // await member?.voice.disconnect();
 }

@@ -4,8 +4,8 @@ import {
 } from "discord.js";
 import { Command } from "../../../typings";
 import QueueInfoService from "../../service/queue-info/QueueInfoService";
-import {UserError} from "../../service/error/UserError";
-import {QueueEvent} from "../../service/queue-info/model/QueueEvent";
+import { UserError } from "../../service/error/UserError";
+import { QueueEvent } from "../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "add",
@@ -15,24 +15,24 @@ const command: Command = {
     guildOnly: true,
     defaultPermission: false,
     options: [
-    {
-        name: "channel",
-        description: "the text channels name",
-        type: ApplicationCommandOptionType.Channel,
-        required: true,
-    },
-    {
-        name: "queue",
-        description: "name of the queue",
-        type: ApplicationCommandOptionType.String,
-        required: true,
-    },
-    {
-        name: "events",
-        description: `${Object.values(QueueEvent).join(', ')} `,
-        type: ApplicationCommandOptionType.String,
-        required: true,
-    },
+        {
+            name: "channel",
+            description: "the text channels name",
+            type: ApplicationCommandOptionType.Channel,
+            required: true,
+        },
+        {
+            name: "queue",
+            description: "name of the queue",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+        },
+        {
+            name: "events",
+            description: `${Object.values(QueueEvent).join(", ")} `,
+            type: ApplicationCommandOptionType.String,
+            required: true,
+        },
     ],
     execute: async (client, interaction, args) => {
         if (!interaction) {
@@ -52,16 +52,16 @@ const command: Command = {
         const g = interaction!.guild!;
         const channel = interaction.options.getChannel("channel", true);
         const queue = interaction.options.getString("queue", true);
-        const events = interaction.options.getString("events", true).replace(/\s/g, '').split(',')
+        const events = interaction.options.getString("events", true).replace(/\s/g, "").split(",");
 
         try {
-            await QueueInfoService.setTextChannelAsQueueInfo(g, queue, channel, events)
+            await QueueInfoService.setTextChannelAsQueueInfo(g, queue, channel, events);
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Success", text: `${channel.name} set to queue info channel for queue: ${queue}`, empheral: true });
         } catch (error) {
             if (error instanceof UserError) {
                 return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: error.message, empheral: true });
             } else {
-                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: 'Could not perform command: Internal Server Error!', empheral: true });
+                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: "Could not perform command: Internal Server Error!", empheral: true });
             }
         }
     },

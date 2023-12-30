@@ -1,10 +1,10 @@
-import {EmbedBuilder} from "discord.js";
-import {ButtonInteraction} from "../../../../typings";
-import {Guild, GuildModel} from "../../../models/guilds";
-import {Queue} from "../../../models/queues";
-import {ArraySubDocumentType, DocumentType} from "@typegoose/typegoose";
+import { EmbedBuilder } from "discord.js";
+import { ButtonInteraction } from "../../../../typings";
+import { Guild, GuildModel } from "../../../models/guilds";
+import { Queue } from "../../../models/queues";
+import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import {QueueEvent} from "../../../service/queue-info/model/QueueEvent";
+import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
 
 const command: ButtonInteraction = {
     customID: "queue_leave",

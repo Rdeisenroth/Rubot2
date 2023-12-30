@@ -7,8 +7,8 @@ import * as moment from "moment";
 import { QueueSpan } from "./queue_span";
 import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
-import {QueueEvent} from "../service/queue-info/model/QueueEvent";
-import djs from 'discord.js'
+import { QueueEvent } from "../service/queue-info/model/QueueEvent";
+import djs from "discord.js";
 
 /**
  * A Queue from the Database
@@ -78,7 +78,7 @@ export class Queue {
     /**
      * Text Channels ids to log queue events
      */
-    @prop({ default: [] , required: false})
+    @prop({ default: [], required: false })
         info_channels!: {
             channel_id: string;
             events: QueueEvent[];

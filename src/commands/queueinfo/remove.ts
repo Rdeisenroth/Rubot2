@@ -4,7 +4,7 @@ import {
 } from "discord.js";
 import { Command } from "../../../typings";
 import QueueInfoService from "../../service/queue-info/QueueInfoService";
-import {UserError} from "../../service/error/UserError";
+import { UserError } from "../../service/error/UserError";
 
 const command: Command = {
     name: "remove",
@@ -14,18 +14,18 @@ const command: Command = {
     guildOnly: true,
     defaultPermission: false,
     options: [
-    {
-        name: "channel",
-        description: "the text channels name",
-        type: ApplicationCommandOptionType.Channel,
-        required: true,
-    },
-    {
-        name: "queue",
-        description: "name of the queue",
-        type: ApplicationCommandOptionType.String,
-        required: true,
-    }
+        {
+            name: "channel",
+            description: "the text channels name",
+            type: ApplicationCommandOptionType.Channel,
+            required: true,
+        },
+        {
+            name: "queue",
+            description: "name of the queue",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+        },
     ],
     execute: async (client, interaction, args) => {
         if (!interaction) {
@@ -47,13 +47,13 @@ const command: Command = {
         const queue = interaction.options.getString("queue", true);
 
         try {
-            await QueueInfoService.removeTextChannelAsQueueInfo(g, queue, channel)
+            await QueueInfoService.removeTextChannelAsQueueInfo(g, queue, channel);
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Success", text: `${channel.name} is not a info channel for queue: ${queue} any more`, empheral: true });
         } catch (error) {
             if (error instanceof UserError) {
                 return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: error.message, empheral: true });
             } else {
-                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: 'Could not perform command: Internal Server Error!', empheral: true });
+                return await client.utils.embeds.SimpleEmbed(interaction, { title: "Command Execution failed", text: "Could not perform command: Internal Server Error!", empheral: true });
             }
         }
     },

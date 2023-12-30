@@ -1,12 +1,12 @@
-import {ExecuteEvent} from "../../typings";
-import {ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder} from "discord.js";
-import {GuildModel} from "../models/guilds";
-import {QueueEntry} from "../models/queue_entry";
-import {RoomModel} from "../models/rooms";
-import {Event as EVT, eventType} from "../models/events";
-import {manageJoinQueue} from "../utils/general";
+import { ExecuteEvent } from "../../typings";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
+import { GuildModel } from "../models/guilds";
+import { QueueEntry } from "../models/queue_entry";
+import { RoomModel } from "../models/rooms";
+import { Event as EVT, eventType } from "../models/events";
+import { manageJoinQueue } from "../utils/general";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
-import {QueueEvent} from "../service/queue-info/model/QueueEvent";
+import { QueueEvent } from "../service/queue-info/model/QueueEvent";
 
 export const name = "voiceStateUpdate";
 
@@ -229,7 +229,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                                 await member.roles.remove(waiting_role);
                             }
-                            await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE)
+                            await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE);
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
                                 text: leave_msg,
@@ -245,7 +245,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                             await member.roles.remove(waiting_role);
                         }
-                        await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE)
+                        await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE);
                         await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }
                 }

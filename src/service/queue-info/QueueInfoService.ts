@@ -1,10 +1,10 @@
-import {Guild as GuildDB, GuildModel} from "../../models/guilds";
-import {Guild, GuildChannel, TextChannel, TextChannel as DiscordTextChannel, User} from "discord.js";
-import {UserError} from "../error/UserError";
-import {QueueEvent} from "./model/QueueEvent";
-import {ArraySubDocumentType, DocumentType} from "@typegoose/typegoose";
-import {Queue} from "../../models/queues";
-import {InternalRoles} from "../../models/bot_roles";
+import { Guild as GuildDB, GuildModel } from "../../models/guilds";
+import { Guild, GuildChannel, TextChannel, TextChannel as DiscordTextChannel, User } from "discord.js";
+import { UserError } from "../error/UserError";
+import { QueueEvent } from "./model/QueueEvent";
+import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
+import { Queue } from "../../models/queues";
+import { InternalRoles } from "../../models/bot_roles";
 
 export default class QueueInfoService {
 
@@ -60,7 +60,7 @@ export default class QueueInfoService {
         const isRemoved = this.removeChannelFromQueueInfo(queueData, channel.id);
 
         if (!isRemoved) {
-            throw new UserError('This channel is not an info channel for queue: ' + queueName);
+            throw new UserError("This channel is not an info channel for queue: " + queueName);
         }
 
         await guildData.save();
@@ -68,18 +68,18 @@ export default class QueueInfoService {
 
     private static getEventMessage(user: User, event: QueueEvent, queueName: string) {
         switch (event) {
-            case QueueEvent.JOIN:
-                return `${user.displayName} joined the queue`
-            case QueueEvent.LEAVE:
-                return `${user.displayName} left the queue`
-            case QueueEvent.NEXT:
-                return `${user.displayName} executed queue next`
-            case QueueEvent.TUTOR_SESSION_START:
-                return `${user.displayName} started a new session on queue: ${queueName}`
-            case QueueEvent.TUTOR_SESSION_QUIT:
-                return `${user.displayName} quit the session on queue: ${queueName}`
-            case QueueEvent.KICK:
-                return `${user.displayName} was kicked out of queue: ${queueName}`
+        case QueueEvent.JOIN:
+            return `${user.displayName} joined the queue`;
+        case QueueEvent.LEAVE:
+            return `${user.displayName} left the queue`;
+        case QueueEvent.NEXT:
+            return `${user.displayName} executed queue next`;
+        case QueueEvent.TUTOR_SESSION_START:
+            return `${user.displayName} started a new session on queue: ${queueName}`;
+        case QueueEvent.TUTOR_SESSION_QUIT:
+            return `${user.displayName} quit the session on queue: ${queueName}`;
+        case QueueEvent.KICK:
+            return `${user.displayName} was kicked out of queue: ${queueName}`;
         }
     }
 
@@ -96,7 +96,7 @@ export default class QueueInfoService {
     private static async fetchGuildData(guildId: string) {
         const guildData = await GuildModel.findById(guildId);
         if (!guildData) {
-            throw new UserError('Guild Data Could not be found.');
+            throw new UserError("Guild Data Could not be found.");
         }
         return guildData;
     }
@@ -104,7 +104,7 @@ export default class QueueInfoService {
     private static findQueueData(guildData: DocumentType<GuildDB>, queueName: string) {
         const queueData = guildData.queues.find(x => x.name === queueName);
         if (!queueData) {
-            throw new UserError('Could not find Queue.');
+            throw new UserError("Could not find Queue.");
         }
         return queueData;
     }

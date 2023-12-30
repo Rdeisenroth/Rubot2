@@ -1,12 +1,12 @@
-import {ApplicationCommandOptionType, Message} from "discord.js";
-import {Command} from "../../../../typings";
-import {GuildModel} from "../../../models/guilds";
-import {UserModel} from "../../../models/users";
-import {SessionModel, sessionRole} from "../../../models/sessions";
-import {assignRoleToUser} from "../../../utils/general";
-import {InternalRoles} from "../../../models/bot_roles";
+import { ApplicationCommandOptionType, Message } from "discord.js";
+import { Command } from "../../../../typings";
+import { GuildModel } from "../../../models/guilds";
+import { UserModel } from "../../../models/users";
+import { SessionModel, sessionRole } from "../../../models/sessions";
+import { assignRoleToUser } from "../../../utils/general";
+import { InternalRoles } from "../../../models/bot_roles";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import {QueueEvent} from "../../../service/queue-info/model/QueueEvent";
+import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "start",
@@ -63,7 +63,7 @@ const command: Command = {
 
         await assignRoleToUser(g, user, InternalRoles.ACTIVE_SESSION);
 
-        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.TUTOR_SESSION_START)
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.TUTOR_SESSION_START);
 
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
     },

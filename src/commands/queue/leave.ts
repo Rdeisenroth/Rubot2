@@ -1,8 +1,8 @@
-import {Message} from "discord.js";
-import {Command} from "../../../typings";
-import {GuildModel} from "../../models/guilds";
+import { Message } from "discord.js";
+import { Command } from "../../../typings";
+import { GuildModel } from "../../models/guilds";
 import QueueInfoService from "../../service/queue-info/QueueInfoService";
-import {QueueEvent} from "../../service/queue-info/model/QueueEvent";
+import { QueueEvent } from "../../service/queue-info/model/QueueEvent";
 
 const command: Command = {
     name: "leave",
@@ -52,7 +52,7 @@ const command: Command = {
                 await member.roles.remove(waiting_role);
             }
 
-            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.LEAVE)
+            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.LEAVE);
         } catch (error) {
             console.log(error);
         }
