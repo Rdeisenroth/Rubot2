@@ -18,7 +18,7 @@ export default class InteractionCreateEvent extends BaseEvent {
         try {
             concreteCommand.execute();
         } catch (error) {
-            console.error(error);
+            this.client.logger.error(error);
             interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
         }
     }

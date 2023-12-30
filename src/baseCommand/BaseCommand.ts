@@ -65,7 +65,7 @@ export default abstract class BaseCommand {
             }
         } catch (error) {
             if (error instanceof Error) {
-                handleInteractionError(error, this.interaction)
+                handleInteractionError(error, this.interaction, this.client.logger)
             } else {
                 this.client.logger.error(error)
             }
