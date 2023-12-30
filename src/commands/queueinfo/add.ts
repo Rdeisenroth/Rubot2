@@ -5,7 +5,7 @@ import {
 import { Command } from "../../../typings";
 import QueueInfoService from "../../service/queue-info/QueueInfoService";
 import { UserError } from "../../service/error/UserError";
-import { QueueEvent } from "../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../models/events";
 
 const command: Command = {
     name: "add",
@@ -29,9 +29,9 @@ const command: Command = {
         },
         {
             name: "events",
-            description: `${Object.values(QueueEvent).join(", ")} `,
+            description: `${Object.values(QueueEventType).join(", ")} (defaults to all)`,
             type: ApplicationCommandOptionType.String,
-            required: true,
+            required: false,
         },
     ],
     execute: async (client, interaction, args) => {
@@ -52,7 +52,10 @@ const command: Command = {
         const g = interaction!.guild!;
         const channel = interaction.options.getChannel("channel", true);
         const queue = interaction.options.getString("queue", true);
-        const events = interaction.options.getString("events", true).replace(/\s/g, "").split(",");
+        const eventsStr = interaction.options.getString("events", false);
+        const events= (!eventsStr || eventsStr === "*" || eventsStr === "all") 
+            ? Object.values(QueueEventType) 
+            : eventsStr.replace(/\s/g, "").split(",");
 
         try {
             await QueueInfoService.setTextChannelAsQueueInfo(g, queue, channel, events);

@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
 import { GuildModel } from "../../../models/guilds";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../../models/events";
 
 const command: Command = {
     name: "kick",
@@ -77,10 +77,11 @@ const command: Command = {
             const dmChannel = await user.createDM();
             await client.utils.embeds.SimpleEmbed(dmChannel, { title: "Coaching System", text: "You were Kicked from the Queue by an Administrator." + (reason ? `\nReason: ${reason}` : "") });
         } catch (error) {
+            console.error(error);
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `${error}`, empheral: true });
         }
 
-        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.KICK);
+        await QueueInfoService.logQueueActivity(g, interaction.user, queueData, QueueEventType.KICK, [user]);
         await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System",
             text: `Kicked ${user} from the ${queueData.name}-Queue`,

@@ -6,7 +6,7 @@ import { SessionModel, sessionRole } from "../../../models/sessions";
 import { assignRoleToUser } from "../../../utils/general";
 import { InternalRoles } from "../../../models/bot_roles";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../../models/events";
 
 const command: Command = {
     name: "start",
@@ -58,12 +58,13 @@ const command: Command = {
         // const queue = (guildData.queues[0] as QueueDocument);
         // Create New Session
         const session = await SessionModel.create({ active: true, user: user.id, guild: g.id, queue: queueData._id, role: sessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
+        await session.save();
         userEntry.sessions.push(session._id);
         await userEntry.save();
 
         await assignRoleToUser(g, user, InternalRoles.ACTIVE_SESSION);
 
-        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.TUTOR_SESSION_START);
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.TUTOR_SESSION_START);
 
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
     },

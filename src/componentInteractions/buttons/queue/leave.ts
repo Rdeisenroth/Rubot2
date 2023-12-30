@@ -4,7 +4,7 @@ import { Guild, GuildModel } from "../../../models/guilds";
 import { Queue } from "../../../models/queues";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../../models/events";
 
 const command: ButtonInteraction = {
     customID: "queue_leave",
@@ -55,7 +55,7 @@ const command: ButtonInteraction = {
                 await member.roles.remove(waiting_role);
             }
             if (guild && member)
-                await QueueInfoService.logQueueActivity(guild, member?.user, queue, QueueEvent.LEAVE);
+                await QueueInfoService.logQueueActivity(guild, member?.user, queue, QueueEventType.LEAVE);
 
             await member?.voice.disconnect();
 

@@ -3,10 +3,10 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder 
 import { GuildModel } from "../models/guilds";
 import { QueueEntry } from "../models/queue_entry";
 import { RoomModel } from "../models/rooms";
-import { Event as EVT, eventType } from "../models/events";
+import { VoiceChannelEvent as EVT, VoiceChannelEventType } from "../models/events";
 import { manageJoinQueue } from "../utils/general";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../models/events";
 
 export const name = "voiceStateUpdate";
 
@@ -133,7 +133,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     }
                 }
             } else if (roomData) {
-                roomData.events.push({ emitted_by: newState.member!.id, type: eventType.user_join, timestamp: Date.now().toString() } as EVT);
+                roomData.events.push({ emitted_by: newState.member!.id, type: VoiceChannelEventType.user_join, timestamp: Date.now().toString() } as EVT);
                 await roomData.save();
             }
         }
@@ -158,7 +158,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                 }
 
                 if (roomData) {
-                    roomData.events.push({ emitted_by: "me", type: eventType.destroy_channel, timestamp: Date.now().toString(), reason: "Queue System: Room destroyed last user left, clean exit" } as EVT);
+                    roomData.events.push({ emitted_by: "me", type: VoiceChannelEventType.destroy_channel, timestamp: Date.now().toString(), reason: "Queue System: Room destroyed last user left, clean exit" } as EVT);
                     await roomData.save();
                 }
 
@@ -229,7 +229,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                                 await member.roles.remove(waiting_role);
                             }
-                            await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE);
+                            await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEventType.LEAVE);
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
                                 text: leave_msg,
@@ -245,14 +245,14 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                         if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                             await member.roles.remove(waiting_role);
                         }
-                        await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEvent.LEAVE);
+                        await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEventType.LEAVE);
                         await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
                     }
                 }
 
             }
             if (roomData) {
-                roomData.events.push({ emitted_by: newState.member!.id, type: eventType.user_leave, timestamp: Date.now().toString() } as EVT);
+                roomData.events.push({ emitted_by: newState.member!.id, type: VoiceChannelEventType.user_leave, timestamp: Date.now().toString() } as EVT);
                 await roomData.save();
             }
         }

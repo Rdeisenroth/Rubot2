@@ -6,7 +6,7 @@ import moment from "moment";
 import { removeRoleFromUser } from "../../../utils/general";
 import { InternalRoles } from "../../../models/bot_roles";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../../models/events";
 
 const command: Command = {
     name: "quit",
@@ -55,7 +55,7 @@ const command: Command = {
 
         const queueData = guildData.queues.find(queue => queue._id.toString() == coachingSession.queue);
         if (queueData)
-            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.TUTOR_SESSION_QUIT);
+            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.TUTOR_SESSION_QUIT);
 
         // Compute some Session Data
 

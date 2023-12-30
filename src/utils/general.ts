@@ -22,7 +22,7 @@ import * as cryptojs from "crypto-js";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import { Queue } from "../models/queues";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../models/events";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not
@@ -462,7 +462,7 @@ export async function manageJoinQueue(
         member.roles.add(waiting_role);
     }
 
-    await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.JOIN);
+    await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.JOIN);
 
     // await member?.voice.disconnect();
 }

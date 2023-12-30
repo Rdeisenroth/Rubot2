@@ -1,4 +1,4 @@
-import { Event as EVT, eventType } from "./../../../models/events";
+import { VoiceChannelEvent as EVT, VoiceChannelEventType } from "./../../../models/events";
 import { PermissionOverwriteData } from "../../../models/permission_overwrite_data";
 import ChannelType, { ApplicationCommandOptionType, Message, TextChannel } from "discord.js";
 import { Command } from "../../../../typings";
@@ -8,7 +8,7 @@ import { RoomModel } from "../../../models/rooms";
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { mongoose } from "@typegoose/typegoose";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
-import { QueueEvent } from "../../../service/queue-info/model/QueueEvent";
+import { QueueEventType } from "../../../models/events";
 
 const command: Command = {
     name: "next",
@@ -137,15 +137,17 @@ const command: Command = {
         }
 
         const roomData = await RoomModel.create({ _id: room.id, active: true, tampered: false, end_certain: false, guild: g.id });
-        roomData.events.push({ emitted_by: "me", type: eventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
+        roomData.events.push({ emitted_by: "me", type: VoiceChannelEventType.create_channel, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated room Creation` } as EVT);
         // Update Coach Session
         coachingSession.rooms.push(roomData._id);
         await coachingSession.save();
 
+        const targets = [] as ChannelType.User[];
         // Notify Match(es)
         for (const e of entries) {
             try {
                 const user = await client.users.fetch(e.discord_id);
+                targets.push(user);
                 console.log("coach queue next: Matches: Notify User");
                 try {
                     // remove from queue
@@ -180,7 +182,7 @@ const command: Command = {
                 // Try to move
                 try {
                     const member = g.members.resolve(user)!;
-                    roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}`, target: member.id } as EVT);
+                    roomData.events.push({ emitted_by: "me", type: VoiceChannelEventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id}`, target: member.id } as EVT);
                     await member.voice.setChannel(room);
                 } catch (error) {
                     // Ignore Errors
@@ -196,13 +198,13 @@ const command: Command = {
         // Try to move Coach
         try {
             await member.voice.setChannel(room);
-            roomData.events.push({ emitted_by: "me", type: eventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)`, target: member.id } as EVT);
+            roomData.events.push({ emitted_by: "me", type: VoiceChannelEventType.move_member, timestamp: Date.now().toString(), reason: `Queue System: '${queueData.name}' Queue automated member Move: ${member.id} (coach)`, target: member.id } as EVT);
         } catch (error) {
             // Ignore Errors
         }
         await roomData.save();
 
-        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEvent.NEXT);
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.NEXT, targets);
 
         return await client.utils.embeds.SimpleEmbed(interaction, {
             title: "Coaching System",

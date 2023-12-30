@@ -1,11 +1,15 @@
 import { Guild as GuildDB, GuildModel } from "../../models/guilds";
 import { Guild, GuildChannel, TextChannel, TextChannel as DiscordTextChannel, User } from "discord.js";
 import { UserError } from "../error/UserError";
-import { QueueEvent } from "./model/QueueEvent";
+import { QueueEventType } from "../../models/events";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import { Queue } from "../../models/queues";
 import { InternalRoles } from "../../models/bot_roles";
+import { Session, SessionModel } from "../../models/sessions";
 
+/**
+ * A Service to handle all queue info related stuff
+ */
 export default class QueueInfoService {
 
     /**
@@ -14,15 +18,17 @@ export default class QueueInfoService {
      * @param user user which triggered the event
      * @param queueData db model of the queue
      * @param event queue event to log
+     * @param targets target users that were effected by the event
      */
-    static async logQueueActivity(g:Guild, user: User, queueData: ArraySubDocumentType<Queue>, event: QueueEvent) {
+    static async logQueueActivity(g: Guild, user: User, queueData: ArraySubDocumentType<Queue>, event: QueueEventType, targets?: User[]) {
         const guildData = await this.fetchGuildData(g.id);
         const activeSessionRole = guildData.guild_settings.roles?.find(role => role.internal_name === InternalRoles.ACTIVE_SESSION);
+        const queueSessions = await SessionModel.find({ queue: queueData._id, active: true });
 
         for (const infoChannel of queueData.info_channels) {
             if (infoChannel.events.includes(event)) {
                 const discordChannel = await g.channels.fetch(infoChannel.channel_id) as TextChannel;
-                await discordChannel.send(`<@&${activeSessionRole?.role_id}> ${this.getEventMessage(user, event, queueData.name)}`);
+                await discordChannel.send(`<@&${activeSessionRole?.role_id}> ${this.getEventMessage(user, event, queueData, queueSessions, targets)}`);
             }
         }
     }
@@ -34,13 +40,13 @@ export default class QueueInfoService {
      * @param channel channel to set as queue info channel
      * @param eventStrings events to log
      */
-    static async setTextChannelAsQueueInfo(g: Guild, queueName: string, channel: any, eventStrings: string[]) {
-        this.validateChannel(channel);
+    static async setTextChannelAsQueueInfo(g: Guild, queueName: string, channel: unknown, eventStrings: string[]) {
+        this.validateIsTextChannel(channel);
 
         const guildData = await this.fetchGuildData(g.id);
         const queueData = this.findQueueData(guildData, queueName);
 
-        const events: QueueEvent[] = this.validateAndConvertEventStrings(eventStrings);
+        const events: QueueEventType[] = this.validateAndConvertEventStrings(eventStrings);
         await this.updateQueueInfoChannels(queueData, channel.id, events);
         await guildData.save();
     }
@@ -51,8 +57,8 @@ export default class QueueInfoService {
      * @param queueName name of the queue to the events of
      * @param channel channel to set as queue info channel
      */
-    static async removeTextChannelAsQueueInfo(g: Guild, queueName: string, channel: any) {
-        this.validateChannel(channel);
+    static async removeTextChannelAsQueueInfo(g: Guild, queueName: string, channel: unknown) {
+        this.validateIsTextChannel(channel);
 
         const guildData = await this.fetchGuildData(g.id);
         const queueData = this.findQueueData(guildData, queueName);
@@ -66,25 +72,49 @@ export default class QueueInfoService {
         await guildData.save();
     }
 
-    private static getEventMessage(user: User, event: QueueEvent, queueName: string) {
+    /**
+     * returns the info channels for the given queue
+     * @param user the user that triggered the event
+     * @param event the event that was triggered
+     * @param queueData the queue data
+     * @param queueSessions the queue sessions
+     * @returns  the message to send
+     */
+    private static getEventMessage(user: User, event: QueueEventType, queueData: DocumentType<Queue>, queueSessions: DocumentType<Session>[], targets?: User[]) {
+        let msg = "";
         switch (event) {
-        case QueueEvent.JOIN:
-            return `${user.displayName} joined the queue`;
-        case QueueEvent.LEAVE:
-            return `${user.displayName} left the queue`;
-        case QueueEvent.NEXT:
-            return `${user.displayName} executed queue next`;
-        case QueueEvent.TUTOR_SESSION_START:
-            return `${user.displayName} started a new session on queue: ${queueName}`;
-        case QueueEvent.TUTOR_SESSION_QUIT:
-            return `${user.displayName} quit the session on queue: ${queueName}`;
-        case QueueEvent.KICK:
-            return `${user.displayName} was kicked out of queue: ${queueName}`;
+        case QueueEventType.JOIN:
+            msg = `${user.displayName} joined the queue ${queueData.name}.`;
+            break;
+        case QueueEventType.LEAVE:
+            msg = `${user.displayName} left the queue ${queueData.name}`;
+            break;
+        case QueueEventType.NEXT:
+            msg = `${user.displayName} picked ${targets?.length ?? 0} student(s) on queue ${queueData.name}: ${targets?.map(x => x.displayName).join(", ")}`;
+            break;
+        case QueueEventType.TUTOR_SESSION_START:
+            msg = `${user.displayName} started a new session on queue ${queueData.name}`;
+            break;
+        case QueueEventType.TUTOR_SESSION_QUIT:
+            msg = `${user.displayName} quit the session on queue ${queueData.name}`;
+            break;
+        case QueueEventType.KICK:
+            msg = `${targets?.map(x => x.displayName).join(", ")} got kicked from queue ${queueData.name} by ${user.displayName}`;
+            break;
         }
+        if ([QueueEventType.TUTOR_SESSION_QUIT, QueueEventType.TUTOR_SESSION_START].includes(event)) {
+            msg += `\nThis queue now has \`${queueSessions.length}\` active session(s).`;
+        } else {
+            msg += `\nThere are now \`${queueData.entries.length}\` student(s) in queue ${queueData.name}`;
+        }
+        return msg;
     }
 
-
-    private static validateChannel(channel: any) {
+    /**
+     * throws an error if the given channel is not a text channel
+     * @param channel the channel to validate
+     */
+    private static validateIsTextChannel(channel: unknown): asserts channel is DiscordTextChannel {
         if (!channel || !(channel instanceof GuildChannel)) {
             throw new UserError("Channel could not be found.");
         }
@@ -93,6 +123,11 @@ export default class QueueInfoService {
         }
     }
 
+    /**
+     * fetches the guild data from the database
+     * @param guildId the id of the guild
+     * @returns the guild data
+     */
     private static async fetchGuildData(guildId: string) {
         const guildData = await GuildModel.findById(guildId);
         if (!guildData) {
@@ -101,6 +136,12 @@ export default class QueueInfoService {
         return guildData;
     }
 
+    /**
+     * finds the queue data for the given queue name
+     * @param guildData the guild data to search in
+     * @param queueName the name of the queue
+     * @returns the queue data
+     */
     private static findQueueData(guildData: DocumentType<GuildDB>, queueName: string) {
         const queueData = guildData.queues.find(x => x.name === queueName);
         if (!queueData) {
@@ -109,17 +150,29 @@ export default class QueueInfoService {
         return queueData;
     }
 
-    private static validateAndConvertEventStrings(eventStrings: string[]): QueueEvent[] {
+    /**
+     * validates the given event strings and converts them to the enum
+     * @param eventStrings the event strings to validate
+     * @returns the converted events
+     */
+    private static validateAndConvertEventStrings(eventStrings: string[]): QueueEventType[] {
         return eventStrings.map(eventString => {
             const eventKey = eventString.toUpperCase();
-            if (eventKey in QueueEvent) {
-                return QueueEvent[eventKey as keyof typeof QueueEvent];
+            if (eventKey in QueueEventType) {
+                return QueueEventType[eventKey as keyof typeof QueueEventType];
             }
             throw new UserError(`Invalid event: ${eventString}`);
         });
     }
 
-    private static async updateQueueInfoChannels(queueData: ArraySubDocumentType<Queue>, channelId: string, events: QueueEvent[]) {
+    /**
+     * updates the queue info channels for the given queue
+     * 
+     * @param queueData the queue data to update
+     * @param channelId the channel id to update
+     * @param events the events to update
+     */
+    private static async updateQueueInfoChannels(queueData: ArraySubDocumentType<Queue>, channelId: string, events: QueueEventType[]) {
         const existingIndex = queueData.info_channels.findIndex(info => info.channel_id === channelId);
 
         if (existingIndex !== -1) {
@@ -129,6 +182,12 @@ export default class QueueInfoService {
         }
     }
 
+    /**
+     * removes the given channel from the queue info channels
+     * @param queueData the queue data to update
+     * @param channelId the channel id to remove
+     * @returns true if the channel was removed
+     */
     private static removeChannelFromQueueInfo(queueData: ArraySubDocumentType<Queue>, channelId: string): boolean {
         const initialLength = queueData.info_channels.length;
         queueData.info_channels = queueData.info_channels.filter(info => info.channel_id !== channelId);
