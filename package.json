@@ -1,16 +1,16 @@
 {
-  "name": "rubot2_new",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "rubot2",
+  "version": "2.0.0",
+  "description": "A General Purpose Discord Bot",
+  "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json",
     "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@shoginn/discordjs-mock": "^1.0.2",
     "@types/node": "^20.10.5",
