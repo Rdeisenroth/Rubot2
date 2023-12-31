@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { EventDate } from "../../typings";
-import { Event, eventType } from "./events";
+import { VoiceChannelEvent, VoiceChannelEventType } from "./events";
 import { UserModel } from "./users";
 import { sessionRole } from "./sessions";
 import { Snowflake, User } from "discord.js";
@@ -36,8 +36,8 @@ export class Room {
     /**
      * The Events that happen in the Channel
      */
-    @prop({ required: true, type: () => [Event], default: [] })
-        events!: mongoose.Types.DocumentArray<ArraySubDocumentType<Event>>;
+    @prop({ required: true, type: () => [VoiceChannelEvent], default: [] })
+        events!: mongoose.Types.DocumentArray<ArraySubDocumentType<VoiceChannelEvent>>;
 
     /**
      * Collects All User IDs that joined The Channel at least Once
@@ -46,8 +46,8 @@ export class Room {
         return (await RoomModel.aggregate<{ _id: string, count: number }>([
             { $match: { _id: this._id } },
             { $unwind: { path: "$events" } },
-            { $match: { "events.type": { $in: [eventType.user_join, eventType.move_member] } } },
-            { $group: { _id: { $cond: { if: { $eq: ["$events.type", eventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, count: { $sum: 1 } } },
+            { $match: { "events.type": { $in: [VoiceChannelEventType.user_join, VoiceChannelEventType.move_member] } } },
+            { $group: { _id: { $cond: { if: { $eq: ["$events.type", VoiceChannelEventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, count: { $sum: 1 } } },
             { $match: { _id: { $ne: "NULL" }, count: { $gt: 0 } } },
         ])).map(x => x._id);
     }
@@ -60,8 +60,8 @@ export class Room {
         return (await RoomModel.aggregate<{ _id: string, timestamp: string }>([
             { $match: { _id: this._id } },
             { $unwind: { path: "$events" } },
-            { $match: { "events.type": { $in: [eventType.user_join, eventType.move_member] } } },
-            { $group: { _id: { $cond: { if: { $eq: ["$events.type", eventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, timestamp: { $min: "$events.timestamp" } } },
+            { $match: { "events.type": { $in: [VoiceChannelEventType.user_join, VoiceChannelEventType.move_member] } } },
+            { $group: { _id: { $cond: { if: { $eq: ["$events.type", VoiceChannelEventType.user_join] }, then: "$events.emitted_by", else: { $ifNull: ["$events.target", "NULL"] } } }, timestamp: { $min: "$events.timestamp" } } },
             { $match: { _id: { $ne: "NULL" } } },
         ])).map(x => { return { target_id: x._id, timestamp: x.timestamp } as EventDate; });
     }
@@ -136,8 +136,8 @@ export class Room {
             events: {
                 $elemMatch: {
                     $or: [
-                        { type: eventType.user_join, emitted_by: user },
-                        { type: eventType.move_member, target: user },
+                        { type: VoiceChannelEventType.user_join, emitted_by: user },
+                        { type: VoiceChannelEventType.move_member, target: user },
                     ],
                 },
             },

@@ -25,6 +25,7 @@ export interface Channel {
      * The Channel owner
      */
     owner?: string,
+
 }
 
 export class TextChannel implements Channel {
@@ -53,6 +54,7 @@ export class TextChannel implements Channel {
      */
     @prop({ default: false })
         rage_channel?: boolean;
+
 }
 
 export const TextChannelModel = getModelForClass(TextChannel, {

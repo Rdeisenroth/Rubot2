@@ -3,9 +3,10 @@ import { Command } from "../../../../typings";
 import { GuildModel } from "../../../models/guilds";
 import { UserModel } from "../../../models/users";
 import { SessionModel, sessionRole } from "../../../models/sessions";
-import { Queue } from "../../../models/queues";
-import { DocumentType } from "@typegoose/typegoose";
 import { assignRoleToUser } from "../../../utils/general";
+import { InternalRoles } from "../../../models/bot_roles";
+import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import { QueueEventType } from "../../../models/events";
 
 const command: Command = {
     name: "start",
@@ -48,7 +49,7 @@ const command: Command = {
         }
 
         const queueName = interaction.options.getString("queue");
-        let queueData: DocumentType<Queue> | undefined = guildData.queues.find(x => x.name === queueName);
+        let queueData= guildData.queues.find(x => x.name === queueName);
         if (!queueData) {
             // await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: `${queueName} could not be Found. Available Queues: ${guildData.queues.map(x => x.name).join(", ")}`, empheral: true });
             // return;
@@ -57,10 +58,13 @@ const command: Command = {
         // const queue = (guildData.queues[0] as QueueDocument);
         // Create New Session
         const session = await SessionModel.create({ active: true, user: user.id, guild: g.id, queue: queueData._id, role: sessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
+        await session.save();
         userEntry.sessions.push(session._id);
         await userEntry.save();
 
-        await assignRoleToUser(g, user, "active_session");
+        await assignRoleToUser(g, user, InternalRoles.ACTIVE_SESSION);
+
+        await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.TUTOR_SESSION_START);
 
         client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "The Session was started.", empheral: true });
     },
