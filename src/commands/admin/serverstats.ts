@@ -38,10 +38,6 @@ const command: Command = {
             {
                 height: 600,
                 width: 800,
-                chartCallback: (chartJs) => {
-
-                },
-
             },
         );
         // Member Joins

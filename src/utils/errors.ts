@@ -10,6 +10,7 @@ export const errorMessage = async (interaction: Message | discord.CommandInterac
     embed.setTitle(":x: __An Error Occured:__");
     embed.setDescription((error instanceof Error) ? `${error.message}` : `${error}`);
     const res = await interaction.reply({ embeds: [embed] });
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     let m: any = null;
     if (res instanceof Message) {
         m = res;
