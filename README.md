@@ -24,6 +24,9 @@ A general Purpose Discord Bot.
 ## Setup for manual Testing
 See [Setup.md](Setup.md).
 
+## Setup pre-commit hook
+install the python package `pre-commit` (e.g. with `pip install pre-commit` or `pipx install pre-commit`) and run `pre-commit install` in the repository root directory. This will ensure the code is formatted correctly before every commit. You can also manually run it with `pre-commit run -a`. If you for some reason want to skip the pre-commit hook you can use `git commit --no-verify` (which you should never do).
+
 # Deployment
 - Run `npm build` once to compile to the dist directory on the target device
 - Start the `index.js` in the dist directory
