@@ -32,6 +32,8 @@
     },
     "exclude": [],
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "typings/index.d.ts",
+        "typings/decs.d.ts"
     ]
 }
