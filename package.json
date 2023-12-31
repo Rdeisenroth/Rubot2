@@ -8,7 +8,7 @@
     "start": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json; node dist/index.js",
     "nodemon": "nodemon --watch 'src/**/*.ts' src/index.ts",
     "build": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json",
-    "lint": "eslint --ext .ts src/ --fix",
+    "lint": "eslint --ext .ts src/ typings/ --fix",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest --detectOpenHandles"
   },
@@ -39,7 +39,6 @@
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.6.2",
     "urban": "^0.3.4",
-    "urban-dictionary": "^3.0.2",
     "yargs": "^17.7.2",
     "yargs-parser": "^21.1.1"
   },

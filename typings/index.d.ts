@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, Client, ClientEvents, Collection, CommandInteraction, EmbedField, Interaction, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment, BaseApplicationCommandOptionsData, ChatInputCommandInteraction } from "discord.js";
-import { Arguments } from "yargs-parser";
+import { ApplicationCommandOptionData, ClientEvents, Collection, CommandInteraction, EmbedField, Message, MessageComponentInteraction, ButtonInteraction as bi, MessageActionRow, BaseMessageComponentOptions, MessageActionRowOptions, MessageAttachment, BaseApplicationCommandOptionsData, ChatInputCommandInteraction } from "discord.js";
 import { Bot } from "../src/bot";
 import mongoose from "mongoose";
 

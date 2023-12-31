@@ -1,6 +1,8 @@
 import { Message } from "discord.js";
 import { Command } from "../../../typings";
 import { GuildModel } from "../../models/guilds";
+import QueueInfoService from "../../service/queue-info/QueueInfoService";
+import { QueueEventType } from "../../models/events";
 
 const command: Command = {
     name: "leave",
@@ -49,6 +51,8 @@ const command: Command = {
             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                 await member.roles.remove(waiting_role);
             }
+
+            await QueueInfoService.logQueueActivity(g, user, queueData, QueueEventType.LEAVE);
         } catch (error) {
             console.log(error);
         }

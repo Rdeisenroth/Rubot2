@@ -7,7 +7,8 @@ import * as moment from "moment";
 import { QueueSpan } from "./queue_span";
 import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
-import * as djs from "discord.js";
+import { QueueEventType } from "./events";
+import djs from "discord.js";
 
 /**
  * A Queue from the Database
@@ -73,6 +74,15 @@ export class Queue {
      */
     @prop()
         text_channel?: string;
+
+    /**
+     * Text Channels ids to log queue events
+     */
+    @prop({ default: [], required: false })
+        info_channels!: {
+            channel_id: string;
+            events: QueueEventType[];
+    }[];
     /**
      * Whether the queue is locked (this also disables the /queue join command for this queue)
      */

@@ -1,8 +1,10 @@
 import { EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import { GuildModel, Guild } from "../../../models/guilds";
+import { Guild, GuildModel } from "../../../models/guilds";
 import { Queue } from "../../../models/queues";
-import { DocumentType } from "@typegoose/typegoose";
+import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
+import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import { QueueEventType } from "../../../models/events";
 
 const command: ButtonInteraction = {
     customID: "queue_leave",
@@ -11,7 +13,7 @@ const command: ButtonInteraction = {
     execute: async (client, interaction) => {
         const guilds = await GuildModel.find();
         let g: DocumentType<Guild> | undefined;
-        let queue: DocumentType<Queue> | undefined;
+        let queue: ArraySubDocumentType<Queue> | undefined;
         for (g of guilds) {
             if (!g.queues) {
                 continue;
@@ -52,7 +54,11 @@ const command: ButtonInteraction = {
             if (waiting_role && member && member.roles.cache.has(waiting_role.id)) {
                 await member.roles.remove(waiting_role);
             }
+            if (guild && member)
+                await QueueInfoService.logQueueActivity(guild, member?.user, queue, QueueEventType.LEAVE);
+
             await member?.voice.disconnect();
+
         } catch (error) {
             console.log(error);
         }

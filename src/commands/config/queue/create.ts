@@ -36,7 +36,6 @@ const command: Command = {
             client.utils.embeds.SimpleEmbed(interaction, "Slash Only Command", "This Command is Slash only but you Called it with The Prefix. use the slash Command instead.");
             return;
         }
-        const owner = client.users.cache.find(m => m.id == client.config.get("ownerID"));
         const member = client.utils.general.getMember(interaction);
         if (!member || member.id !== client.config.get("ownerID") as string) {
             await interaction?.reply("You do not have permission to execute this command.");
@@ -58,6 +57,7 @@ const command: Command = {
             leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
             entries: new mongoose.Types.DocumentArray([]),
             opening_times: new mongoose.Types.DocumentArray([]),
+            info_channels: [],
         };
         guildData.queues.push(queue);
         await guildData.save();

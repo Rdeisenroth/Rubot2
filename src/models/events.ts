@@ -1,6 +1,6 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
-export enum eventType {
+export enum VoiceChannelEventType {
     "create_channel" = "create_channel",
     "destroy_channel" = "destroy_channel",
     "move_member" = "move_member",
@@ -16,20 +16,30 @@ export enum eventType {
     "other" = "other",
 }
 
+export enum QueueEventType {
+    JOIN = "join",
+    LEAVE = "leave",
+    KICK = "kick",
+    NEXT = "next",
+    TUTOR_SESSION_START = "tutor_session_start",
+    TUTOR_SESSION_QUIT = "tutor_session_quit",
+    OTHER = "other",
+}
+
 /**
- * A Guild from the Database
+ * An Event that is stored in the Database
  */
-export class Event {
+export abstract class Event<T> {
     /**
      * The Unix Time Stamp of the Event
      */
     @prop({ required: true })
         timestamp!: string;
+
     /**
      * The Event Type
      */
-    @prop({ required: true, enum: eventType, default: eventType.other })
-        type!: eventType;
+    abstract type: T;
     /**
      * Client ID or "me"
      */
@@ -47,8 +57,18 @@ export class Event {
         reason?: string;
 }
 
-export const EventModel = getModelForClass(Event, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});
+/**
+ * An Event concerning a Voice Channel
+ */
+export class VoiceChannelEvent extends Event<VoiceChannelEventType> {
+    @prop({ required: true, enum: VoiceChannelEventType, default: VoiceChannelEventType.other })
+        type!: VoiceChannelEventType;
+}
+
+/**
+ * An Event concerning a Queue
+ */
+export class QueueEvent extends Event<QueueEventType> {
+    @prop({ required: true, enum: QueueEventType, default: QueueEventType.OTHER })
+        type!: QueueEventType;
+}

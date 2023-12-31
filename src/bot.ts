@@ -53,6 +53,21 @@ export class Bot extends Client {
                 Partials.Channel,
             ],
         });
+        Bot._instance = this;
+    }
+
+    private static _instance: Bot;
+
+    /**
+     * Returns the Bot Instance. If the Bot is not initialized, an Error is thrown.
+     * @returns The Bot Instance.
+     * @throws Error if the Bot is not initialized.
+     */
+    public static getInstance(): Bot {
+        if (!this._instance) {
+            throw new Error("Bot not initialized");
+        }
+        return this._instance;
     }
 
     /**
