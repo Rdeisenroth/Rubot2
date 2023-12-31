@@ -14,7 +14,7 @@ repos:
         exclude_types: [tex]
         alias: ec
 -   repo: https://github.com/pre-commit/mirrors-eslint
-    rev: ''  # Use the sha / tag you want to point at
+    rev: 'v8.51.0'  # Use the sha / tag you want to point at
     hooks:
     -   id: eslint
         additional_dependencies:
