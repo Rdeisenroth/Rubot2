@@ -43,7 +43,7 @@ export class Bot extends Client {
      * @param client The Discord client.
      * @param token The bot token.
      */
-    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, configManager: ConfigManager) {
+    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager) {
         super(options);
         this.token = token
         this.logger = createConsola({ level: Environment.logLevel })
