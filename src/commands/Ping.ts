@@ -15,6 +15,11 @@ export default class PingCommand extends BaseCommand {
         await this.send({ content: "Pong.", embeds: [embed] });
     }
 
+    /**
+     * Returns the ping embed to be sent to the user.
+     * @param ping The ping to be displayed.
+     * @returns The embed to be sent to the user.
+     */
     private mountPingEmbed(ping: number): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setTitle("__Response Times__")
