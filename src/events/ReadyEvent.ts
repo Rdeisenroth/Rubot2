@@ -5,40 +5,21 @@ export default class ReadyEvent extends BaseEvent {
     static name: string = "ready";
 
     public async execute() {
-        await this.registerSlashCommandsForAllGuilds();
+        await this.prepareAllGuilds();
         this.setBotPresence();
         this.logStats();
     }
 
-    private loadCommandsData(): ApplicationCommandData[] {
-        const commandsData: ApplicationCommandData[] = [];
-        for (const command of this.client.commands) {
-            const commandData: ApplicationCommandData = {
-                name: command.name,
-                description: command.description,
-                options: command.options,
-            };
-            commandsData.push(commandData);
-        }
-        return commandsData;
-    }
-
-    private async registerSlashCommandsForAllGuilds() {
-        const commandsData = this.loadCommandsData();
+    private async prepareAllGuilds(): Promise<void> {
         const promises = this.client.guilds.cache.map(async (guild: Guild) => {
-            await this.registerSlashCommands(guild, commandsData);
+            await this.prepareGuild(guild);
         });
         await Promise.all(promises);
     }
 
-    private async registerSlashCommands(guild: Guild, commandsData: ApplicationCommandData[]): Promise<void> {
-        try {
-            await guild.commands.set(commandsData);
-            this.client.logger.success(`Registered commands in guild ${guild.name}`);
-        } catch (error) {
-            this.client.logger.error(`Failed to register commands in guild ${guild.name}`);
-            throw error;
-        }
+    private async prepareGuild(guild: Guild): Promise<void> {
+        await this.client.configManager.getGuildConfig(guild);
+        await this.client.commandsManager.registerSlashCommandsFor(guild);
     }
 
     private setBotPresence(): void {

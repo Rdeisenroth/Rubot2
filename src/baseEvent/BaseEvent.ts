@@ -25,5 +25,5 @@ export default abstract class BaseEvent {
      * Executes the event with the given arguments.
      * @param args The event arguments.
      */
-    public abstract execute(...args: any[]): void;
+    public abstract execute(...args: any[]): Promise<void>;
 }

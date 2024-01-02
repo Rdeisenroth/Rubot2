@@ -11,14 +11,14 @@ export default class PingCommand extends BaseCommand {
         const messageTimestamp = res.createdTimestamp;
         const ping = messageTimestamp - this.interaction.createdTimestamp;
 
-        const embed = await this.mountPingEmbed(ping);
+        const embed = this.mountPingEmbed(ping);
         await this.send({ content: "Pong.", embeds: [embed] });
     }
 
-    private async mountPingEmbed(ping: number): Promise<EmbedBuilder> {
+    private mountPingEmbed(ping: number): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setTitle("__Response Times__")
-            .setColor(this.interaction.guild?.members.me?.roles.highest.color || 0x7289da)
+            .setColor(this.interaction.guild?.members.me?.roles?.highest.color || 0x7289da)
             .addFields({ name:"Bot Latency:", value:":hourglass_flowing_sand:" + ping + "ms", inline:true })
             .addFields({ name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(this.client.ws.ping) + "ms", inline:true })
         return embed

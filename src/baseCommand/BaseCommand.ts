@@ -1,6 +1,7 @@
-import { CommandInteraction, Interaction, Message, BaseMessageOptions, ApplicationCommandOptionData, BaseApplicationCommandOptionsData } from "discord.js";
+import { CommandInteraction, Interaction, Message, BaseMessageOptions } from "discord.js";
 import { handleInteractionError } from "../utils/handleError";
 import { Bot } from "../Bot";
+import OptionRequirement from "../types/OptionRequirement";
 
 /**
  * The base command class.
@@ -17,7 +18,7 @@ export default abstract class BaseCommand {
     /**
      * The command options.
      */
-    public static options: (ApplicationCommandOptionData & Pick<BaseApplicationCommandOptionsData, "required">)[]
+    public static options: OptionRequirement<any>[]
     /** 
      * The interaction.
      */
@@ -42,7 +43,7 @@ export default abstract class BaseCommand {
      * Executes the command with the given arguments.
      * @param args The command arguments.
      */
-    public abstract execute(...args: any[]): void;
+    public abstract execute(...args: any[]): Promise<void>;
 
     /**
      * Sends a message to the interaction channel.
@@ -56,11 +57,15 @@ export default abstract class BaseCommand {
             const interaction = this.interaction as CommandInteraction
             const messageContent = typeof content === "string" ? { content } : content
 
-            if (interaction.replied)  {
+            if (interaction.replied || interaction.deferred)  {
+                this.client.logger.debug(`Editing reply to interaction ${interaction.id}`)
                 const sentContent = await interaction.editReply({ ...messageContent })
+                this.client.logger.debug(`Finished edit reply to interaction ${interaction.id}`)
                 return sentContent as Message
             } else {
+                this.client.logger.debug(`Replying to interaction ${interaction.id}`)
                 const sentContent = await interaction.reply({ ...messageContent, fetchReply: true })
+                this.client.logger.debug(`Finished reply to interaction ${interaction.id}`)
                 return sentContent as Message
             }
         } catch (error) {
@@ -73,4 +78,28 @@ export default abstract class BaseCommand {
         }
     }
 
+    protected async defer(): Promise<void> {
+        try {
+            this.client.logger.debug(`Deferring reply to interaction ${this.interaction.id}`)
+            const interaction = this.interaction as CommandInteraction
+            await interaction.deferReply()
+        } catch (error) {
+            if (error instanceof Error) {
+                handleInteractionError(error, this.interaction, this.client.logger)
+            } else {
+                this.client.logger.error(error)
+            }
+            throw error
+        }
+    }
+
+    protected async getOptionValue<T>(option: OptionRequirement<T>): Promise<T> {
+        this.client.logger.debug(`Getting option value ${option.name} from interaction ${this.interaction.id}`)
+        const interaction = this.interaction as CommandInteraction
+        const optionValue = interaction.options.get(option.name)
+        if (optionValue) {
+            return optionValue.value as T
+        }
+        return option.default as T
+    }
 }

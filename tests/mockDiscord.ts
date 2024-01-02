@@ -10,85 +10,107 @@ import {
 import "reflect-metadata"
 import { Bot } from '../src/Bot';
 import { ChatInputCommandInteraction, Guild, GuildMember, TextBasedChannel, TextChannel, User } from 'discord.js';
-import { singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
+import { randomInt } from 'crypto';
+import assert from 'assert';
 
 @singleton()
 export class MockDiscord {
     private client!: Bot;
-    private guild!: Guild;
-    private channel!: TextChannel;
-    private user!: User;
-    private guildMember!: GuildMember;
-    private interaction!: ChatInputCommandInteraction;
+    // private guild!: Guild;
+    // private channel!: TextChannel;
+    // private user!: User;
+    // private guildMember!: GuildMember;
+    // private interaction!: ChatInputCommandInteraction;
 
 
-    getClient(withBots: boolean = false): Bot {
-        if (withBots) {
-            const botUser = mockUser(this.client, { bot: true });
-            mockGuildMember({
-                client: this.client,
-                user: botUser,
-                guild: this.guild,
-            });
-        }
+    public getClient(): Bot {
         return this.client;
     }
-    getUser(): User {
-        return this.user;
-    }
-    getGuild(): Guild {
-        return this.guild;
-    }
 
-    getGuildMember(): GuildMember {
-        return this.guildMember;
-    }
+    // getClient(withBots: boolean = false): Bot {
+    //     if (withBots) {
+    //         const botUser = mockUser(this.client, { bot: true });
+    //         mockGuildMember({
+    //             client: this.client,
+    //             user: botUser,
+    //             guild: this.guild,
+    //         });
+    //     }
+    //     return this.client;
+    // }
 
-    getChannel(): TextBasedChannel {
-        return this.channel;
-    }
+    // getUser(): User {
+    //     return this.user;
+    // }
 
-    getInteraction(): ChatInputCommandInteraction {
-        return this.interaction;
-    }
+    // resetGuild(): void {
+    //     this.mockGuild();
+    // }
+
+    // getGuild(): Guild {
+    //     return this.guild;
+    // }
+
+    // getGuildMember(): GuildMember {
+    //     return this.guildMember;
+    // }
+
+    // getChannel(): TextBasedChannel {
+    //     return this.channel;
+    // }
+
+    // getNewInteraction(): ChatInputCommandInteraction {
+    //     this.mockInteraction();
+    //     return this.interaction;
+    // }
 
     public constructor() {
-        this.mockClient();
-        this.mockGuild();
-        this.mockUser();
-        this.mockGuildMember();
-        this.mockChannel();
-        this.mockInteraction();
+        this.client = this.mockClient();
+        //     this.mockGuild();
+        //     this.mockUser();
+        //     this.mockGuildMember();
+        //     this.mockChannel();
+        //     this.mockInteraction();
     }
 
-    private mockClient(): void {
-        // this.client = new Client({ intents: [] });
-        this.client = new Bot({ intents: [] }, "test");
-        mockClientUser(this.client);
+    private mockClient(): Bot {
+        const clientOptions = { intents: [] };
+        container.register("options", { useValue: clientOptions })
+        container.register("token", { useValue: "test" })
+        const client = container.resolve(Bot);
+        mockClientUser(client);
 
-        this.client.login = jest.fn(() => Promise.resolve('LOGIN_TOKEN')) as any;
+        client.login = jest.fn(() => Promise.resolve('LOGIN_TOKEN')) as any;
+        return client;
     }
 
-    private mockGuild(): void {
-        this.guild = mockGuild(this.client);
-    }
-    private mockChannel(): void {
-        this.channel = mockTextChannel(this.client, this.guild);
+    public mockGuild(): Guild {
+        const guildId = randomInt(281474976710655).toString();
+        return mockGuild(this.client, undefined, { name: guildId, id: guildId });
     }
 
-    private mockUser(): void {
-        this.user = mockUser(this.client);
+    public mockChannel(guild: Guild = this.mockGuild()): TextChannel {
+        return mockTextChannel(this.client, guild);
     }
 
-    private mockGuildMember(): void {
-        this.guildMember = mockGuildMember({
+    public mockUser(): User {
+        return mockUser(this.client);
+    }
+
+    public mockGuildMember(user: User = this.mockUser(), guild: Guild = this.mockGuild()): GuildMember {
+        return mockGuildMember({
             client: this.client,
-            user: this.user,
-            guild: this.guild,
+            user: user,
+            guild: guild,
         });
     }
 
-    private mockInteraction(): void {
-        this.interaction = mockChatInputCommandInteraction({ client: this.client, name: "test", id: "test", channel: this.channel, member: this.guildMember })
+    public mockInteraction(channel?: TextChannel, guildMember?: GuildMember): ChatInputCommandInteraction {
+        const guild = this.mockGuild();
+        channel = channel ? channel : this.mockChannel(guild);
+        guildMember = guildMember ? guildMember : this.mockGuildMember(this.mockUser(), guild);
+        assert(guildMember.guild === guild);
+        return mockChatInputCommandInteraction({ client: this.client, name: "test", id: "test", channel: channel, member: guildMember })
     }
 }

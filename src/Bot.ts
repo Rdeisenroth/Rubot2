@@ -1,20 +1,30 @@
+import "reflect-metadata"
+import 'dotenv/config'
 import { Client, Partials, ClientOptions } from 'discord.js'
 import { CronJob } from 'cron'
 import { ConsolaInstance, createConsola } from 'consola'
+import { CommandsManager, ConfigManager } from "./managers"
 import commands from './commands'
 import events from './events'
-import 'dotenv/config'
+import { container, delay, inject, injectable, singleton } from "tsyringe"
+import Environment from "./Environment"
+import mongoose from "mongoose"
+import { exit } from "process"
 
 /**
  * The main `Bot` class.
  */
+@injectable()
+@singleton()
 export class Bot extends Client {
     /**
      * The logger used by the bot.
      */
     public logger: ConsolaInstance
-    // TODO
-    // private configManager: ConfigManager  
+    
+    public configManager: ConfigManager  
+
+    public commandsManager: CommandsManager
 
 
     /**
@@ -33,10 +43,12 @@ export class Bot extends Client {
      * @param client The Discord client.
      * @param token The bot token.
      */
-    constructor(options: ClientOptions, token: string) {
+    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, configManager: ConfigManager) {
         super(options);
         this.token = token
-        this.logger = createConsola()
+        this.logger = createConsola({ level: Environment.logLevel })
+        this.commandsManager = commandsManager
+        this.configManager = configManager
     }
 
     /**
@@ -60,6 +72,20 @@ export class Bot extends Client {
         })
     }
 
+    public async connectToDatabase(): Promise<void> {
+        this.logger.debug('Connecting to MongoDB')
+        mongoose.connect(Environment.monogodbUrl, {})
+        mongoose.connection.on("connected", () => {
+            this.logger.success('Connected to MongoDB')
+        })
+    }
+
+    public async disconnectFromDatabase(): Promise<void> {
+        this.logger.debug('Disconnecting from MongoDB')
+        await mongoose.disconnect()
+        this.logger.success('Disconnected from MongoDB')
+    }
+
     /**
      * Registers the bot events.
      */
@@ -72,6 +98,8 @@ export class Bot extends Client {
         }
     }
 }
+
+container.registerSingleton(Bot)
 
 export default function initiateBot() {
     const clientOptions: ClientOptions = {
@@ -100,7 +128,11 @@ export default function initiateBot() {
         throw new Error('Token not found')
     }
 
-    const bot = new Bot(clientOptions, token)
+    container.register("options", { useValue: clientOptions })
+    container.register("token", { useValue: token })
+    const bot = container.resolve(Bot)
+    // const bot = new Bot(clientOptions, token)
+    bot.connectToDatabase()
     bot.listen()
     bot.startQueueGuardJob()
 }

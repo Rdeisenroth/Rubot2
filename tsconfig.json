@@ -2,13 +2,7 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "commonjs",
-    "baseUrl": "./src",
-    "paths": {
-      "@types": ["types.ts"],
-      "@baseCommand": ["baseCommand"],
-      "@commands": ["commands"],
-      "@utils/*": ["utils/*"]
-    },
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "outDir": "./dist",
     "esModuleInterop": true,
