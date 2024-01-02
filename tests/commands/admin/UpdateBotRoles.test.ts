@@ -125,7 +125,6 @@ describe("UpdateBotRolesCommand", () => {
             expect(dbGuild.guild_settings.roles).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
-                        _id: expect.anything(),
                         internal_name: internalRole,
                         role_id: `${internalRole}_id_${interaction.guild!.id}`,
                         scope: "server",
@@ -157,8 +156,6 @@ describe("UpdateBotRolesCommand", () => {
         }
         await dbGuild.save()
 
-
-        const guildSaveSpy = jest.spyOn(GuildModel.prototype, 'save')
         await commandInstance.execute()
         dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
 
@@ -177,10 +174,35 @@ describe("UpdateBotRolesCommand", () => {
                 ])
             )
         }
+    });
+
+    it("should not update the database if the discord role name is the same", async () => {
+        let dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        // create the roles 
+        for (const internalRole of InternalGuildRoles) {
+            // create the role on the server
+            const role = await interaction.guild!.roles.create({
+                name: `${internalRole}_changed`,
+                mentionable: false,
+            })
+            // create the role in the db
+            dbGuild.guild_settings.roles?.push({
+                internal_name: internalRole,
+                role_id: role.id,
+                scope: "server",
+                server_id: interaction.guild!.id,
+                server_role_name: role.name,
+            })
+        }
+        await dbGuild.save()
+
+        const guildSaveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        await commandInstance.execute()
+        dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
 
         // check db was not updated
         expect(guildSaveSpy).not.toHaveBeenCalled()
-    });
+    })
 
     it("should defer the reply", async () => {
         const deferSpy = jest.spyOn(interaction, 'deferReply')
