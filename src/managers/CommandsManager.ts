@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionData, ApplicationCommandOptionType, BaseChannel, ChatInputApplicationCommandData, Guild } from "discord.js";
 import { Bot } from "../Bot";
 import { delay, inject, injectable, singleton } from "tsyringe";
-import { BaseCommand, BaseCommandOrSubcommandHandler, BaseSubcommandHandler } from "../baseCommand";
+import { BaseCommand, BaseCommandOrSubcommandsHandler, BaseSubcommandsHandler } from "../baseCommand";
 
 @injectable()
 @singleton()
@@ -24,7 +24,7 @@ export default class CommandsManager {
         }
     }
 
-    private loadCommandsData(commands: typeof BaseCommandOrSubcommandHandler[]): ChatInputApplicationCommandData[] {
+    private loadCommandsData(commands: typeof BaseCommandOrSubcommandsHandler[]): ChatInputApplicationCommandData[] {
         const commandsData: ChatInputApplicationCommandData[] = [];
 
         for (const command of commands) {
@@ -35,11 +35,11 @@ export default class CommandsManager {
         return commandsData;
     }
 
-    private loadCommandData(command: typeof BaseCommandOrSubcommandHandler): ChatInputApplicationCommandData {
+    private loadCommandData(command: typeof BaseCommandOrSubcommandsHandler): ChatInputApplicationCommandData {
         if (command.prototype instanceof BaseCommand) {
             return this.loadBaseCommandData(command as typeof BaseCommand);
-        } else if (command.prototype instanceof BaseSubcommandHandler) {
-            return this.loadBaseSubcommandHandlerData(command as typeof BaseSubcommandHandler);
+        } else if (command.prototype instanceof BaseSubcommandsHandler) {
+            return this.loadBaseSubcommandsHandlerData(command as typeof BaseSubcommandsHandler);
         }
         throw new Error(`Command ${command.name} is neither a BaseCommand nor a BaseSubcommandHandler.`);
     }
@@ -53,16 +53,16 @@ export default class CommandsManager {
         return commandData;
     }
 
-    private loadBaseSubcommandHandlerData(command: typeof BaseSubcommandHandler): ChatInputApplicationCommandData {
-        const baseSubcommandHandler = command as typeof BaseSubcommandHandler;
-        const subcommandsData = this.loadCommandsData(baseSubcommandHandler.subcommands);
+    private loadBaseSubcommandsHandlerData(command: typeof BaseSubcommandsHandler): ChatInputApplicationCommandData {
+        const baseSubcommandsHandler = command as typeof BaseSubcommandsHandler;
+        const subcommandsData = this.loadCommandsData(baseSubcommandsHandler.subcommands);
         const subcommandOptions = subcommandsData.map(subcommandData => {
             const subcommandDataOptions = subcommandData.options!;
-            const subcommandIsSubcommandHandler = subcommandDataOptions.flatMap(option => option.type).includes(ApplicationCommandOptionType.Subcommand);
+            const subcommandIsSubcommandsHandler = subcommandDataOptions.flatMap(option => option.type).includes(ApplicationCommandOptionType.Subcommand);
             return {
                 name: subcommandData.name,
                 description: subcommandData.description,
-                type: subcommandIsSubcommandHandler ? ApplicationCommandOptionType.SubcommandGroup : ApplicationCommandOptionType.Subcommand,
+                type: subcommandIsSubcommandsHandler ? ApplicationCommandOptionType.SubcommandGroup : ApplicationCommandOptionType.Subcommand,
                 options: subcommandData.options,
             }
         })

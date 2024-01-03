@@ -1,6 +1,6 @@
-import { BaseSubcommandHandler } from "../../baseCommand";
+import { BaseSubcommandsHandler } from "../../baseCommand";
 
-export default class QueueCommandHandler extends BaseSubcommandHandler {
+export default class QueueCommandsHandler extends BaseSubcommandsHandler {
     public static name = "queue";
     public static description = "Queue command handler.";
 

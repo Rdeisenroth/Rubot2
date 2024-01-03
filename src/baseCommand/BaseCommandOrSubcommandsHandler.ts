@@ -4,7 +4,7 @@ import { Bot } from "../Bot";
 /**
  * The base class for all commands and subcommands.
  */
-export default class BaseCommandOrSubcommandHandler {
+export default class BaseCommandOrSubcommandsHandler {
     /** 
      * The command name.
      */

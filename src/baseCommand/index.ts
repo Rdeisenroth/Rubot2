@@ -1,9 +1,9 @@
 import BaseCommand from "./BaseCommand";
-import BaseCommandOrSubcommandHandler from "./BaseCommandOrSubcommandHandler";
-import BaseSubcommandHandler from "./BaseSubcommandHandler";
+import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
+import BaseSubcommandsHandler from "./BaseSubcommandsHandler";
 
 export {
-    BaseCommandOrSubcommandHandler,
-    BaseSubcommandHandler,
+    BaseCommandOrSubcommandsHandler,
+    BaseSubcommandsHandler,
     BaseCommand
 }

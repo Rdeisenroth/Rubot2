@@ -1,15 +1,15 @@
 import { CommandInteraction, CommandInteractionOption } from "discord.js";
 import { handleInteractionError } from "../utils/handleError";
-import BaseCommandOrSubcommandHandler from "./BaseCommandOrSubcommandHandler";
+import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
 
 /**
  * The base class for all subcommands.
  */
-export default class BaseSubcommandHandler extends BaseCommandOrSubcommandHandler {
+export default class BaseSubcommandsHandler extends BaseCommandOrSubcommandsHandler {
     /**
      * The subcommands of this command.
      */
-    public static subcommands: typeof BaseCommandOrSubcommandHandler[]
+    public static subcommands: typeof BaseCommandOrSubcommandsHandler[]
 
     public async execute() {
         try {
@@ -21,7 +21,7 @@ export default class BaseSubcommandHandler extends BaseCommandOrSubcommandHandle
             }
             const subcommandName = subcommandInteraction.resolved_subcommand.name;
             this.client.logger.debug(`Executing subcommand ${subcommandName} from interaction ${this.interaction.id}`)
-            const someClass = this.constructor as typeof BaseSubcommandHandler;
+            const someClass = this.constructor as typeof BaseSubcommandsHandler;
             const subcommand = someClass.subcommands.find(subcommand => subcommand.name == subcommandName)!;
             const concreteSubcommand = new subcommand(this.interaction, this.client);
             await concreteSubcommand.execute();

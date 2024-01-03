@@ -1,9 +1,9 @@
 import PingCommand from './Ping';
 import HelpCommand from './Help';
-import AdminCommandHandler from './AdminCommandHandler';
+import AdminCommandsHandler from './AdminCommandsHandler';
 
 export default [
     PingCommand,
     HelpCommand,
-    AdminCommandHandler,
+    AdminCommandsHandler,
 ]
