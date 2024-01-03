@@ -16,6 +16,7 @@ export default class ConfigManager {
     public async getGuildConfig(guild: DiscordGuild): Promise<DocumentType<Guild>> {
         var guildModel = await GuildModel.findById(guild.id);
         if (!guildModel) {
+            this.client.logger.debug(`Config for guild ${guild.name} does not exist. Creating...`)
             return await this.getDefaultGuildConfig(guild);
         }
         this.client.logger.info(`Config for guild ${guild.name} already exists.`)
