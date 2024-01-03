@@ -33,12 +33,12 @@ export default class ReadyEvent extends BaseEvent {
     private logStats(): void {
         const message =
             `"${this.client.user?.username}" is Ready! (${(Date.now() - this.client.initTimestamp) / 1000}s)\n` +
-            "-".repeat(26) + "\n" +
-            "Bot Stats:\n" +
-            `${this.client.users.cache.size} user(s)\n` +
-            `${this.client.channels.cache.size} channel(s)\n` +
-            `${this.client.guilds.cache.size} guild(s)\n` +
-            "=".repeat(26);
+            "  " + "-".repeat(26) + "\n" +
+            "  Bot Stats:\n" +
+            `  ${this.client.users.cache.size} user(s)\n` +
+            `  ${this.client.channels.cache.size} channel(s)\n` +
+            `  ${this.client.guilds.cache.size} guild(s)\n` +
+            "  " + "=".repeat(26);
         this.client.logger.ready(message);
     }
 }
