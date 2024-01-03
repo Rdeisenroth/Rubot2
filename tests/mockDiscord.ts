@@ -106,11 +106,11 @@ export class MockDiscord {
         });
     }
 
-    public mockInteraction(channel?: TextChannel, guildMember?: GuildMember): ChatInputCommandInteraction {
+    public mockInteraction(commandName: string = "ping", channel?: TextChannel, guildMember?: GuildMember): ChatInputCommandInteraction {
         const guild = this.mockGuild();
         channel = channel ? channel : this.mockChannel(guild);
         guildMember = guildMember ? guildMember : this.mockGuildMember(this.mockUser(), guild);
         assert(guildMember.guild === guild);
-        return mockChatInputCommandInteraction({ client: this.client, name: "test", id: "test", channel: channel, member: guildMember })
+        return mockChatInputCommandInteraction({ client: this.client, name: commandName, id: "test", channel: channel, member: guildMember })
     }
 }
