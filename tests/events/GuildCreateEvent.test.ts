@@ -25,6 +25,7 @@ describe("GuildCreateEvent", () => {
         const logSpy = jest.spyOn(discord.getClient().logger, 'success')
         await eventInstance.execute(guild)
 
+        expect(logSpy).toHaveBeenCalledTimes(1)
         expect(logSpy).toHaveBeenCalledWith(`Joined guild ${guild.name} (id: ${guild.id})`)
     })
 
