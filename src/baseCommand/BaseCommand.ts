@@ -10,7 +10,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
     /**
      * The command options.
      */
-    public static options: OptionRequirement<any>[]
+    public static options: OptionRequirement<any>[] = []
 
     /**
      * Sends a message to the interaction channel.
