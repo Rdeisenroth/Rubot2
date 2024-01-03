@@ -26,7 +26,7 @@ describe("InteractionCreateEvent", () => {
 
         const commandInteraction = interaction as ChatInputCommandInteraction
         expect(logSpy).toHaveBeenCalledTimes(2)
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${interaction.user.tag} executed command ${commandInteraction.commandName} with options ${JSON.stringify(commandInteraction.options)}`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${interaction.user.tag} executed command "${commandInteraction.commandName}" with options`))
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`Command ${commandInteraction.commandName} executed successfully.`))
     })
 
