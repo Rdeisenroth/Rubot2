@@ -1,7 +1,7 @@
 import { CommandInteraction, Interaction, Message, BaseMessageOptions, CommandInteractionOption } from "discord.js";
 import { handleInteractionError } from "../utils/handleError";
 import OptionRequirement from "../types/OptionRequirement";
-import { BaseCommandOrSubcommandHandler } from "./BaseCommandOrSubcommandHandler";
+import BaseCommandOrSubcommandHandler from "./BaseCommandOrSubcommandHandler";
 
 /**
  * The base class for all commands.

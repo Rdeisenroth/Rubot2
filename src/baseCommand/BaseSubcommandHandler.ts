@@ -1,11 +1,11 @@
 import { CommandInteraction, CommandInteractionOption } from "discord.js";
-import { BaseCommandOrSubcommandHandler } from "./BaseCommandOrSubcommandHandler";
 import { handleInteractionError } from "../utils/handleError";
+import BaseCommandOrSubcommandHandler from "./BaseCommandOrSubcommandHandler";
 
 /**
  * The base class for all subcommands.
  */
-export class BaseSubcommandHandler extends BaseCommandOrSubcommandHandler {
+export default class BaseSubcommandHandler extends BaseCommandOrSubcommandHandler {
     /**
      * The subcommands of this command.
      */
