@@ -4,7 +4,7 @@ import { Bot } from "../Bot";
 /**
  * The base class for all commands and subcommands.
  */
-export default class BaseCommandOrSubcommandsHandler {
+export default abstract class BaseCommandOrSubcommandsHandler {
     /** 
      * The command name.
      */
@@ -36,7 +36,5 @@ export default class BaseCommandOrSubcommandsHandler {
      * Executes the command with the given arguments.
      * @param args The command arguments.
      */
-    public async execute(...args: any[]) {
-        throw new Error("Method not implemented.");
-    }
+    public abstract execute(...args: any[]): Promise<void>;
 }

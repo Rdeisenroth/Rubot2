@@ -6,7 +6,7 @@ import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
 /**
  * The base class for all commands.
  */
-export default class BaseCommand extends BaseCommandOrSubcommandsHandler {
+export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandler {
     /**
      * The command options.
      */

@@ -1,15 +1,16 @@
-import { CommandInteraction, CommandInteractionOption } from "discord.js";
+import { CommandInteraction, CommandInteractionOption, Interaction } from "discord.js";
 import { handleInteractionError } from "../utils/handleError";
 import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
+import { Bot } from "../Bot";
 
 /**
  * The base class for all subcommands.
  */
-export default class BaseSubcommandsHandler extends BaseCommandOrSubcommandsHandler {
+export default abstract class BaseSubcommandsHandler extends BaseCommandOrSubcommandsHandler {
     /**
      * The subcommands of this command.
      */
-    public static subcommands: typeof BaseCommandOrSubcommandsHandler[]
+    public static subcommands: (new (interaction: Interaction, client: Bot) => BaseCommandOrSubcommandsHandler)[]
 
     public async execute() {
         try {

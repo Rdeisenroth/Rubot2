@@ -55,7 +55,8 @@ export default class CommandsManager {
 
     private loadBaseSubcommandsHandlerData(command: typeof BaseSubcommandsHandler): ChatInputApplicationCommandData {
         const baseSubcommandsHandler = command as typeof BaseSubcommandsHandler;
-        const subcommandsData = this.loadCommandsData(baseSubcommandsHandler.subcommands);
+        const subcommandTypes: typeof BaseCommandOrSubcommandsHandler[] = baseSubcommandsHandler.subcommands.map(subcommand => subcommand.prototype.constructor)
+        const subcommandsData = this.loadCommandsData(subcommandTypes);
         const subcommandOptions = subcommandsData.map(subcommandData => {
             const subcommandDataOptions = subcommandData.options!;
             const subcommandIsSubcommandsHandler = subcommandDataOptions.flatMap(option => option.type).includes(ApplicationCommandOptionType.Subcommand);
