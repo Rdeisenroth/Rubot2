@@ -1,5 +1,4 @@
 import { BaseSubcommandsHandler } from "../baseCommand";
-import HelpCommand from "./Help";
 import ConfigQueueCommandsHandler from "./config/ConfigQueueCommandsHandler";
 
 export default class ConfigCommandsHandler extends BaseSubcommandsHandler {

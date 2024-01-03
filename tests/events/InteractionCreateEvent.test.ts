@@ -2,7 +2,7 @@ import { container } from "tsyringe"
 import InteractionCreateEvent from "../../src/events/InteractionCreateEvent"
 import { MockDiscord } from "../mockDiscord"
 import { ChatInputCommandInteraction, Interaction } from "discord.js"
-import PingCommand from "../../src/commands/Ping"
+import PingCommand from "../../src/commands/PingCommand"
 
 
 describe("InteractionCreateEvent", () => {
