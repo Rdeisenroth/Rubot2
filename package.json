@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc --build --clean tsconfig.json; tsc --build tsconfig.json",
-    "test": "jest --detectOpenHandles --rootDir=./tests -i",
+    "test": "jest --detectOpenHandles --rootDir=./tests",
     "clean": "rm package-lock.json && rm -rf node_modules"
   },
   "keywords": [],
