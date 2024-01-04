@@ -27,13 +27,13 @@ export default class UpdateBotRolesCommand extends BaseCommand {
         if (!this.interaction.guild) {
             throw new Error("Interaction is not in a guild");
         }
-        this.dbGuild = await this.client.configManager.getGuildConfig(this.interaction.guild)
+        this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const createIfNotExists = await this.getOptionValue(UpdateBotRolesCommand.options[0]);
         await this.createDbRoles(createIfNotExists);
         const embed = this.mountRoleEmbed();
         await this.send({ embeds: [embed] });
 
-        this.client.logger.info(`Done generating internal Roles for guild ${this.interaction.guild.name}`);
+        this.app.logger.info(`Done generating internal Roles for guild ${this.interaction.guild.name}`);
     }
 
     /**
@@ -103,24 +103,24 @@ export default class UpdateBotRolesCommand extends BaseCommand {
                     if (roleInDatabase.server_role_name !== roleOnDiscordServer.name) {
                         await this.updateRoleInDatabase(roleInDatabase, roleOnDiscordServer.name);
                     } else {
-                        this.client.logger.debug(`Role ${internalGuildRoleName} found in guild ${this.interaction.guild!.name}. Role was not renamed.`);
+                        this.app.logger.debug(`Role ${internalGuildRoleName} found in guild ${this.interaction.guild!.name}. Role was not renamed.`);
                     }
                     return;
                 }
             }
             if (!createIfNotExists) {
-                this.client.logger.debug(`Role ${internalGuildRoleName} not found in guild ${this.interaction.guild!.name}. Skipping`);
+                this.app.logger.debug(`Role ${internalGuildRoleName} not found in guild ${this.interaction.guild!.name}. Skipping`);
                 return;
             }
             roleOnDiscordServer = await this.createRoleOnDiscordServer(internalGuildRoleName);
         } else {
-            this.client.logger.debug(`Role ${internalGuildRoleName} found in guild ${this.interaction.guild!.name}`);
+            this.app.logger.debug(`Role ${internalGuildRoleName} found in guild ${this.interaction.guild!.name}`);
         }
     
         if (!roleInDatabase) {
             await this.createRoleInDatabase(internalGuildRoleName, roleOnDiscordServer!);
         } else {
-            this.client.logger.debug(`Role ${internalGuildRoleName} found in database`);
+            this.app.logger.debug(`Role ${internalGuildRoleName} found in database`);
         }
     }
     
@@ -130,7 +130,7 @@ export default class UpdateBotRolesCommand extends BaseCommand {
      * @param newRoleName The new name of the role.
      */
     private async updateRoleInDatabase(roleInDatabase: ArraySubDocumentType<DBRole>, newRoleName: string): Promise<void> {
-        this.client.logger.debug(`Role "${roleInDatabase.internal_name}" was renamed from "${roleInDatabase.server_role_name}" to "${newRoleName}". Updating DB`);
+        this.app.logger.debug(`Role "${roleInDatabase.internal_name}" was renamed from "${roleInDatabase.server_role_name}" to "${newRoleName}". Updating DB`);
         roleInDatabase.server_role_name = newRoleName;
         await this.dbGuild.save();
     }
@@ -141,12 +141,12 @@ export default class UpdateBotRolesCommand extends BaseCommand {
      * @returns The created role.
      */
     private async createRoleOnDiscordServer(internalGuildRoleName: string): Promise<Role> {
-        this.client.logger.debug(`Role ${internalGuildRoleName} not found in guild ${this.interaction.guild!.name}. Creating`);
+        this.app.logger.debug(`Role ${internalGuildRoleName} not found in guild ${this.interaction.guild!.name}. Creating`);
         const newRole = await this.interaction.guild!.roles.create({
             name: internalGuildRoleName,
             mentionable: false,
         });
-        this.client.logger.debug(`Created role ${internalGuildRoleName} with id ${newRole.id} in guild ${this.interaction.guild!.name}`);
+        this.app.logger.debug(`Created role ${internalGuildRoleName} with id ${newRole.id} in guild ${this.interaction.guild!.name}`);
         return newRole;
     }
     
@@ -156,7 +156,7 @@ export default class UpdateBotRolesCommand extends BaseCommand {
      * @param roleOnDiscordServer The role on the discord guild.
      */
     private async createRoleInDatabase(internalGuildRoleName: string, roleOnDiscordServer: Role): Promise<void> {
-        this.client.logger.debug(`Creating role ${internalGuildRoleName} for guild ${this.interaction.guild!.name} in database`);
+        this.app.logger.debug(`Creating role ${internalGuildRoleName} for guild ${this.interaction.guild!.name} in database`);
         if (!this.dbGuild.guild_settings.roles) {
             this.dbGuild.guild_settings.roles = new mongoose.Types.DocumentArray([]);
         }

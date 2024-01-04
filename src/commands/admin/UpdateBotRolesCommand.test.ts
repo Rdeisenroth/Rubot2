@@ -15,19 +15,19 @@ describe("UpdateBotRolesCommand", () => {
 
     beforeEach(() => {
         interaction = discord.mockInteraction()
-        const bot = discord.getClient()
+        const app = discord.getApplication()
         interaction.guild!.roles.create = jest.fn().mockImplementation(async (role: RoleCreateOptions) => {
-            bot.logger.debug(`Creating role ${role.name}`)
-            const newRole = mockRole(bot, PermissionsBitField.Default, interaction.guild!, { name: role.name, id: `${role.name}_id_${interaction.guild!.id}` })
+            app.logger.debug(`Creating role ${role.name}`)
+            const newRole = mockRole(app.client, PermissionsBitField.Default, interaction.guild!, { name: role.name, id: `${role.name}_id_${interaction.guild!.id}` })
             roles.push(newRole)
             return newRole
         })
         interaction.guild!.roles.resolve = jest.fn().mockImplementation((roleId: string) => {
-            bot.logger.debug(`Resolving role ${roleId}`)
+            app.logger.debug(`Resolving role ${roleId}`)
             return roles.find((role) => role.id === roleId)
         })
         jest.spyOn(command.prototype as any, 'getOptionValue').mockImplementation(async () => true)
-        commandInstance = new command(interaction, discord.getClient())
+        commandInstance = new command(interaction, discord.getApplication())
     })
 
     it("should have the correct name", () => {
@@ -65,7 +65,7 @@ describe("UpdateBotRolesCommand", () => {
     })
 
     it("should not create the discord roles if they don't exist and option is false", async () => {
-        const dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         jest.spyOn(command.prototype as any, 'getOptionValue').mockImplementation(async () => false)
         await commandInstance.execute()
@@ -75,9 +75,9 @@ describe("UpdateBotRolesCommand", () => {
     })
 
     it("should create the database entries if they don't exist", async () => {
-        let dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         await commandInstance.execute()
-        dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         expect(dbGuild.guild_settings.roles).toHaveLength(InternalGuildRoles.length)
         for (const internalRole of InternalGuildRoles) {
@@ -96,7 +96,7 @@ describe("UpdateBotRolesCommand", () => {
     })
 
     it("should update the database if the discord role name changed", async () => {
-        let dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         // create the roles 
         for (const internalRole of InternalGuildRoles) {
             // create the role on the server
@@ -118,7 +118,7 @@ describe("UpdateBotRolesCommand", () => {
         await dbGuild.save()
 
         await commandInstance.execute()
-        dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         expect(dbGuild.guild_settings.roles).toHaveLength(InternalGuildRoles.length)
         for (const internalRole of InternalGuildRoles) {
@@ -137,7 +137,7 @@ describe("UpdateBotRolesCommand", () => {
     })
 
     it("should find the discord role by id if the name is different to the internal name", async () => {
-        let dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         // create the roles 
         for (const internalRole of InternalGuildRoles) {
             // create the role on the server
@@ -157,7 +157,7 @@ describe("UpdateBotRolesCommand", () => {
         await dbGuild.save()
 
         await commandInstance.execute()
-        dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         expect(dbGuild.guild_settings.roles).toHaveLength(InternalGuildRoles.length)
         for (const internalRole of InternalGuildRoles) {
@@ -177,7 +177,7 @@ describe("UpdateBotRolesCommand", () => {
     });
 
     it("should not update the database if the discord role name is the same", async () => {
-        let dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         // create the roles 
         for (const internalRole of InternalGuildRoles) {
             // create the role on the server
@@ -198,7 +198,7 @@ describe("UpdateBotRolesCommand", () => {
 
         const guildSaveSpy = jest.spyOn(GuildModel.prototype, 'save')
         await commandInstance.execute()
-        dbGuild = await discord.getClient().configManager.getGuildConfig(interaction.guild!)
+        dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         // check db was not updated
         expect(guildSaveSpy).not.toHaveBeenCalled()

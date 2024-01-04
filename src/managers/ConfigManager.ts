@@ -1,25 +1,25 @@
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { Guild as DiscordGuild } from "discord.js";
 import { Guild, GuildModel } from "@models/Guild";
-import { Bot } from "../Bot";
 import { DocumentType } from "@typegoose/typegoose";
+import { Application } from "@application";
 
 @injectable()
 @singleton()
 export default class ConfigManager {
-    protected client: Bot;
+    protected app: Application;
 
-    constructor(@inject(delay(() => Bot)) client: Bot) {
-        this.client = client;
+    constructor(@inject(delay(() => Application)) app: Application) {
+        this.app = app;
     }
 
     public async getGuildConfig(guild: DiscordGuild): Promise<DocumentType<Guild>> {
         var guildModel = await GuildModel.findById(guild.id);
         if (!guildModel) {
-            this.client.logger.debug(`Config for guild ${guild.name} does not exist. Creating...`)
+            this.app.logger.debug(`Config for guild ${guild.name} does not exist. Creating...`)
             return await this.getDefaultGuildConfig(guild);
         }
-        this.client.logger.info(`Config for guild ${guild.name} already exists.`)
+        this.app.logger.info(`Config for guild ${guild.name} already exists.`)
         return guildModel;
     }
 
@@ -38,7 +38,7 @@ export default class ConfigManager {
             queues: [],
         });
         await newGuildData.save();
-        this.client.logger.info(`Created new Guild Config for ${guild.name} (id: ${guild.id})`);
+        this.app.logger.info(`Created new Guild Config for ${guild.name} (id: ${guild.id})`);
         return newGuildData;
     }
 

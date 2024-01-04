@@ -9,14 +9,14 @@ import events from './events'
 import { container, delay, inject, injectable, singleton } from "tsyringe"
 import Environment from "./Environment"
 import mongoose from "mongoose"
-import { exit } from "process"
 
 /**
- * The main `Bot` class.
+ * The main `Application` class.
  */
 @injectable()
 @singleton()
-export class Bot extends Client {
+export class Application {
+    public client: Client
     /**
      * The logger used by the bot.
      */
@@ -26,6 +26,8 @@ export class Bot extends Client {
 
     public commandsManager: CommandsManager
 
+
+    private readonly token: string
 
     /**
      * Timestamp of bot initialization.
@@ -44,7 +46,7 @@ export class Bot extends Client {
      * @param token The bot token.
      */
     constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager) {
-        super(options);
+        this.client = new Client(options)
         this.token = token
         this.logger = createConsola({ level: Environment.logLevel })
         this.commandsManager = commandsManager
@@ -58,7 +60,7 @@ export class Bot extends Client {
     public listen(): void {
         this.logger.info('Listening to events')
         this.registerEvents()
-        this.login(this.token!)
+        this.client.login(this.token)
     }
 
     public startQueueGuardJob(): void {
@@ -93,15 +95,13 @@ export class Bot extends Client {
         this.logger.info('Registering events')
         for (const event of events) {
             const concreteEvent = new event(this)
-            this.on(event.name, concreteEvent.execute.bind(concreteEvent))
+            this.client.on(event.name, concreteEvent.execute.bind(concreteEvent))
             this.logger.info(`Registered event ${event.name}`)
         }
     }
 }
 
-container.registerSingleton(Bot)
-
-export default function initiateBot() {
+export default function start() {
     const clientOptions: ClientOptions = {
         intents: [
             "DirectMessages",
@@ -130,9 +130,8 @@ export default function initiateBot() {
 
     container.register("options", { useValue: clientOptions })
     container.register("token", { useValue: token })
-    const bot = container.resolve(Bot)
-    // const bot = new Bot(clientOptions, token)
-    bot.connectToDatabase()
-    bot.listen()
-    bot.startQueueGuardJob()
+    const app = container.resolve(Application)
+    app.connectToDatabase()
+    app.listen()
+    app.startQueueGuardJob()
 }

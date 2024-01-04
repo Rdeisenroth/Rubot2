@@ -1,4 +1,4 @@
-import { Bot } from "../Bot";
+import { Application } from "@application";
 
 /**
  * Base class for all events
@@ -9,16 +9,16 @@ export default abstract class BaseEvent {
      */
     public static name: string;
     /** 
-     * Client instance.
+     * The app which received the event.
      */
-    protected client: Bot;
+    protected app: Application;
 
     /**
      * Creates a new instance of the BaseEvent class.
      * @param client The client instance.
      */
-    constructor(client: Bot) {
-        this.client = client;
+    constructor(app: Application) {
+        this.app = app;
     }
 
     /**

@@ -12,7 +12,7 @@ describe("InteractionCreateEvent", () => {
     let interaction: Interaction
 
     beforeEach(() => {
-        eventInstance = new event(discord.getClient())
+        eventInstance = new event(discord.getApplication())
         interaction = discord.mockInteraction("ping")
     })
 
@@ -21,7 +21,7 @@ describe("InteractionCreateEvent", () => {
     })
 
     it("should log who executed which command with which options", async () => {
-        const logSpy = jest.spyOn(discord.getClient().logger, 'info')
+        const logSpy = jest.spyOn(discord.getApplication().logger, 'info')
         await eventInstance.execute(interaction)
 
         const commandInteraction = interaction as ChatInputCommandInteraction

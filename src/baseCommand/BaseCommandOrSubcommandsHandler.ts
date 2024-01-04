@@ -1,5 +1,6 @@
+import { Application } from "@application";
 import { Interaction } from "discord.js";
-import { Bot } from "../Bot";
+
 
 /**
  * The base class for all commands and subcommands.
@@ -18,18 +19,18 @@ export default abstract class BaseCommandOrSubcommandsHandler {
      */
     protected interaction: Interaction;
     /** 
-     * The client who received the interaction.
+     * The app which received the interaction.
      */
-    protected client: Bot;
+    protected app: Application;
 
     /**
      * Creates a new instance of the BaseCommand class.
      * @param interaction The interaction.
-     * @param client The client who received the interaction.
+     * @param app The app which received the interaction.
      */
-    constructor(interaction: Interaction, client: Bot) {
+    constructor(interaction: Interaction, app: Application) {
         this.interaction = interaction;
-        this.client = client;
+        this.app = app;
     }
 
     /**

@@ -25,21 +25,21 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
             const messageContent = typeof content === "string" ? { content } : content
 
             if (interaction.replied || interaction.deferred) {
-                this.client.logger.debug(`Editing reply to interaction ${interaction.id}`)
+                this.app.logger.debug(`Editing reply to interaction ${interaction.id}`)
                 const sentContent = await interaction.editReply({ ...messageContent })
-                this.client.logger.debug(`Finished edit reply to interaction ${interaction.id}`)
+                this.app.logger.debug(`Finished edit reply to interaction ${interaction.id}`)
                 return sentContent as Message
             } else {
-                this.client.logger.debug(`Replying to interaction ${interaction.id}`)
+                this.app.logger.debug(`Replying to interaction ${interaction.id}`)
                 const sentContent = await interaction.reply({ ...messageContent, fetchReply: true })
-                this.client.logger.debug(`Finished reply to interaction ${interaction.id}`)
+                this.app.logger.debug(`Finished reply to interaction ${interaction.id}`)
                 return sentContent as Message
             }
         } catch (error) {
             if (error instanceof Error) {
-                handleInteractionError(error, this.interaction, this.client.logger)
+                handleInteractionError(error, this.interaction, this.app.logger)
             } else {
-                this.client.logger.error(error)
+                this.app.logger.error(error)
             }
             throw error
         }
@@ -50,14 +50,14 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
      */
     protected async defer(): Promise<void> {
         try {
-            this.client.logger.debug(`Deferring reply to interaction ${this.interaction.id}`)
+            this.app.logger.debug(`Deferring reply to interaction ${this.interaction.id}`)
             const interaction = this.interaction as CommandInteraction
             await interaction.deferReply()
         } catch (error) {
             if (error instanceof Error) {
-                handleInteractionError(error, this.interaction, this.client.logger)
+                handleInteractionError(error, this.interaction, this.app.logger)
             } else {
-                this.client.logger.error(error)
+                this.app.logger.error(error)
             }
             throw error
         }
@@ -69,7 +69,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
      * @returns The option value.
      */
     protected async getOptionValue<T>(option: OptionRequirement<T>): Promise<T> {
-        this.client.logger.debug(`Getting option value ${option.name} from interaction ${this.interaction.id}`)
+        this.app.logger.debug(`Getting option value ${option.name} from interaction ${this.interaction.id}`)
         const interaction = this.interaction as CommandInteraction
         const optionValue = interaction.options.get(option.name)
         if (optionValue) {

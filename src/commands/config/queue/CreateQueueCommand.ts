@@ -34,7 +34,7 @@ export default class CreateQueueCommand extends BaseCommand {
         if (!this.interaction.guild) {
             throw new Error("Interaction is not in a guild");
         }
-        this.dbGuild = await this.client.configManager.getGuildConfig(this.interaction.guild)
+        this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const queueName = await this.getOptionValue(CreateQueueCommand.options[0]);
         const queueDescription = await this.getOptionValue(CreateQueueCommand.options[1]);
         await this.createQueue(queueName, queueDescription);

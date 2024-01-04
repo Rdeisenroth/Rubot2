@@ -1,25 +1,25 @@
 import { ApplicationCommandOptionData, ApplicationCommandOptionType, BaseChannel, ChatInputApplicationCommandData, Guild } from "discord.js";
-import { Bot } from "../Bot";
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { BaseCommand, BaseCommandOrSubcommandsHandler, BaseSubcommandsHandler } from "../baseCommand";
+import { Application } from "@application";
 
 @injectable()
 @singleton()
 export default class CommandsManager {
-    protected client: Bot;
+    protected app: Application;
     private commandsData: ChatInputApplicationCommandData[] = [];
 
-    constructor(@inject(delay(() => Bot)) client: Bot) {
-        this.client = client;
-        this.commandsData = this.loadCommandsData(this.client.commands);
+    constructor(@inject(delay(() => Application)) app: Application) {
+        this.app = app;
+        this.commandsData = this.loadCommandsData(this.app.commands);
     }
 
     public async registerSlashCommandsFor(guild: Guild): Promise<void> {
         try {
             await guild.commands.set(this.commandsData);
-            this.client.logger.info(`Registered commands in guild ${guild.name}`);
+            this.app.logger.info(`Registered commands in guild ${guild.name}`);
         } catch (error) {
-            this.client.logger.error(`Failed to register commands in guild ${guild.name}`);
+            this.app.logger.error(`Failed to register commands in guild ${guild.name}`);
             throw error;
         }
     }

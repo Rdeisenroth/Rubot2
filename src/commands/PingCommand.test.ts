@@ -11,7 +11,7 @@ describe("PingCommand", () => {
 
     beforeEach(() => {
         interaction = discord.mockInteraction()
-        commandInstance = new command(interaction, discord.getClient())
+        commandInstance = new command(interaction, discord.getApplication())
     })
 
     it("should have the correct name", () => {

@@ -7,21 +7,21 @@ export default class InteractionCreateEvent extends BaseEvent {
     public async execute(interaction: Interaction) {
         if (!interaction.isCommand()) return;
 
-        const command = this.client.commands.find(command => command.name === interaction.commandName);
+        const command = this.app.commands.find(command => command.name === interaction.commandName);
 
         if (!command) return;
 
         const options = this.getOptions(interaction.options.data);
         const commandName = interaction.commandName + (options.commandName.length > 0 ? ` ${options.commandName.map(option => option.name).join(" ")}` : "");
-        this.client.logger.info(`${interaction.user.tag} executed command "${commandName}" with options ${JSON.stringify(options.options)}`);
+        this.app.logger.info(`${interaction.user.tag} executed command "${commandName}" with options ${JSON.stringify(options.options)}`);
 
-        const concreteCommand = new command(interaction, this.client);
+        const concreteCommand = new command(interaction, this.app);
 
         try {
             await concreteCommand.execute();
-            this.client.logger.info(`Command ${command.name} executed successfully.`);
+            this.app.logger.info(`Command ${command.name} executed successfully.`);
         } catch (error) {
-            this.client.logger.error(error);
+            this.app.logger.error(error);
             interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
         }
     }

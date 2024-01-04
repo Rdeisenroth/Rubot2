@@ -25,7 +25,7 @@ export default class PingCommand extends BaseCommand {
             .setTitle("__Response Times__")
             .setColor(this.interaction.guild?.members.me?.roles?.highest.color || 0x7289da)
             .addFields({ name:"Bot Latency:", value:":hourglass_flowing_sand:" + ping + "ms", inline:true })
-            .addFields({ name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(this.client.ws.ping) + "ms", inline:true })
+            .addFields({ name:"API Latency:", value:":hourglass_flowing_sand:" + Math.round(this.app.client.ws.ping) + "ms", inline:true })
         return embed
     }
 }

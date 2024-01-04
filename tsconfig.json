@@ -21,6 +21,8 @@
       "@tests/*": ["tests/*"],
       "@models/*": ["src/models/*"],
       "@commands/*": ["src/commands/*"],
+      "@events/*": ["src/events/*"],
+      "@application": ["src/Application.ts"],
     },
     "plugins": [
       /* Transform paths in output .js files */

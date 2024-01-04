@@ -5,8 +5,8 @@ export default class GuildCreateEvent extends BaseEvent {
     public static name = "guildCreate";
 
     public async execute(guild: Guild) {
-        await this.client.configManager.getGuildConfig(guild)
-        await this.client.commandsManager.registerSlashCommandsFor(guild)
-        this.client.logger.success(`Joined guild ${guild.name} (id: ${guild.id})`)
+        await this.app.configManager.getGuildConfig(guild)
+        await this.app.commandsManager.registerSlashCommandsFor(guild)
+        this.app.logger.success(`Joined guild ${guild.name} (id: ${guild.id})`)
     }
 }

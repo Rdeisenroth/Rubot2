@@ -12,7 +12,7 @@ describe("GuildCreateEvent", () => {
     let guild: Guild
 
     beforeEach(() => {
-        eventInstance = new event(discord.getClient())
+        eventInstance = new event(discord.getApplication())
         guild = discord.mockGuild()
         guild.commands.set = jest.fn().mockImplementation(() => Promise.resolve())
     })
@@ -22,7 +22,7 @@ describe("GuildCreateEvent", () => {
     })
 
     it("should log the guild name and id", async () => {
-        const logSpy = jest.spyOn(discord.getClient().logger, 'success')
+        const logSpy = jest.spyOn(discord.getApplication().logger, 'success')
         await eventInstance.execute(guild)
 
         expect(logSpy).toHaveBeenCalledTimes(1)

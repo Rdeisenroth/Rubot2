@@ -12,7 +12,7 @@ describe("ReadyEvent", () => {
     let guild: Guild
 
     beforeEach(() => {
-        eventInstance = new event(discord.getClient())
+        eventInstance = new event(discord.getApplication())
         guild = discord.mockGuild()
         guild.commands.set = jest.fn().mockImplementation(() => Promise.resolve())
     })
@@ -22,19 +22,19 @@ describe("ReadyEvent", () => {
     })
 
     it("should log the bot stats", async () => {
-        const logSpy = jest.spyOn(discord.getClient().logger, 'ready')
+        const logSpy = jest.spyOn(discord.getApplication().logger, 'ready')
         await eventInstance.execute()
 
         expect(logSpy).toHaveBeenCalledTimes(1)
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`"${discord.getClient().user?.username}" is Ready!`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`"${discord.getApplication().client.user?.username}" is Ready!`))
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`Bot Stats:`))
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getClient().users.cache.size} user(s)`))
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getClient().channels.cache.size} channel(s)`))
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getClient().guilds.cache.size} guild(s)`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getApplication().client.users.cache.size} user(s)`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getApplication().client.channels.cache.size} channel(s)`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${discord.getApplication().client.guilds.cache.size} guild(s)`))
     })
 
     it("should not create a new guild entry in the database if it already exists", async () => {
-        await discord.getClient().configManager.getGuildConfig(guild)
+        await discord.getApplication().configManager.getGuildConfig(guild)
 
         const findSpy = jest.spyOn(GuildModel, 'findById')
         const saveSpy = jest.spyOn(GuildModel.prototype, 'save')
@@ -59,7 +59,7 @@ describe("ReadyEvent", () => {
 
 
     it("should register slash commands for the guild", async () => {
-        const registerSpy = jest.spyOn(discord.getClient().commandsManager, 'registerSlashCommandsFor')
+        const registerSpy = jest.spyOn(discord.getApplication().commandsManager, 'registerSlashCommandsFor')
         const commandSetSpy = jest.spyOn(guild.commands, 'set')
         await eventInstance.execute()
 
@@ -68,7 +68,7 @@ describe("ReadyEvent", () => {
     })
 
     it("should set the bot's presence", async () => {
-        const setPresenceSpy = jest.spyOn(discord.getClient().user!, 'setPresence')
+        const setPresenceSpy = jest.spyOn(discord.getApplication().client.user!, 'setPresence')
         await eventInstance.execute()
 
         expect(setPresenceSpy).toHaveBeenCalledTimes(1)
