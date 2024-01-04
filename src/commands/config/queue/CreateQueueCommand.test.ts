@@ -87,7 +87,7 @@ describe("CreateQueueCommand", () => {
         expect(dbGuild.queues[0].description).toBe("test description")
     })
 
-    it("should fail if the queue name is already taken", async () => {
+    it("should fail if the queue name is already taken on the same guild", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         const queue = {
             name: "test name",
@@ -113,6 +113,40 @@ describe("CreateQueueCommand", () => {
             title: "Queue Creation Failed",
             description: expect.stringContaining(`Queue with name "${queue.name}" already exists.`),
             color: Colors.Red
+        })
+    })
+
+    it("should create a queue if the queue name is already taken on another guild", async () => {
+        const queue = {
+            name: "test name",
+            description: "test description",
+            tracks: []
+        }
+        const otherGuild = discord.mockGuild()
+        let dbGuild = await discord.getApplication().configManager.getGuildConfig(otherGuild)
+        dbGuild.queues.push(queue)
+        await dbGuild.save()
+
+        const replySpy = jest.spyOn(interaction, 'editReply')
+        await commandInstance.execute()
+        dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
+
+        expect(dbGuild.queues).toHaveLength(1)
+        expect(dbGuild.queues[0].name).toBe("test name")
+        expect(dbGuild.queues[0].description).toBe("test description")
+
+        expect(replySpy).toHaveBeenCalledTimes(1)
+        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
+        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
+        expect(messageContent.embeds).toBeDefined()
+        const embeds = messageContent.embeds as EmbedBuilder[]
+        expect(embeds).toHaveLength(1)
+        const embed = embeds[0]
+        const embedData = embed.data
+
+        expect(embedData).toEqual({
+            title: "Queue Created",
+            description: expect.stringContaining("Queue"),
         })
     })
 
