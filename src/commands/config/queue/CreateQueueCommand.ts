@@ -83,6 +83,7 @@ export default class CreateQueueCommand extends BaseCommand {
      */
     private async createQueue(queueName: string, queueDescription: string): Promise<void> {
         if (this.checkQueueName(queueName)) {
+            this.app.logger.info(`Queue "${queueName}" already exists on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id}). Aborting.`)
             throw new QueueAlreadyExistsError(queueName);
         }
         const queue: Queue = {
