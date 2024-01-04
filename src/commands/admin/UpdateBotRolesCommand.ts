@@ -33,7 +33,7 @@ export default class UpdateBotRolesCommand extends BaseCommand {
         const embed = this.mountRoleEmbed();
         await this.send({ embeds: [embed] });
 
-        this.app.logger.info(`Done generating internal Roles for guild ${this.interaction.guild.name}`);
+        this.app.logger.info(`Done generating internal Roles for guild "${this.interaction.guild.name}" (id: ${this.interaction.guild.id})`);
     }
 
     /**

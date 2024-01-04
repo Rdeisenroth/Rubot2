@@ -17,9 +17,9 @@ export default class CommandsManager {
     public async registerSlashCommandsFor(guild: Guild): Promise<void> {
         try {
             await guild.commands.set(this.commandsData);
-            this.app.logger.info(`Registered commands in guild ${guild.name}`);
+            this.app.logger.info(`Registered commands in guild "${guild.name}" (id: ${guild.id})`);
         } catch (error) {
-            this.app.logger.error(`Failed to register commands in guild ${guild.name}`);
+            this.app.logger.error(`Failed to register commands in guild "${guild.name}" (id: ${guild.id})`);
             throw error;
         }
     }
