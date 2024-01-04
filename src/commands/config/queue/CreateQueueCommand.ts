@@ -1,23 +1,24 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, Colors, EmbedBuilder } from "discord.js";
 import { BaseCommand } from "@baseCommand";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { Queue } from "@models/Queue";
+import { QueueAlreadyExistsError } from "@types";
 
 export default class CreateQueueCommand extends BaseCommand {
     public static name = "create";
-    public static description = "Create a queue.";
+    public static description = "Creates a new queue.";
     public static options = [
         {
             name: "name",
-            description: "The Queue Name",
+            description: "The name of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
             default: "",
         },
         {
             name: "description",
-            description: "The Queue Description",
+            description: "The description of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
             default: "",
@@ -37,9 +38,18 @@ export default class CreateQueueCommand extends BaseCommand {
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const queueName = await this.getOptionValue(CreateQueueCommand.options[0]);
         const queueDescription = await this.getOptionValue(CreateQueueCommand.options[1]);
-        await this.createQueue(queueName, queueDescription);
+        try {
+            await this.createQueue(queueName, queueDescription);
+        } catch (error) {
+            if (error instanceof QueueAlreadyExistsError) {
+                const embed = this.mountCreateQueueFailedEmbed(error.queueName);
+                this.send({ embeds: [embed] });
+                return;
+            }
+            throw error;
+        }
         const embed = this.mountCreateQueueEmbed();
-        this.send({ embeds: [embed] });
+        this.send({ embeds: [embed] });    
     }
 
     /**
@@ -54,11 +64,27 @@ export default class CreateQueueCommand extends BaseCommand {
     }
 
     /**
+     * Returns the create queue failed embed with the duplicate queue name to be sent to the user.
+     * @param duplicateQueueName The name of the queue that already exists.
+     * @returns The embed to be sent to the user.
+     */
+    private mountCreateQueueFailedEmbed(duplicateQueueName: string): EmbedBuilder {
+        const embed = new EmbedBuilder()
+            .setTitle("Queue Creation Failed")
+            .setDescription(`Queue with name "${duplicateQueueName}" already exists.`)
+            .setColor(Colors.Red)
+        return embed
+    }
+
+    /**
      * Creates a queue on the database.
      * @param queueName The queue name.
      * @param queueDescription The queue description.
      */
     private async createQueue(queueName: string, queueDescription: string): Promise<void> {
+        if (this.checkQueueName(queueName)) {
+            throw new QueueAlreadyExistsError(queueName);
+        }
         const queue: Queue = {
             name: queueName,
             description: queueDescription,
@@ -73,7 +99,20 @@ export default class CreateQueueCommand extends BaseCommand {
             opening_times: new mongoose.Types.DocumentArray([]),
             info_channels: [],
         }
+        this.app.logger.debug(`Creating queue "${queueName}" on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id})`)
         this.dbGuild.queues.push(queue);
         await this.dbGuild.save();
+        this.app.logger.info(`Queue "${queueName}" created on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id})`)
+    }
+
+    /**
+     * Returns whether the queue name already exists on this guild.
+     * 
+     * The check is case insensitive.
+     * @param queueName The queue name to check.
+     * @returns Whether the queue name already exists on this guild.
+     */
+    private checkQueueName(queueName: string): boolean {
+        return this.dbGuild.queues.some((queue) => queue.name.toLowerCase === queueName.toLowerCase);
     }
 }
