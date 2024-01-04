@@ -9,7 +9,7 @@ export default class QueueAlreadyExistsError extends Error {
      * @param queueName The queue name which already exists.
      */
     constructor(queueName: string) {
-        super(`Queue ${queueName} already exists.`);
+        super(`Queue "${queueName}" already exists.`);
         this.queueName = queueName;
     }
 }
