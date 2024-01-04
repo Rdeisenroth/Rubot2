@@ -38,7 +38,7 @@ export default class ConfigManager {
             queues: [],
         });
         await newGuildData.save();
-        this.app.logger.info(`Created new Guild Config for ${guild.name} (id: ${guild.id})`);
+        this.app.logger.info(`Created new Guild Config for "${guild.name}" (id: ${guild.id})`);
         return newGuildData;
     }
 

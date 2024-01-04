@@ -26,7 +26,7 @@ describe("GuildCreateEvent", () => {
         await eventInstance.execute(guild)
 
         expect(logSpy).toHaveBeenCalledTimes(1)
-        expect(logSpy).toHaveBeenCalledWith(`Joined guild ${guild.name} (id: ${guild.id})`)
+        expect(logSpy).toHaveBeenCalledWith(`Joined guild "${guild.name}" (id: ${guild.id})`)
     })
 
     it("should create a new guild in the database", async () => {
