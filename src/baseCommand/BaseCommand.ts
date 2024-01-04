@@ -75,7 +75,6 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
         const interaction = this.interaction as CommandInteraction
         const optionValue = interaction.options.get(option.name)
         if (optionValue) {
-            console.log(optionValue)
             return optionValue.value as string
         } else if (option.default) {
             return option.default as string
