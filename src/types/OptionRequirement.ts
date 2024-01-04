@@ -3,7 +3,7 @@ import { ApplicationCommandOptionType } from "discord.js";
 /**
  * The option requirement interface used for the command options.
  */
-export default interface OptionRequirement<T> {
+export default interface OptionRequirement {
     /**
      * The option name.
      */
@@ -23,5 +23,5 @@ export default interface OptionRequirement<T> {
     /**
      * The default value of the option.
      */
-    default: T
+    default?: string | boolean | number
 }

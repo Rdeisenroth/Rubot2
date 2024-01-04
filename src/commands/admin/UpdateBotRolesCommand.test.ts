@@ -26,7 +26,6 @@ describe("UpdateBotRolesCommand", () => {
             app.logger.debug(`Resolving role ${roleId}`)
             return roles.find((role) => role.id === roleId)
         })
-        jest.spyOn(command.prototype as any, 'getOptionValue').mockImplementation(async () => true)
         commandInstance = new command(interaction, discord.getApplication())
     })
 
@@ -67,7 +66,14 @@ describe("UpdateBotRolesCommand", () => {
     it("should not create the discord roles if they don't exist and option is false", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
-        jest.spyOn(command.prototype as any, 'getOptionValue').mockImplementation(async () => false)
+        interaction.options.get = jest.fn().mockImplementation((option: string) => {
+            switch (option) {
+                case "create-if-not-exists":
+                    return { value: false }
+                default:
+                    return null
+            }
+        })
         await commandInstance.execute()
 
         expect(interaction.guild!.roles.create).not.toHaveBeenCalled()

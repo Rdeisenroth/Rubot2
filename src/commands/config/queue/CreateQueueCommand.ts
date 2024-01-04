@@ -14,14 +14,12 @@ export default class CreateQueueCommand extends BaseCommand {
             description: "The name of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: String.prototype,
         },
         {
             name: "description",
             description: "The description of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: String.prototype,
         },
     ];
 

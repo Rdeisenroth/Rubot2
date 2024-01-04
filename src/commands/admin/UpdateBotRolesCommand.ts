@@ -28,7 +28,8 @@ export default class UpdateBotRolesCommand extends BaseCommand {
             throw new Error("Interaction is not in a guild");
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
-        const createIfNotExists = await this.getOptionValue(UpdateBotRolesCommand.options[0]);
+        const createIfNotExists = Boolean(await this.getOptionValue(UpdateBotRolesCommand.options[0]));
+        console.log(`createIfNotExists: ${createIfNotExists}`);
         await this.createDbRoles(createIfNotExists);
         const embed = this.mountRoleEmbed();
         await this.send({ embeds: [embed] });

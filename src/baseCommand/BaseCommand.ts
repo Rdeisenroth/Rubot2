@@ -1,7 +1,7 @@
 import { CommandInteraction, Interaction, Message, BaseMessageOptions, CommandInteractionOption } from "discord.js";
 import { handleInteractionError } from "@utils/handleError";
 import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
-import { OptionRequirement } from "@types";
+import { MissingOptionError, OptionRequirement } from "@types";
 
 /**
  * The base class for all commands.
@@ -10,7 +10,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
     /**
      * The command options.
      */
-    public static options: OptionRequirement<any>[] = []
+    public static options: OptionRequirement[] = []
 
     /**
      * Sends a message to the interaction channel.
@@ -65,16 +65,21 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
 
     /**
      * Returns the value of the given option or the default value if the option is not present.
+     * 
+     * If the option is not present and there is no default value, throws an error.
      * @param option The option to get the value from.
      * @returns The option value.
      */
-    protected async getOptionValue<T>(option: OptionRequirement<T>): Promise<T> {
+    protected async getOptionValue(option: OptionRequirement): Promise<string> {
         this.app.logger.debug(`Getting option value ${option.name} from interaction ${this.interaction.id}`)
         const interaction = this.interaction as CommandInteraction
         const optionValue = interaction.options.get(option.name)
         if (optionValue) {
-            return optionValue.value as T
+            console.log(optionValue)
+            return optionValue.value as string
+        } else if (option.default) {
+            return option.default as string
         }
-        return option.default as T
+        throw new MissingOptionError(option.name, interaction.commandName)
     }
 }
