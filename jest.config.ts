@@ -5,11 +5,12 @@ const config: Config = {
     coverageDirectory: './coverage/',
     collectCoverage: false,
     preset: 'ts-jest',
-    globalSetup: "<rootDir>/globalSetup.ts",
-    globalTeardown: "<rootDir>/globalTeardown.ts",
+    globalSetup: "<rootDir>/tests/globalSetup.ts",
+    globalTeardown: "<rootDir>/tests/globalTeardown.ts",
     setupFilesAfterEnv: [
-        '<rootDir>/testSetup.ts'
-    ]
+        '<rootDir>/tests/testSetup.ts'
+    ],
+    modulePathIgnorePatterns: ["<rootDir>/dist/"],
 }
 
 export default config

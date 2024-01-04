@@ -1,8 +1,8 @@
 import { container } from "tsyringe"
-import ReadyEvent from "../../src/events/ReadyEvent"
-import { MockDiscord } from "../mockDiscord"
+import ReadyEvent from "./ReadyEvent"
+import { MockDiscord } from "../../tests/mockDiscord"
 import { ActivityType, Guild } from "discord.js"
-import { GuildModel } from "../../src/models/Guild"
+import { GuildModel } from "../models/Guild"
 
 
 describe("ReadyEvent", () => {

@@ -1,6 +1,6 @@
 import { BaseMessageOptions, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import PingCommand from "../../src/commands/PingCommand";
-import { MockDiscord } from "../mockDiscord";
+import PingCommand from "./PingCommand";
+import { MockDiscord } from "../../tests/mockDiscord";
 import { container } from "tsyringe";
 
 describe("PingCommand", () => {
