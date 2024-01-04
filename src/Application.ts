@@ -22,11 +22,19 @@ export class Application {
      */
     public logger: ConsolaInstance
     
+    /**
+     * The config manager responsible for managing the bot config in the database.
+     */
     public configManager: ConfigManager  
 
+    /**
+     * The commands manager responsible for managing the bot commands.
+     */
     public commandsManager: CommandsManager
 
-
+    /**
+     * The bot token.
+     */
     private readonly token: string
 
     /**
@@ -63,10 +71,17 @@ export class Application {
         this.client.login(this.token)
     }
 
+    /**
+     * Starts the queue guard job.
+     */
     public startQueueGuardJob(): void {
         this.queueGuardJob().start()
     }
 
+    /**
+     * Returns the queue guard job.
+     * @returns The queue guard job.
+     */
     private queueGuardJob(): CronJob<any, any> {
         return new CronJob("*/30 * * * * *", () => {
             // TODO
@@ -74,6 +89,9 @@ export class Application {
         })
     }
 
+    /**
+     * Connects the application to the database.
+     */
     public async connectToDatabase(): Promise<void> {
         this.logger.debug('Connecting to MongoDB')
         mongoose.connect(Environment.monogodbUrl, {})
@@ -82,6 +100,9 @@ export class Application {
         })
     }
 
+    /**
+     * Disconnects the application from the database.
+     */
     public async disconnectFromDatabase(): Promise<void> {
         this.logger.debug('Disconnecting from MongoDB')
         await mongoose.disconnect()
@@ -101,6 +122,9 @@ export class Application {
     }
 }
 
+/**
+ * Starts the bot.
+ */
 export default function start() {
     const clientOptions: ClientOptions = {
         intents: [
