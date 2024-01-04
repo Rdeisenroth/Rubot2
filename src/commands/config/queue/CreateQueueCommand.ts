@@ -14,14 +14,14 @@ export default class CreateQueueCommand extends BaseCommand {
             description: "The name of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: "",
+            default: String.prototype,
         },
         {
             name: "description",
             description: "The description of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: "",
+            default: String.prototype,
         },
     ];
 
@@ -39,7 +39,7 @@ export default class CreateQueueCommand extends BaseCommand {
         const queueName = await this.getOptionValue(CreateQueueCommand.options[0]);
         const queueDescription = await this.getOptionValue(CreateQueueCommand.options[1]);
         try {
-            await this.createQueue(queueName, queueDescription);
+            await this.createQueue(queueName.valueOf(), queueDescription.valueOf());
         } catch (error) {
             if (error instanceof QueueAlreadyExistsError) {
                 const embed = this.mountCreateQueueFailedEmbed(error.queueName);

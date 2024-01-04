@@ -40,14 +40,14 @@ describe("CreateQueueCommand", () => {
             description: "The name of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: "",
+            default: String.prototype,
         })
         expect(command.options[1]).toStrictEqual({
             name: "description",
             description: "The description of the queue.",
             type: ApplicationCommandOptionType.String,
             required: true,
-            default: "",
+            default: String.prototype,
         })
     })
 
