@@ -20,13 +20,14 @@ describe("InteractionCreateEvent", () => {
         expect(event.name).toBe("interactionCreate")
     })
 
-    it("should log who executed which command with which options", async () => {
+    it("should log who executed which command with which options in which guild", async () => {
         const logSpy = jest.spyOn(discord.getApplication().logger, 'info')
         await eventInstance.execute(interaction)
 
         const commandInteraction = interaction as ChatInputCommandInteraction
         expect(logSpy).toHaveBeenCalledTimes(2)
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${interaction.user.tag} executed command "${commandInteraction.commandName}" with options`))
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`in guild ${interaction.guild?.name} (id: ${interaction.guild?.id})`))
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`Command ${commandInteraction.commandName} executed successfully.`))
     })
 

@@ -12,8 +12,10 @@ export default class InteractionCreateEvent extends BaseEvent {
         if (!command) return;
 
         const options = this.getOptions(interaction.options.data);
-        const commandName = interaction.commandName + (options.commandName.length > 0 ? ` ${options.commandName.map(option => option.name).join(" ")}` : "");
-        this.app.logger.info(`${interaction.user.tag} executed command "${commandName}" with options ${JSON.stringify(options.options)}`);
+        const commandName = interaction.commandName + (options.commandName.length > 0 ? ` ${options.commandName.join(" ")}` : "");
+        const optionsArray = Array.from(options.options.entries())
+        const optionsString = `[${optionsArray.map(([key, value]) => `"${key}": "${value}"`).join(", ")}]`
+        this.app.logger.info(`${interaction.user.tag} executed command "${commandName}" with options ${optionsString} in guild ${interaction.guild?.name} (id: ${interaction.guild?.id})`);
 
         const concreteCommand = new command(interaction, this.app);
 
@@ -26,25 +28,20 @@ export default class InteractionCreateEvent extends BaseEvent {
         }
     }
 
-    private getOptions(options: readonly CommandInteractionOption[] | undefined): {commandName: Option<any>[], options: Option<any>[]} {
-        if (!options) return {commandName: [], options: []};
-        const commandName: Option<any>[] = []
-        const commandOptions: Option<any>[] = []
+    private getOptions(options: readonly CommandInteractionOption[] | undefined): {commandName: Array<string>, options: Map<string, any>} {
+        if (!options) return {commandName: [], options: new Map()};
+        const commandName: Array<string> = []
+        const commandOptions: Map<string, any> = new Map()
         
         options.forEach(option => {
-            const optionData = {
-                name: option.name,
-                value: option.value,
-                type: option.type,
-            } 
             if (option.type == ApplicationCommandOptionType.Subcommand || option.type == ApplicationCommandOptionType.SubcommandGroup) {
-                commandName.push(optionData)
+                commandName.push(option.name)
             } else {
-                commandOptions.push(optionData)
+                commandOptions.set(option.name, option.value)
             }
             const nestedOptions = this.getOptions(option.options)
             commandName.push(...nestedOptions.commandName)
-            commandOptions.push(...nestedOptions.options)
+            nestedOptions.options.forEach((value, key) => { commandOptions.set(key, value) })
         })
         return {commandName: commandName, options: commandOptions}
     }
@@ -53,5 +50,4 @@ export default class InteractionCreateEvent extends BaseEvent {
 interface Option<T> {
     name: string;
     value: T
-    type: ApplicationCommandOptionType;
 }
