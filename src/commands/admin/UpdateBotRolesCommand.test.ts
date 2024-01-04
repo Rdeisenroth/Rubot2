@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionType, BaseMessageOptions, ChatInputCommandInteraction, EmbedBuilder, PermissionsBitField, Role, RoleCreateOptions } from "discord.js";
-import { MockDiscord } from "../../../tests/mockDiscord";
+import { MockDiscord } from "@tests/mockDiscord";
 import UpdateBotRolesCommand from "./UpdateBotRolesCommand";
 import { container } from "tsyringe";
 import { mockRole } from "@shoginn/discordjs-mock";
-import { InternalGuildRoles } from "../../models/BotRoles";
-import { GuildModel } from "../../models/Guild";
+import { InternalGuildRoles } from "@models/BotRoles";
+import { GuildModel } from "@models/Guild";
 
 describe("UpdateBotRolesCommand", () => {
     const command = UpdateBotRolesCommand

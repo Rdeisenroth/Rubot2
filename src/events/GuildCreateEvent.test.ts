@@ -1,9 +1,9 @@
 import { container } from "tsyringe"
 import GuildCreateEvent from "./GuildCreateEvent"
-import { MockDiscord } from "../../tests/mockDiscord"
+import { MockDiscord } from "@tests/mockDiscord"
 import { Guild } from "discord.js"
-import { CommandsManager } from "../managers"
-import { GuildModel } from "../models/Guild"
+import { CommandsManager } from "@managers"
+import { GuildModel } from "@models/Guild"
 
 describe("GuildCreateEvent", () => {
     const event = GuildCreateEvent

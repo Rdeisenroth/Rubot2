@@ -1,4 +1,4 @@
-import { BaseSubcommandsHandler } from "../baseCommand";
+import { BaseSubcommandsHandler } from "@baseCommand";
 import AdminQueueCommandsHandler from "./admin/AdminQueueCommandsHandler";
 import UpdateBotRolesCommand from "./admin/UpdateBotRolesCommand";
 

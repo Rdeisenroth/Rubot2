@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
-import { BaseCommand } from "../../../baseCommand";
-import { Guild as DatabaseGuild } from "../../../models/Guild";
+import { BaseCommand } from "@baseCommand";
+import { Guild as DatabaseGuild } from "@models/Guild";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
-import { Queue } from "../../../models/Queue";
+import { Queue } from "@models/Queue";
 
 export default class CreateQueueCommand extends BaseCommand {
     public static name = "create";

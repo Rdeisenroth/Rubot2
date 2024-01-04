@@ -1,5 +1,5 @@
 import { Guild } from "discord.js";
-import { BaseEvent } from "../baseEvent";
+import { BaseEvent } from "@baseEvent";
 
 export default class GuildCreateEvent extends BaseEvent {
     public static name = "guildCreate";

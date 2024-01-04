@@ -1,4 +1,4 @@
-import { BaseEvent } from "../baseEvent";
+import { BaseEvent } from "@baseEvent";
 import { ActivityType, ApplicationCommandData, Guild } from "discord.js";
 
 export default class ReadyEvent extends BaseEvent {

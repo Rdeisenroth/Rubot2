@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, Guild as DiscordGuild, EmbedBuilder, Role } from "discord.js";
-import { BaseCommand } from "../../baseCommand";
-import { DBRole, InternalGuildRoles, RoleScopes } from "../../models/BotRoles";
-import { Guild as DatabaseGuild } from "../../models/Guild";
+import { BaseCommand } from "@baseCommand";
+import { DBRole, InternalGuildRoles, RoleScopes } from "@models/BotRoles";
+import { Guild as DatabaseGuild } from "@models/Guild";
 import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
 
 export default class UpdateBotRolesCommand extends BaseCommand {

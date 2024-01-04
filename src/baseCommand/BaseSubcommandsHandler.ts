@@ -1,5 +1,5 @@
 import { CommandInteraction, CommandInteractionOption, Interaction } from "discord.js";
-import { handleInteractionError } from "../utils/handleError";
+import { handleInteractionError } from "@utils/handleError";
 import BaseCommandOrSubcommandsHandler from "./BaseCommandOrSubcommandsHandler";
 import { Bot } from "../Bot";
 

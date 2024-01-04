@@ -10,7 +10,31 @@
     "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@baseCommand": ["src/baseCommand"],
+      "@baseEvent": ["src/baseEvent"],
+      "@managers": ["src/managers"],
+      "@types": ["src/types"],
+      "@utils/*": ["src/utils/*"],
+      "@tests/*": ["tests/*"],
+      "@models/*": ["src/models/*"],
+      "@commands/*": ["src/commands/*"],
+    },
+    "plugins": [
+      /* Transform paths in output .js files */
+      {
+        "transform": "typescript-transform-paths"
+      },
+      /* Transform paths in output .d.ts files */
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ]
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

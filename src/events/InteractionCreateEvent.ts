@@ -1,4 +1,4 @@
-import { BaseEvent } from "../baseEvent";
+import { BaseEvent } from "@baseEvent";
 import { ApplicationCommandOptionType, CommandInteractionOption, Interaction } from "discord.js";
 
 export default class InteractionCreateEvent extends BaseEvent {

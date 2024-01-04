@@ -1,4 +1,4 @@
-import { BaseCommand } from "../baseCommand";
+import { BaseCommand } from "@baseCommand";
 import { EmbedBuilder } from "discord.js";
 
 export default class HelpCommand extends BaseCommand {

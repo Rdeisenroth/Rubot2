@@ -1,4 +1,4 @@
-import { BaseSubcommandsHandler } from "../baseCommand";
+import { BaseSubcommandsHandler } from "@baseCommand";
 import ConfigQueueCommandsHandler from "./config/ConfigQueueCommandsHandler";
 
 export default class ConfigCommandsHandler extends BaseSubcommandsHandler {

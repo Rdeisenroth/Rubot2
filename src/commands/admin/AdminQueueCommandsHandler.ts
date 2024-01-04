@@ -1,4 +1,4 @@
-import { BaseSubcommandsHandler } from "../../baseCommand";
+import { BaseSubcommandsHandler } from "@baseCommand";
 
 export default class AdminQueueCommandsHandler extends BaseSubcommandsHandler {
     public static name = "queue";
