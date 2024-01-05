@@ -25,10 +25,9 @@ describe("InteractionCreateEvent", () => {
         await eventInstance.execute(interaction)
 
         const commandInteraction = interaction as ChatInputCommandInteraction
-        expect(logSpy).toHaveBeenCalledTimes(2)
+        expect(logSpy).toHaveBeenCalledTimes(1)
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`${interaction.user.tag} executed command "${commandInteraction.commandName}" with options`))
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`in guild ${interaction.guild?.name} (id: ${interaction.guild?.id})`))
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`Command ${commandInteraction.commandName} executed successfully.`))
     })
 
     it("should not execute a command if the interaction is not a command", async () => {

@@ -21,7 +21,7 @@ export default class InteractionCreateEvent extends BaseEvent {
 
         try {
             await concreteCommand.execute();
-            this.app.logger.info(`Command ${command.name} executed successfully.`);
+            this.app.logger.debug(`Finished executing "${commandName}" in guild ${interaction.guild?.name} (id: ${interaction.guild?.id})`);
         } catch (error) {
             this.app.logger.error(error);
             interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
