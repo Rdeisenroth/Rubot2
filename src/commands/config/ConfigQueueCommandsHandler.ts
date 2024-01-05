@@ -1,5 +1,6 @@
 import { BaseSubcommandsHandler } from "@baseCommand";
 import CreateQueueCommand from "./queue/CreateQueueCommand";
+import SetWaitingRoomCommand from "./queue/SetWaitingRoomCommand";
 
 export default class ConfigQueueCommandsHandler extends BaseSubcommandsHandler {
     public static name = "queue";
@@ -7,5 +8,6 @@ export default class ConfigQueueCommandsHandler extends BaseSubcommandsHandler {
 
     public static subcommands = [
         CreateQueueCommand,
+        SetWaitingRoomCommand,
     ]
 }
