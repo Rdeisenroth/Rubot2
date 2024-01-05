@@ -1,4 +1,4 @@
-import { mongoose, prop, Ref, SubDocumentType } from "@typegoose/typegoose";
+import { getModelForClass, mongoose, prop, Ref, SubDocumentType } from "@typegoose/typegoose";
 import { VoiceChannelSpawner } from "./VoiceChannelSpawner";
 import { Queue } from "./Queue";
 import { ChannelType } from "discord.js";
@@ -61,3 +61,9 @@ export class VoiceChannel implements Channel {
     @prop({ type: String, default: [] })
         supervisors?: mongoose.Types.Array<string>;
 }
+
+export const VoiceChannelModel = getModelForClass(VoiceChannel, {
+    schemaOptions: {
+        autoCreate: false,
+    },
+});
