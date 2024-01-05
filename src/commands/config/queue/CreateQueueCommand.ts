@@ -24,7 +24,7 @@ export default class CreateQueueCommand extends BaseCommand {
     ];
 
     /**
-     * The guild saved in the database.s
+     * The guild saved in the database.
      */
     private dbGuild!: DocumentType<DatabaseGuild>;
 
@@ -34,10 +34,10 @@ export default class CreateQueueCommand extends BaseCommand {
             throw new Error("Interaction is not in a guild");
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
-        const queueName = await this.getOptionValue(CreateQueueCommand.options[0]);
-        const queueDescription = await this.getOptionValue(CreateQueueCommand.options[1]);
+        const queueName = this.getOptionValue(CreateQueueCommand.options[0]);
+        const queueDescription = this.getOptionValue(CreateQueueCommand.options[1]);
         try {
-            await this.createQueue(queueName.valueOf(), queueDescription.valueOf());
+            await this.createQueue(queueName, queueDescription);
         } catch (error) {
             if (error instanceof QueueAlreadyExistsError) {
                 const embed = this.mountCreateQueueFailedEmbed(error.queueName);
@@ -47,7 +47,7 @@ export default class CreateQueueCommand extends BaseCommand {
             throw error;
         }
         const embed = this.mountCreateQueueEmbed();
-        this.send({ embeds: [embed] });    
+        await this.send({ embeds: [embed] });    
     }
 
     /**

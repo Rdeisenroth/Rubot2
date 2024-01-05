@@ -70,7 +70,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
      * @param option The option to get the value from.
      * @returns The option value.
      */
-    protected async getOptionValue(option: OptionRequirement): Promise<string> {
+    protected getOptionValue(option: OptionRequirement): string {
         this.app.logger.debug(`Getting option value ${option.name} from interaction ${this.interaction.id}`)
         const interaction = this.interaction as CommandInteraction
         const optionValue = interaction.options.get(option.name)
