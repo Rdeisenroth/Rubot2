@@ -62,3 +62,9 @@ export interface BotRole extends DBRole {
      */
     scope: RoleScopes.GLOBAL,
 }
+
+export const DBRoleModel = getModelForClass(DBRole, {
+    schemaOptions: {
+        autoCreate: false,
+    },
+});

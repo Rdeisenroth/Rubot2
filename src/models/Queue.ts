@@ -1,4 +1,4 @@
-import { prop, mongoose, SubDocumentType, ArraySubDocumentType } from '@typegoose/typegoose';
+import { prop, mongoose, SubDocumentType, ArraySubDocumentType, getModelForClass } from '@typegoose/typegoose';
 import { VoiceChannelSpawner } from './VoiceChannelSpawner';
 import { QueueEventType } from './Event';
 import { QueueSpan } from './QueueSpan';
@@ -108,3 +108,9 @@ export class Queue {
     @prop({ type: QueueEntry, default: [], required: true })
         entries!: mongoose.Types.DocumentArray<ArraySubDocumentType<QueueEntry>>;
 }
+
+export const QueueModel = getModelForClass(Queue, {
+    schemaOptions: {
+        autoCreate: false,
+    },
+});
