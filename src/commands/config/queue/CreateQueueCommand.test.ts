@@ -71,7 +71,8 @@ describe("CreateQueueCommand", () => {
 
         expect(embedData).toEqual({
             title: "Queue Created",
-            description: expect.stringContaining("Queue"),
+            description: expect.stringContaining(`Queue "${interaction.options.get("name")?.value}" created.`),
+            color: Colors.Green
         })
     })
 
@@ -145,6 +146,7 @@ describe("CreateQueueCommand", () => {
         expect(embedData).toEqual({
             title: "Queue Created",
             description: expect.stringContaining("Queue"),
+            color: Colors.Green
         })
     })
 

@@ -57,7 +57,8 @@ export default class CreateQueueCommand extends BaseCommand {
     private mountCreateQueueEmbed(): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setTitle("Queue Created")
-            .setDescription(`Queue ${this.dbGuild.queues[this.dbGuild.queues.length - 1].name} created.`)
+            .setDescription(`Queue "${this.dbGuild.queues[this.dbGuild.queues.length - 1].name}" created.`)
+            .setColor(Colors.Green)
         return embed
     }
 
