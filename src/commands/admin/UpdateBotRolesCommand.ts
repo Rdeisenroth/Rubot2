@@ -5,7 +5,7 @@ import { Guild as DatabaseGuild } from "@models/Guild";
 import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
 
 export default class UpdateBotRolesCommand extends BaseCommand {
-    public static name = "updatebotroles";
+    public static name = "update_bot_roles";
     public static description = "Creates or updates the database entries for the internal roles";
     public static options = [
         {

@@ -30,7 +30,7 @@ describe("UpdateBotRolesCommand", () => {
     })
 
     it("should have the correct name", () => {
-        expect(command.name).toBe("updatebotroles")
+        expect(command.name).toBe("update_bot_roles")
     })
 
     it("should have the correct description", () => {
