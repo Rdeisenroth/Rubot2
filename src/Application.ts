@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { Client, Partials, ClientOptions } from 'discord.js'
 import { CronJob } from 'cron'
 import { ConsolaInstance, createConsola } from 'consola'
-import { CommandsManager, ConfigManager } from "./managers"
+import { CommandsManager, ConfigManager, UserManager } from "./managers"
 import commands from './commands'
 import events from './events'
 import { container, delay, inject, injectable, singleton } from "tsyringe"
@@ -26,6 +26,11 @@ export class Application {
      * The config manager responsible for managing the bot config in the database.
      */
     public configManager: ConfigManager  
+
+    /**
+     * The user manager responsible for managing the users in the database.
+     */
+    public userManager: UserManager
 
     /**
      * The commands manager responsible for managing the bot commands.
@@ -53,12 +58,13 @@ export class Application {
      * @param client The Discord client.
      * @param token The bot token.
      */
-    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager) {
+    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager, @inject(delay(() => UserManager)) userManager: UserManager) {
         this.client = new Client(options)
         this.token = token
         this.logger = createConsola({ level: Environment.logLevel })
         this.commandsManager = commandsManager
         this.configManager = configManager
+        this.userManager = userManager
     }
 
     /**

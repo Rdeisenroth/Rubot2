@@ -41,8 +41,4 @@ export default class ConfigManager {
         this.app.logger.info(`Created new Guild Config for "${guild.name}" (id: ${guild.id})`);
         return newGuildData;
     }
-
-    public async getGuildConfigs(): Promise<DocumentType<Guild>[]> {
-        return await GuildModel.find();
-    }
 }

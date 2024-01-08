@@ -47,7 +47,8 @@ export class MockDiscord {
     }
 
     public mockUser(): User {
-        return mockUser(this.app.client);
+        const userId = randomInt(281474976710655).toString();
+        return mockUser(this.app.client, { id: userId, username: userId, global_name: userId, discriminator: randomInt(9999).toString() });
     }
 
     public mockGuildMember(user: User = this.mockUser(), guild: Guild = this.mockGuild()): GuildMember {
