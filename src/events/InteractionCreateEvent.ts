@@ -46,8 +46,3 @@ export default class InteractionCreateEvent extends BaseEvent {
         return {commandName: commandName, options: commandOptions}
     }
 }
-
-interface Option<T> {
-    name: string;
-    value: T
-}
