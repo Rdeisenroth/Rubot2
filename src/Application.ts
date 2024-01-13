@@ -1,14 +1,16 @@
 import "reflect-metadata"
 import 'dotenv/config'
-import { Client, Partials, ClientOptions } from 'discord.js'
+import { Client, Partials, ClientOptions, Interaction } from 'discord.js'
 import { CronJob } from 'cron'
 import { ConsolaInstance, createConsola } from 'consola'
 import { CommandsManager, ConfigManager, UserManager } from "./managers"
-import commands from './commands'
-import events from './events'
 import { container, delay, inject, injectable, singleton } from "tsyringe"
 import Environment from "./Environment"
 import mongoose from "mongoose"
+import BaseCommandOrSubcommandsHandler from "./baseCommand/BaseCommandOrSubcommandsHandler"
+import path from "path"
+import CommandsLoader from "@utils/CommandsLoader"
+import events from "./events"
 
 /**
  * The main `Application` class.
@@ -47,11 +49,17 @@ export class Application {
      * 
      * Used to calculate bot startup time.
      */
-    readonly initTimestamp = Date.now()
+    public readonly initTimestamp = Date.now()
+
+    /**
+     * The folder where the bot commands are located.
+     */
+    private readonly commandsFolder = path.join(__dirname, "commands");
+
     /**
      * The bot commands.
      */
-    public commands = commands
+    public commands: (new (interaction: Interaction, app: Application) => BaseCommandOrSubcommandsHandler)[] = []
     
     /**
      * Initializes the bot.
@@ -68,13 +76,23 @@ export class Application {
     }
 
     /**
+     * Loads the bot commands.
+     */
+    private loadCommands(): void {
+        this.logger.info('Loading commands')
+        this.commands = container.resolve(CommandsLoader).loadCommands(this.commandsFolder)
+        this.logger.success('Loaded commands')
+    }
+
+    /**
      * Logs the bot in and starts listening to events.
      * Thereby also registers the bot commands.
      */
     public listen(): void {
-        this.logger.info('Listening to events')
+        this.loadCommands()
         this.registerEvents()
         this.client.login(this.token)
+        this.logger.info('Listening to events')
     }
 
     /**

@@ -14,6 +14,7 @@ describe("InteractionCreateEvent", () => {
     beforeEach(() => {
         eventInstance = new event(discord.getApplication())
         interaction = discord.mockInteraction("ping")
+        jest.spyOn(discord.getApplication().commands, 'find').mockReturnValue(PingCommand)
     })
 
     it("should have the correct name", () => {
@@ -21,6 +22,7 @@ describe("InteractionCreateEvent", () => {
     })
 
     it("should log who executed which command with which options in which guild", async () => {
+        console.log(discord.getApplication().commands)
         const logSpy = jest.spyOn(discord.getApplication().logger, 'info')
         await eventInstance.execute(interaction)
 

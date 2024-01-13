@@ -11,7 +11,7 @@ export default class CommandsManager {
 
     constructor(@inject(delay(() => Application)) app: Application) {
         this.app = app;
-        this.commandsData = this.loadCommandsData(this.app.commands);
+        this.commandsData = this.loadCommandsData(this.app.commands.map(command => command.prototype.constructor));
     }
 
     public async registerSlashCommandsFor(guild: Guild): Promise<void> {
