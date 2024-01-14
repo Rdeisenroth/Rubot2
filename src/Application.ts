@@ -7,10 +7,11 @@ import { CommandsManager, ConfigManager, UserManager } from "./managers"
 import { container, delay, inject, injectable, singleton } from "tsyringe"
 import Environment from "./Environment"
 import mongoose from "mongoose"
-import BaseCommandOrSubcommandsHandler from "./baseCommand/BaseCommandOrSubcommandsHandler"
 import path from "path"
 import CommandsLoader from "@utils/CommandsLoader"
-import events from "./events"
+import { BaseEvent } from "@baseEvent"
+import { BaseCommandOrSubcommandsHandler } from "@baseCommand"
+import EventsLoader from "@utils/EventsLoader"
 
 /**
  * The main `Application` class.
@@ -60,6 +61,16 @@ export class Application {
      * The bot commands.
      */
     public commands: (new (interaction: Interaction, app: Application) => BaseCommandOrSubcommandsHandler)[] = []
+
+    /**
+     * The folder where the bot events are located.
+     */
+    private readonly eventsFolder = path.join(__dirname, "events");
+
+    /**
+     * The bot events.
+     */
+    public events: (new (app: Application) => BaseEvent)[] = []
     
     /**
      * Initializes the bot.
@@ -75,12 +86,18 @@ export class Application {
         this.userManager = userManager
     }
 
+    private loadEvents(): void {
+        this.logger.info('Loading events')
+        this.events = container.resolve(EventsLoader).load(this.eventsFolder)
+        this.logger.success('Loaded events')
+    }
+
     /**
      * Loads the bot commands.
      */
     private loadCommands(): void {
         this.logger.info('Loading commands')
-        this.commands = container.resolve(CommandsLoader).loadCommands(this.commandsFolder)
+        this.commands = container.resolve(CommandsLoader).load(this.commandsFolder)
         this.logger.success('Loaded commands')
     }
 
@@ -89,6 +106,7 @@ export class Application {
      * Thereby also registers the bot commands.
      */
     public listen(): void {
+        this.loadEvents()
         this.loadCommands()
         this.registerEvents()
         this.client.login(this.token)
@@ -138,7 +156,7 @@ export class Application {
      */
     private registerEvents() {
         this.logger.info('Registering events')
-        for (const event of events) {
+        for (const event of this.events) {
             const concreteEvent = new event(this)
             this.client.on(event.name, concreteEvent.execute.bind(concreteEvent))
             this.logger.info(`Registered event ${event.name}`)

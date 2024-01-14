@@ -2,6 +2,7 @@ import OptionRequirement from "./OptionRequirement";
 import CouldNotFindChannelError from "./errors/CouldNotFindChannelError";
 import CouldNotFindQueueError from "./errors/CouldNotFindGuildError";
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
+import CouldNotFindTypeInFileError from "./errors/CouldNotFindTypeError";
 import MissingOptionError from "./errors/MissingOptionError";
 import QueueAlreadyExistsError from "./errors/QueueAlreadyExistsError";
 import RoleNotInDatabaseError from "./errors/RoleNotInDatabaseError";
@@ -14,4 +15,5 @@ export {
     CouldNotFindQueueError,
     CouldNotFindRoleError,
     RoleNotInDatabaseError,
+    CouldNotFindTypeInFileError,
 }
