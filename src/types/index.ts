@@ -3,6 +3,7 @@ import CouldNotFindChannelError from "./errors/CouldNotFindChannelError";
 import CouldNotFindQueueError from "./errors/CouldNotFindGuildError";
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
 import CouldNotFindTypeInFileError from "./errors/CouldNotFindTypeError";
+import InteractionNotInGuildError from "./errors/InteractionNotInGuildError";
 import MissingOptionError from "./errors/MissingOptionError";
 import NotInQueueError from "./errors/NotInQueueError";
 import QueueAlreadyExistsError from "./errors/QueueAlreadyExistsError";
@@ -18,4 +19,5 @@ export {
     RoleNotInDatabaseError,
     CouldNotFindTypeInFileError,
     NotInQueueError,
+    InteractionNotInGuildError,
 }

@@ -3,6 +3,7 @@ import { BaseCommand } from "@baseCommand";
 import { DBRole, InternalGuildRoles, RoleScopes } from "@models/BotRoles";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
+import { InteractionNotInGuildError } from "@types";
 
 export default class UpdateBotRolesCommand extends BaseCommand {
     public static name = "update_bot_roles";
@@ -25,7 +26,7 @@ export default class UpdateBotRolesCommand extends BaseCommand {
     public async execute(): Promise<void> {
         await this.defer();
         if (!this.interaction.guild) {
-            throw new Error("Interaction is not in a guild");
+            throw new InteractionNotInGuildError(this.interaction);
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const createIfNotExists = Boolean(this.getOptionValue(UpdateBotRolesCommand.options[0]));

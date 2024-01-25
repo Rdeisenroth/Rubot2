@@ -1,7 +1,7 @@
 import { BaseCommand } from "@baseCommand";
 import { Queue } from "@models/Queue";
 import { DocumentType } from "@typegoose/typegoose";
-import { NotInQueueError } from "@types";
+import { InteractionNotInGuildError, NotInQueueError } from "@types";
 import { Colors, EmbedBuilder } from "discord.js";
 
 export default class QueueInfoCommand extends BaseCommand {
@@ -26,7 +26,7 @@ export default class QueueInfoCommand extends BaseCommand {
 
     private async loadQueueAndPosition(): Promise<{ queue: DocumentType<Queue>, position: number }> {
         if (!this.interaction.guild) {
-            throw new Error("Interaction is not in a guild");
+            throw new InteractionNotInGuildError(this.interaction);
         }
         const user = this.interaction.user;
         const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)

@@ -1,6 +1,6 @@
 import { BaseCommand } from "@baseCommand";
 import { Queue } from "@models/Queue";
-import { CouldNotFindChannelError, CouldNotFindQueueError, CouldNotFindRoleError, RoleNotInDatabaseError } from "@types";
+import { CouldNotFindChannelError, CouldNotFindQueueError, CouldNotFindRoleError, InteractionNotInGuildError, RoleNotInDatabaseError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
 import { ApplicationCommandOptionType, ChannelType, Colors, EmbedBuilder, Role, VoiceChannel } from "discord.js";
@@ -38,7 +38,7 @@ export default class SetWaitingRoomCommand extends BaseCommand {
     public async execute() {
         await this.defer();
         if (!this.interaction.guild) {
-            throw new Error("Interaction is not in a guild");
+            throw new InteractionNotInGuildError(this.interaction);
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         try {

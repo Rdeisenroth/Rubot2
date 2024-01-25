@@ -3,7 +3,7 @@ import { BaseCommand } from "@baseCommand";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { Queue } from "@models/Queue";
-import { QueueAlreadyExistsError } from "@types";
+import { InteractionNotInGuildError, QueueAlreadyExistsError } from "@types";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 
 export default class CreateQueueCommand extends BaseCommand {
@@ -32,7 +32,7 @@ export default class CreateQueueCommand extends BaseCommand {
     public async execute() {
         await this.defer();
         if (!this.interaction.guild) {
-            throw new Error("Interaction is not in a guild");
+            throw new InteractionNotInGuildError(this.interaction);
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const queueName = this.getOptionValue(CreateQueueCommand.options[0]);
