@@ -1,4 +1,4 @@
-import InfoCommand from "./QueueInfoCommand";
+import QueueInfoCommand from "./QueueInfoCommand";
 import { MockDiscord } from "@tests/mockDiscord";
 import { Queue } from "@models/Queue";
 import { mongoose } from "@typegoose/typegoose";
@@ -8,9 +8,9 @@ import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEntry } from "@models/QueueEntry";
 
 describe("InfoCommand", () => {
-    const command = InfoCommand;
+    const command = QueueInfoCommand;
     const discord = new MockDiscord();
-    let commandInstance: InfoCommand;
+    let commandInstance: QueueInfoCommand;
     let interaction: ChatInputCommandInteraction;
 
     beforeEach(() => {
