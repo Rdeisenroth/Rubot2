@@ -4,6 +4,7 @@ import { Guild as DatabaseGuild } from "@models/Guild";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { Queue } from "@models/Queue";
 import { QueueAlreadyExistsError } from "@types";
+import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 
 export default class CreateQueueCommand extends BaseCommand {
     public static name = "create";
@@ -85,7 +86,7 @@ export default class CreateQueueCommand extends BaseCommand {
             this.app.logger.info(`Queue "${queueName}" already exists on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id}). Aborting.`)
             throw new QueueAlreadyExistsError(queueName);
         }
-        const queue: Queue = {
+        const queue: FilterOutFunctionKeys<Queue> = {
             name: queueName,
             description: queueDescription,
             disconnect_timeout: 60000,

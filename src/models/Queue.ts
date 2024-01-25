@@ -3,6 +3,7 @@ import { VoiceChannelSpawner } from './VoiceChannelSpawner';
 import { QueueEventType } from './Event';
 import { QueueSpan } from './QueueSpan';
 import { QueueEntry } from './QueueEntry';
+import { DocumentType } from '@typegoose/typegoose';
 
 /**
  * A Queue from the Database
@@ -107,6 +108,37 @@ export class Queue {
      */
     @prop({ type: QueueEntry, default: [], required: true })
         entries!: mongoose.Types.DocumentArray<ArraySubDocumentType<QueueEntry>>;
+
+
+    /**
+     * Gets the Sorted Entries with the First ones being the ones with the highest Importance
+     * @param limit How many entries should we get at most?
+     */
+    public getSortedEntries(this: DocumentType<Queue>, limit?: number | undefined): DocumentType<QueueEntry>[] {
+        const entries = this.entries.sort((x, y) => {
+            const x_importance = (Date.now() - (+x.joinedAt)) * (x.importance || 1);
+            const y_importance = (Date.now() - (+y.joinedAt)) * (y.importance || 1);
+            return y_importance - x_importance;
+        });
+        return entries.slice(0, limit);
+    }
+
+    /**
+     * Returns true if the ID is contained in the queue
+     * @param discord_id the Discord ID to check if it's contained
+     */
+    public contains(this: DocumentType<Queue>, discord_id: string): boolean {
+        return this.entries.some(x => x.discord_id === discord_id);
+    }
+
+    /**
+     * Gets the Position in the Current Queue
+     * @param discord_id the Discord ID of the entry
+     */
+    public getPosition(this: DocumentType<Queue>, discord_id: string): number {
+        return this.getSortedEntries().findIndex(x => x.discord_id === discord_id) + 1;
+    }
+    
 }
 
 export const QueueModel = getModelForClass(Queue, {
