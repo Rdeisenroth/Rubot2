@@ -1,9 +1,8 @@
-import dotenv from "dotenv";
-// Load the .env File
-dotenv.config();
-// Change the Current Working Directory to the Bot Folder
-process.chdir(__dirname);
-import { Bot } from "./bot";
-// Start Bot
-const botInstance = new Bot();
-botInstance.start();
+import { Severity, setGlobalOptions } from "@typegoose/typegoose"
+
+// TODO: is this a good idea?
+setGlobalOptions({ options: { allowMixed: Severity.ALLOW } });
+
+import start from "@application"
+
+start()

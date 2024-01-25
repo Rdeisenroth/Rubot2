@@ -1,48 +1,44 @@
-import { ExecuteEvent } from "../../typings";
-import { ActivityType, ApplicationCommandData } from "discord.js";
-import { GuildModel } from "../models/guilds";
+import { BaseEvent } from "@baseEvent";
+import { ActivityType, Guild } from "discord.js";
 
-export const execute: ExecuteEvent<"ready"> = async (client) => {
-    // -- Setup Databases -- //
+export default class ReadyEvent extends BaseEvent {
+    static name: string = "ready";
 
-    // Global Slash Commands
-    const data: ApplicationCommandData[] = [];
-
-    // for(const c of [...client.commands.values()]){
-    //     if(!c.guildOnly){
-    //         data.push({
-    //             name: c.name,
-    //             description: c.description,
-    //         })
-    //     }
-    // }
-    // data.push({
-    //     name: 'lel',
-    //     description: 'kek',
-    // });
-
-    // const command = await client.application?.commands.set(data);
-    // console.log(command);
-
-    // Guilds
-    client.logger.info("Processing Guilds");
-    for (const g of [...client.guilds.cache.values()]) {
-        await GuildModel.prepareGuild(client, g);
+    public async execute() {
+        await this.prepareAllGuilds();
+        this.setBotPresence();
+        this.logStats();
     }
 
-    await client.user?.setPresence({ status: "online", activities: [{ name: "Sprechstunden.", type: ActivityType.Watching }], afk: false });
-    // Bot is ready
-    client.logger.ready({
-        message: `"${client.user?.username}" is Ready! (${(Date.now() - client.initTimestamp) / 1000}s)`,
-        badge: true,
-    });
-    console.log("-".repeat(26));
-    console.log("Bot Stats:");
-    console.log(`${client.users.cache.size} user(s)`);
-    console.log(`${client.channels.cache.size} channel(s)`);
-    console.log(`${client.guilds.cache.size} guild(s)`);
-    console.log("=".repeat(26));
-    return;
-};
+    private async prepareAllGuilds(): Promise<void> {
+        const promises = this.app.client.guilds.cache.map(async (guild: Guild) => {
+            await this.prepareGuild(guild);
+        });
+        await Promise.all(promises);
+    }
 
-export const name = "ready";
+    private async prepareGuild(guild: Guild): Promise<void> {
+        await this.app.configManager.getGuildConfig(guild);
+        await this.app.commandsManager.registerSlashCommandsFor(guild);
+    }
+
+    private setBotPresence(): void {
+        this.app.client.user?.setPresence({
+            status: 'online',
+            activities: [{ name: 'Sprechstunden', type: ActivityType.Watching }],
+            afk: false
+        })
+    }
+
+    private logStats(): void {
+        const message =
+            `"${this.app.client.user?.username}" is Ready! (${(Date.now() - this.app.initTimestamp) / 1000}s)\n` +
+            "  " + "-".repeat(26) + "\n" +
+            "  Bot Stats:\n" +
+            `  ${this.app.client.users.cache.size} user(s)\n` +
+            `  ${this.app.client.channels.cache.size} channel(s)\n` +
+            `  ${this.app.client.guilds.cache.size} guild(s)\n` +
+            "  " + "=".repeat(26);
+        this.app.logger.ready(message);
+    }
+}

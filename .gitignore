@@ -124,3 +124,6 @@ dist
 report*.csv
 result.json
 result.json.bak
+
+# macOS
+.DS_Store

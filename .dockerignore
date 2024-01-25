@@ -1,9 +1,0 @@
-# Folders
-/.vscode
-/.git
-/dist
-/node_modules
-
-# Files
-config.json
-.env
