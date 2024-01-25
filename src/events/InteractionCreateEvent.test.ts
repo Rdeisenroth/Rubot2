@@ -22,7 +22,6 @@ describe("InteractionCreateEvent", () => {
     })
 
     it("should log who executed which command with which options in which guild", async () => {
-        console.log(discord.getApplication().commands)
         const logSpy = jest.spyOn(discord.getApplication().logger, 'info')
         await eventInstance.execute(interaction)
 
