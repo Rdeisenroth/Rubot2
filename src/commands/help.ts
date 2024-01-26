@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, EmojiIdentifierResolvable, Message, EmbedBuilder } from "discord.js";
 import yargsParser from "yargs-parser";
 import { Command } from "../../typings";
-import { GuildModel } from "../models/guilds";
+import { GuildModel } from "../models/models";
 
 
 const command: Command = {

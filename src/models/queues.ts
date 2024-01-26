@@ -9,6 +9,7 @@ import { Guild } from "./guilds";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
 import { QueueEventType } from "./events";
 import djs from "discord.js";
+import {SessionModel} from "./models";
 
 /**
  * A Queue from the Database
@@ -177,31 +178,31 @@ export class Queue {
      * Interpolates the Queue String
      * @param string The String to Interpolate
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string: string): string | null;
+    public interpolateQueueString(this: DocumentType<Queue>, string: string): Promise<string | null>;
     /**
      * Interpolates the Queue String
      * @param string The String to Interpolate
      * @param discord_id The Discord ID of the Entry
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string: string, discord_id: string): string | null;
+    public interpolateQueueString(this: DocumentType<Queue>, string: string, discord_id: string): Promise<string | null>;
     /**
      * Interpolates the Queue String
      * @param string The String to Interpolate
      * @param entry The Queue Entry
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry: QueueEntry): string | null;
+    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry: QueueEntry): Promise<string | null>;
     /**
      * Interpolates the Queue String
      * @param string The String to Interpolate
      * @param entry_resolvable The Entry Resolvable
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry_resolvable?: string | QueueEntry | undefined): string | null;
+    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry_resolvable?: string | QueueEntry | undefined): Promise<string | null>;
     /**
      * Interpolates the Queue String
      * @param string The String to Interpolate
      * @param entry_resolvable The Entry Resolvable
      */
-    public interpolateQueueString(this: DocumentType<Queue>, string: string, entry_resolvable?: string | QueueEntry | undefined): string | null {
+    public async interpolateQueueString(this: DocumentType<Queue>, string: string, entry_resolvable?: string | QueueEntry | undefined): Promise<string | null> {
         try {
             const replacements: StringReplacements = {
                 "limit": this.limit,
@@ -210,6 +211,8 @@ export class Queue {
                 "eta": "null",
                 "timeout": (this.disconnect_timeout ?? 0) / 1000,
                 "total": this.entries.length,
+                "active_coaches": (await SessionModel.find({queue: this, active: true})).length,
+                "closing_time": this.opening_times.find(queueSpan => queueSpan.isActive())?.getActualEndTimeFormatted()
             };
 
             if (entry_resolvable) {
@@ -242,25 +245,25 @@ export class Queue {
     /**
      * Gets the leave Message of the Queue
      */
-    public getLeaveMessage(this: DocumentType<Queue>): string;
+    public getLeaveMessage(this: DocumentType<Queue>): Promise<string>;
     /**
      * Gets the leave Message of the Queue
      * @param discord_id The Discord ID of the Leaver
      */
-    public getLeaveMessage(this: DocumentType<Queue>, discord_id: string): string;
+    public getLeaveMessage(this: DocumentType<Queue>, discord_id: string): Promise<string>;
     /**
      * Gets the leave Message of the Queue
      * @param entry The Entry that wants to leave the queue
      */
-    public getLeaveMessage(this: DocumentType<Queue>, entry: QueueEntry): string;
+    public getLeaveMessage(this: DocumentType<Queue>, entry: QueueEntry): Promise<string>;
     /**
      * Gets the leave Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getLeaveMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
+    public async getLeaveMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): Promise<string> {
         const default_leave_message = "You left the Queue.";
         if (this.leave_message) {
-            const leave_msg = this.interpolateQueueString(this.leave_message!, entry_resolvable);
+            const leave_msg = await this.interpolateQueueString(this.leave_message!, entry_resolvable);
             return leave_msg ?? default_leave_message;
         }
         else {
@@ -270,25 +273,25 @@ export class Queue {
     /**
      * Gets the leave Room Message of the Queue
      */
-    public getLeaveRoomMessage(this: DocumentType<Queue>): string;
+    public async getLeaveRoomMessage(this: DocumentType<Queue>): Promise<string>;
     /**
      * Gets the leave Room Message of the Queue
      * @param discord_id The Discord ID of the Leaver
      */
-    public getLeaveRoomMessage(this: DocumentType<Queue>, discord_id: string): string;
+    public async getLeaveRoomMessage(this: DocumentType<Queue>, discord_id: string): Promise<string>;
     /**
      * Gets the leave Room Message of the Queue
      * @param entry The Entry that wants to leave the queue
      */
-    public getLeaveRoomMessage(this: DocumentType<Queue>, entry: QueueEntry): string;
+    public async getLeaveRoomMessage(this: DocumentType<Queue>, entry: QueueEntry): Promise<string>;
     /**
      * Gets the leave Room Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getLeaveRoomMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
+    public async getLeaveRoomMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): Promise<string> {
         const default_leave_message = `You left the Room. Please confirm your stay or you will be removed from the queue after the Timeout of ${(this.disconnect_timeout ?? 0) / 1000}s.`;
         if (this.leave_room_message) {
-            const leave_msg = this.interpolateQueueString(this.leave_room_message, entry_resolvable);
+            const leave_msg = await this.interpolateQueueString(this.leave_room_message, entry_resolvable);
             return leave_msg ?? default_leave_message;
         }
         else {
@@ -298,25 +301,25 @@ export class Queue {
     /**
      * Gets the join Message of the Queue
      */
-    public getJoinMessage(this: DocumentType<Queue>): string;
+    public async getJoinMessage(this: DocumentType<Queue>): Promise<string>;
     /**
      * Gets the join Message of the Queue
      * @param discord_id The Discord ID of the Joiner
      */
-    public getJoinMessage(this: DocumentType<Queue>, discord_id: string): string;
+    public async getJoinMessage(this: DocumentType<Queue>, discord_id: string): Promise<string>;
     /**
      * Gets the join Message of the Queue
      * @param entry The Entry that wants to join the queue
      */
-    public getJoinMessage(this: DocumentType<Queue>, entry: QueueEntry): string;
+    public async getJoinMessage(this: DocumentType<Queue>, entry: QueueEntry): Promise<string>;
     /**
      * Gets the leave Message of the Queue
      * @param entry_resolvable The Entry Resolvable
      */
-    public getJoinMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): string {
+    public async getJoinMessage(this: DocumentType<Queue>, entry_resolvable?: string | QueueEntry | undefined): Promise<string> {
         const default_join_message = "You left the Queue.";
         if (this.join_message) {
-            const join_msg = this.interpolateQueueString(this.join_message, entry_resolvable);
+            const join_msg = await this.interpolateQueueString(this.join_message, entry_resolvable);
             return join_msg ?? default_join_message;
         }
         else {

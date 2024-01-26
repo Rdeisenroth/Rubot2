@@ -1,5 +1,5 @@
 import { PermissionOverwriteData } from "./permission_overwrite_data";
-import { prop, mongoose, getModelForClass, ArraySubDocumentType } from "@typegoose/typegoose";
+import { prop, mongoose, ArraySubDocumentType } from "@typegoose/typegoose";
 
 export class VoiceChannelSpawner {
     /**
@@ -44,8 +44,3 @@ export class VoiceChannelSpawner {
         parent?: string;
 }
 
-export const VoiceChannelSpawnerModel = getModelForClass(VoiceChannelSpawner, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

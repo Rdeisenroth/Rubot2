@@ -1,7 +1,7 @@
 import { ExecuteEvent } from "../../typings";
 import { ChatInputCommandInteraction, Collection } from "discord.js";
 export const name = "interactionCreate";
-import { GuildModel } from "../models/guilds";
+import { GuildModel } from "../models/models";
 
 export const execute: ExecuteEvent<"interactionCreate"> = async (client, interaction) => {
 

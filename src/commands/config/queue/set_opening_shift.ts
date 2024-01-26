@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
+import {GuildModel} from "../../../models/models";
 
 const command: Command = {
     name: "set_opening_shift",

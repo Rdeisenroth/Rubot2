@@ -1,11 +1,12 @@
-import { Guild as GuildDB, GuildModel } from "../../models/guilds";
 import { Guild, GuildChannel, TextChannel, TextChannel as DiscordTextChannel, User } from "discord.js";
 import { UserError } from "../error/UserError";
 import { QueueEventType } from "../../models/events";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import { Queue } from "../../models/queues";
 import { InternalRoles } from "../../models/bot_roles";
-import { Session, SessionModel } from "../../models/sessions";
+import { Session } from "../../models/sessions";
+import {QueueService} from "../queue/QueueService";
+import {GuildModel, SessionModel} from "../../models/models";
 
 /**
  * A Service to handle all queue info related stuff
@@ -44,7 +45,7 @@ export default class QueueInfoService {
         this.validateIsTextChannel(channel);
 
         const guildData = await this.fetchGuildData(g.id);
-        const queueData = this.findQueueData(guildData, queueName);
+        const queueData = QueueService.findQueueData(guildData, queueName);
 
         const events: QueueEventType[] = this.validateAndConvertEventStrings(eventStrings);
         await this.updateQueueInfoChannels(queueData, channel.id, events);
@@ -61,7 +62,7 @@ export default class QueueInfoService {
         this.validateIsTextChannel(channel);
 
         const guildData = await this.fetchGuildData(g.id);
-        const queueData = this.findQueueData(guildData, queueName);
+        const queueData = QueueService.findQueueData(guildData, queueName);
 
         const isRemoved = this.removeChannelFromQueueInfo(queueData, channel.id);
 
@@ -134,20 +135,6 @@ export default class QueueInfoService {
             throw new UserError("Guild Data Could not be found.");
         }
         return guildData;
-    }
-
-    /**
-     * finds the queue data for the given queue name
-     * @param guildData the guild data to search in
-     * @param queueName the name of the queue
-     * @returns the queue data
-     */
-    private static findQueueData(guildData: DocumentType<GuildDB>, queueName: string) {
-        const queueData = guildData.queues.find(x => x.name === queueName);
-        if (!queueData) {
-            throw new UserError("Could not find Queue.");
-        }
-        return queueData;
     }
 
     /**

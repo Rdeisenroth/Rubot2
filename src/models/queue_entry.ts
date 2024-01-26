@@ -1,4 +1,4 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 /**
  * A Queue Entry
@@ -26,8 +26,3 @@ export class QueueEntry {
         intent?: string;
 }
 
-export const QueueEntryModel = getModelForClass(QueueEntry, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

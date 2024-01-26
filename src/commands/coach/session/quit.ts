@@ -1,12 +1,11 @@
 import { Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
 import moment from "moment";
 import { removeRoleFromUser } from "../../../utils/general";
 import { InternalRoles } from "../../../models/bot_roles";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
 import { QueueEventType } from "../../../models/events";
+import {GuildModel, UserModel} from "../../../models/models";
 
 const command: Command = {
     name: "quit",

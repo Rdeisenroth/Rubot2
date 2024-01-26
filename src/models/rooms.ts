@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { EventDate } from "../../typings";
 import { VoiceChannelEvent, VoiceChannelEventType } from "./events";
-import { UserModel } from "./users";
-import { sessionRole } from "./sessions";
+import {sessionRole} from "./sessions";
 import { Snowflake, User } from "discord.js";
 import { filterAsync } from "../utils/general";
-import { ArraySubDocumentType, DocumentType, ReturnModelType, getModelForClass, prop } from "@typegoose/typegoose";
+import { ArraySubDocumentType, DocumentType, ReturnModelType, prop } from "@typegoose/typegoose";
+import {RoomModel, UserModel} from "./models";
 
 export class Room {
     /**
@@ -173,8 +173,3 @@ export class Room {
     }
 }
 
-export const RoomModel = getModelForClass(Room, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});

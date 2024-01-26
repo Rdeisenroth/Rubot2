@@ -1,5 +1,5 @@
 import { ExecuteEvent } from "../../typings";
-import { GuildModel } from "../models/guilds";
+import { GuildModel } from "../models/models";
 
 export const name = "guildCreate";
 

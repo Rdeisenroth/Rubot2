@@ -1,6 +1,6 @@
 import { SlashCommandPermission } from "./slash_command_permission";
 import { PermissionResolvable } from "discord.js";
-import { ArraySubDocumentType, getModelForClass, prop, mongoose } from "@typegoose/typegoose";
+import { ArraySubDocumentType, prop, mongoose } from "@typegoose/typegoose";
 export class SlashCommandSettings {
     /**
      * The original Command name used to retrieve it from the event handler
@@ -44,8 +44,3 @@ export class SlashCommandSettings {
     }
 }
 
-export const SlashCommandSettingsModel = getModelForClass(SlashCommandSettings, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

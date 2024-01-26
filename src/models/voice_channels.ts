@@ -1,4 +1,4 @@
-import { SubDocumentType, getModelForClass } from "@typegoose/typegoose";
+import { SubDocumentType } from "@typegoose/typegoose";
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Channel } from "./text_channels";
 import { VoiceChannelSpawner } from "./voice_channel_spawner";
@@ -119,8 +119,3 @@ export class VoiceChannel implements Channel {
     }
 }
 
-export const VoiceChannelModel = getModelForClass(VoiceChannel, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

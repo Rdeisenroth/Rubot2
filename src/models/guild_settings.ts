@@ -1,6 +1,6 @@
 import { DBRole } from "./bot_roles";
 import { SlashCommandSettings } from "./slash_command_settings";
-import { ArraySubDocumentType, DocumentType, getModelForClass, mongoose, prop } from "@typegoose/typegoose";
+import { ArraySubDocumentType, DocumentType, mongoose, prop } from "@typegoose/typegoose";
 
 /**
  * Command Listen Modes
@@ -80,8 +80,3 @@ export class GuildSettings {
     }
 }
 
-export const GuildSettingsModel = getModelForClass(GuildSettings, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

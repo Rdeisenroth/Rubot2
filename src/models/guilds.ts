@@ -4,9 +4,10 @@ import { TextChannel } from "./text_channels";
 import { VoiceChannel } from "./voice_channels";
 import * as djs from "discord.js";
 import { ApplicationCommandData, ApplicationCommandOptionChoiceData } from "discord.js";
-import { prop, getModelForClass, DocumentType, ReturnModelType, SubDocumentType, ArraySubDocumentType, mongoose } from "@typegoose/typegoose";
+import { prop, DocumentType, ReturnModelType, SubDocumentType, ArraySubDocumentType, mongoose } from "@typegoose/typegoose";
 import { Command, SubcommandHandler } from "../../typings";
 import { GuildSettings } from "./guild_settings";
+import {GuildModel} from "./models";
 
 /**
  * A Guild from the Database
@@ -195,8 +196,3 @@ export class Guild {
     }
 }
 
-export const GuildModel = getModelForClass(Guild, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});

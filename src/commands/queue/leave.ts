@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { Command } from "../../../typings";
-import { GuildModel } from "../../models/guilds";
+import { GuildModel } from "../../models/models";
 import QueueInfoService from "../../service/queue-info/QueueInfoService";
 import { QueueEventType } from "../../models/events";
 
@@ -31,7 +31,7 @@ const command: Command = {
             return await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: "You are currently not in a queue.", empheral: true });
         }
 
-        const leave_msg = queueData.getLeaveMessage(user.id);
+        const leave_msg = await queueData.getLeaveMessage(user.id);
         await queueData.leave(user.id);
 
 

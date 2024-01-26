@@ -1,5 +1,5 @@
 import { Command } from "../../../typings";
-import { GuildModel } from "../../models/guilds";
+import { GuildModel } from "../../models/models";
 
 const command: Command = {
     name: "lock",

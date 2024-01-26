@@ -1,5 +1,5 @@
 import { OverwriteData, PermissionResolvable, Snowflake } from "discord.js";
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 export class PermissionOverwriteData implements OverwriteData {
     @prop({ required: true, type: String })
@@ -10,8 +10,3 @@ export class PermissionOverwriteData implements OverwriteData {
         deny?: PermissionResolvable[];
 }
 
-export const PermissionOverwriteDataModel = getModelForClass(PermissionOverwriteData, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});
