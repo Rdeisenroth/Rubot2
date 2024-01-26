@@ -9,4 +9,3 @@ export class PermissionOverwriteData implements OverwriteData {
     @prop({ required: true, type: String, default: [] })
         deny?: PermissionResolvable[];
 }
-

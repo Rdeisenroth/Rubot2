@@ -62,4 +62,3 @@ export interface BotRole extends DBRole {
      */
     scope: RoleScopes.GLOBAL,
 }
-

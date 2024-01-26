@@ -43,4 +43,3 @@ export class SlashCommandSettings {
             .map(x => { return { id: x.id, permission: x.permission, type: x.type } as SlashCommandPermission; });
     }
 }
-

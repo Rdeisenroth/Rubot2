@@ -56,4 +56,3 @@ export class TextChannel implements Channel {
         rage_channel?: boolean;
 
 }
-

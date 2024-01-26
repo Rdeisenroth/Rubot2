@@ -79,4 +79,3 @@ export class GuildSettings {
         return this.getCommandByInternalName(name)!;
     }
 }
-

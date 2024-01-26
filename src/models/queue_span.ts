@@ -194,4 +194,3 @@ export class QueueSpan {
         return this.begin.equals(other.begin) && this.end.equals(other.end) && this.openShift === other.openShift && this.closeShift === other.closeShift && this.startDate === other.startDate && this.endDate === other.endDate;
     }
 }
-

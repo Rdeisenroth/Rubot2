@@ -145,4 +145,3 @@ export class WeekTimestamp {
         return this.weekday === other.weekday && this.hour === other.hour && this.minute === other.minute;
     }
 }
-

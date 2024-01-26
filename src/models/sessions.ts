@@ -74,4 +74,3 @@ export class Session {
         return amount;
     }
 }
-

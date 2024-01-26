@@ -43,4 +43,3 @@ export class VoiceChannelSpawner {
     @prop()
         parent?: string;
 }
-

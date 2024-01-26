@@ -25,4 +25,3 @@ export class QueueEntry {
     @prop({ required: false })
         intent?: string;
 }
-

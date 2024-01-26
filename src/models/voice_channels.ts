@@ -118,4 +118,3 @@ export class VoiceChannel implements Channel {
         }
     }
 }
-

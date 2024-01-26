@@ -195,4 +195,3 @@ export class Guild {
         await guildData.postSlashCommands(client, g);
     }
 }
-
