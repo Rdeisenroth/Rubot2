@@ -237,7 +237,7 @@ export async function verifyUser(replyable: Message | CommandInteraction, tokens
 
     // Token-Format: <server_id>|<version_id>|<tu_id>|<moodle_id>|<internal_role_names>
     // get token parts using name capturing regex groups
-    const regex = /^(?<server_id>\d+?)\|(?<version_id>\d+?)\|(?<tu_id>\w{8})\|(?<moodle_id>\d+)\|(?<internal_role_names_string>.*)$/;
+    const regex = /^(?<server_id>\d+?)\|(?<version_id>\d+?)\|(?<tu_id>\w{6,8})\|(?<moodle_id>\d+)\|(?<internal_role_names_string>.*)$/;
     const match = regex.exec(decrypted);
     if (!match) {
         console.log(`Failed Verifying User ${author.tag} with message: Token is not valid.`);
