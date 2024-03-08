@@ -48,7 +48,7 @@ export default class CreateQueueCommand extends BaseCommand {
             throw error;
         }
         const embed = this.mountCreateQueueEmbed();
-        await this.send({ embeds: [embed] });    
+        await this.send({ embeds: [embed] });   
     }
 
     /**

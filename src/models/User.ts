@@ -1,5 +1,5 @@
-import { getModelForClass, prop, mongoose, Ref } from "@typegoose/typegoose";
-import { Session } from "./Session";
+import { getModelForClass, prop, mongoose, Ref, DocumentType } from "@typegoose/typegoose";
+import { Session, SessionModel } from "./Session";
 import { DBRole } from "./BotRoles";
 
 /**
@@ -37,6 +37,13 @@ export class User {
      */
     @prop({ required: true, default: [], ref: () => DBRole })
     token_roles!: mongoose.Types.Array<Ref<DBRole>>;
+
+    /**
+     * Checks if the User has Active Sessions
+     */
+    public async hasActiveSessions(this: DocumentType<User>): Promise<boolean> {
+        return !!(await SessionModel.findOne({ user: (this._id as string), active: true }));
+    }
 }
 
 export const UserModel = getModelForClass(User, {

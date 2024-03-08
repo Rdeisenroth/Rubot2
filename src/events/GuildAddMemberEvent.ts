@@ -2,7 +2,7 @@ import { BaseEvent } from "@baseEvent";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { EmbedBuilder, GuildMember } from "discord.js";
 import { DocumentType } from "@typegoose/typegoose";
-import { StringReplacements } from "src/types/StringReplacements";
+import { StringReplacements } from "@types";
 import { interpolateString } from "@utils/interpolateString";
 
 export default class GuildAddMemberEvent extends BaseEvent {
