@@ -78,7 +78,9 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
             return optionValue.value as string
         } else if (option.default) {
             return option.default as string
+        } else if (option.required) {
+            throw new MissingOptionError(option.name, interaction.commandName)
         }
-        throw new MissingOptionError(option.name, interaction.commandName)
+        return ""
     }
 }
