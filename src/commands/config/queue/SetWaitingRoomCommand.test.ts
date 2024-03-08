@@ -229,7 +229,7 @@ describe("SetWaitingRoomCommand", () => {
         const embedData = embed.data
         expect(embedData).toEqual({
             title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`:x: Could not find queue "test queue".`),
+            description: expect.stringContaining(`:x: Could not find the queue "test queue".`),
             color: Colors.Red
         })
     })
