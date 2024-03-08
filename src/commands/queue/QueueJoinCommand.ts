@@ -3,7 +3,6 @@ import { Guild as DatabaseGuild } from "@models/Guild";
 import { DocumentType } from "@typegoose/typegoose";
 import { AlreadyInQueueError, CouldNotFindQueueError, InteractionNotInGuildError, QueueLockedError, UserHasActiveSessionError } from "@types";
 import { ApplicationCommandOptionType, Colors, EmbedBuilder, User } from "discord.js";
-import { join } from "path";
 
 export default class QueueJoinCommand extends BaseCommand {
     public static name = "join";
@@ -37,7 +36,6 @@ export default class QueueJoinCommand extends BaseCommand {
         const user = this.interaction.user
         try {
             let joinMessage = await this.joinQueue(queueName, intent, user)
-            console.log(joinMessage)
             const embed = this.mountJoinQueueEmbed(joinMessage);
             await this.send({ embeds: [embed] })
         } catch (error) {

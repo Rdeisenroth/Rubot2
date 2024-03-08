@@ -1,3 +1,6 @@
+/**
+ * Represents an error that occurs when a user is already in a queue.
+ */
 export default class AlreadyInQueueError extends Error {
     /**
      * The name of the queue in which the user is already in.
@@ -5,7 +8,7 @@ export default class AlreadyInQueueError extends Error {
     public queueName: string
 
     /**
-     * Creates a new already in queue error.
+     * Creates a new instance of the AlreadyInQueueError class.
      * @param queueName The name of the queue in which the user is already in.
      */
     constructor(queueName: string) {
