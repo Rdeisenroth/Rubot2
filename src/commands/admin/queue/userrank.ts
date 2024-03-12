@@ -1,8 +1,6 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
-import { RoomModel } from "../../../models/rooms";
+import {GuildModel, RoomModel, UserModel} from "../../../models/models";
 
 const command: Command = {
     name: "userrank",

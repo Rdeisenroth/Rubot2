@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
 import { QueueEventType } from "../../../models/events";
+import {GuildModel} from "../../../models/models";
 
 const command: Command = {
     name: "kick",

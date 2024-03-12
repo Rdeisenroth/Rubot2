@@ -6,12 +6,12 @@ import { BotEvent, ButtonInteraction, Command } from "../typings";
 import glob from "glob-promise";
 import * as fs from "fs";
 import * as utils from "./utils/utils";
-import { GuildModel } from "./models/guilds";
 import parser from "yargs-parser";
 import mongoose from "mongoose";
 import path from "path/posix";
 import { QueueSpan } from "./models/queue_span";
 import { WeekTimestamp } from "./models/week_timestamp";
+import {GuildModel} from "./models/models";
 export class Bot extends Client {
     public logger: ConsolaInstance = consola;
     public commands: Collection<string, Command> = new Collection();

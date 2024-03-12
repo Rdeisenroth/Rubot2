@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
 import { QueueSpan } from "../../../models/queue_span";
+import {GuildModel} from "../../../models/models";
 
 const command: Command = {
     name: "add_unlock_time",

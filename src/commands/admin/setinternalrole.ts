@@ -1,9 +1,9 @@
 import { Message, ApplicationCommandOptionType } from "discord.js";
 import { Command } from "../../../typings";
 import "moment-duration-format";
-import { GuildModel } from "../../models/guilds";
 import { InternalGuildRoles, InternalRoles, RoleScopes } from "../../models/bot_roles";
 import { mongoose } from "@typegoose/typegoose";
+import {GuildModel} from "../../models/models";
 
 
 

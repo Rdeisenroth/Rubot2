@@ -1,7 +1,6 @@
 import { EmbedField, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { SessionModel } from "../../../models/sessions";
+import {GuildModel, SessionModel} from "../../../models/models";
 
 const command: Command = {
     name: "list",

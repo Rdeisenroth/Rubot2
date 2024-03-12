@@ -1,6 +1,5 @@
 import { ExecuteEvent, StringReplacements } from "../../typings";
-import { GuildModel } from "../models/guilds";
-import { UserModel } from "../models/users";
+import { GuildModel, UserModel } from "../models/models";
 
 export const name = "guildMemberAdd";
 

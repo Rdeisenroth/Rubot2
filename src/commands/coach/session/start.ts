@@ -1,12 +1,11 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
-import { SessionModel, sessionRole } from "../../../models/sessions";
 import { assignRoleToUser } from "../../../utils/general";
 import { InternalRoles } from "../../../models/bot_roles";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
 import { QueueEventType } from "../../../models/events";
+import {GuildModel, SessionModel, UserModel} from "../../../models/models";
+import {sessionRole} from "../../../models/sessions";
 
 const command: Command = {
     name: "start",

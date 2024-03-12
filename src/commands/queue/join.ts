@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../typings";
-import { GuildModel } from "../../models/guilds";
-import { UserModel } from "../../models/users";
+import { GuildModel, UserModel } from "../../models/models";
 import { manageJoinQueue } from "../../utils/general";
 
 
@@ -81,7 +80,7 @@ const command: Command = {
             console.log(error);
         }
 
-        await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: queueData.getJoinMessage(user.id), empheral: true });
+        await client.utils.embeds.SimpleEmbed(interaction, { title: "Coaching System", text: await queueData.getJoinMessage(user.id), empheral: true });
 
         // await client.utils.embeds.SimpleEmbed(interaction, "TODO", `Command \`${path.relative(process.cwd(), __filename)}\` is not Implemented Yet.`);
 

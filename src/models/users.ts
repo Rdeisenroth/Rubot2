@@ -1,7 +1,8 @@
 // import mongoose from 'mongoose';
 import mongoose from "mongoose";
-import  { Session, SessionModel, sessionRole } from "./sessions";
-import { DocumentType, Ref, getModelForClass, prop } from "@typegoose/typegoose";
+import  { Session, sessionRole } from "./sessions";
+import { SessionModel } from "./models"
+import { DocumentType, Ref, prop } from "@typegoose/typegoose";
 import { DBRole } from "./bot_roles";
 
 // TODO: User Settings, Other User Stuff
@@ -82,9 +83,3 @@ export class User {
         }
     }
 }
-
-export const UserModel = getModelForClass(User, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});

@@ -1,4 +1,4 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 export enum Weekday {
     /**
@@ -145,9 +145,3 @@ export class WeekTimestamp {
         return this.weekday === other.weekday && this.hour === other.hour && this.minute === other.minute;
     }
 }
-
-export const WeekTimestampModel = getModelForClass(WeekTimestamp, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

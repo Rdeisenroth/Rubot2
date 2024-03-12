@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { ButtonInteraction } from "../../../../typings";
-import { Guild, GuildModel } from "../../../models/guilds";
+import { Guild } from "../../../models/guilds";
+import { GuildModel } from "../../../models/models";
 import { Queue } from "../../../models/queues";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
@@ -37,7 +38,7 @@ const command: ButtonInteraction = {
 
 
         // Leave the Queue
-        const leave_msg = queue.getLeaveMessage(interaction.user.id);
+        const leave_msg = await queue.getLeaveMessage(interaction.user.id);
         await queue.leave(interaction.user.id);
         let color = 0x7289da;
         try {
