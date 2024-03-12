@@ -2,7 +2,6 @@ import { MockDiscord } from "@tests/mockDiscord";
 import { ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js";
 import { container } from "tsyringe";
 import QueueJoinCommand from "./QueueJoinCommand";
-import exp from "node:constants";
 import { SessionModel, SessionRole } from "@models/Session";
 
 describe("QueueJoinCommand", () => {
