@@ -79,11 +79,13 @@ export default class QueueLeaveCommand extends BaseCommand {
             throw new NotInQueueError();
         }
 
+        const leaveMessage = queueData.getLeaveMessage(user.id);
+
         // remove the user from the queue
         const userIndex = queueData.entries.findIndex(entry => entry.discord_id === user.id)
         queueData.entries.splice(userIndex, 1)
         await this.dbGuild.save()
 
-        return queueData.getLeaveMessage(user.id);
+        return leaveMessage;
     }
 }
