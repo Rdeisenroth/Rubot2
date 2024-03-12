@@ -14,7 +14,7 @@ export default class QueueJoinCommand extends BaseCommand {
             type: ApplicationCommandOptionType.String,
             required: true,
         },
-        { 
+        {
             name: "intent",
             description: "The intent of joining the queue.",
             type: ApplicationCommandOptionType.String,
@@ -25,7 +25,7 @@ export default class QueueJoinCommand extends BaseCommand {
      * The guild saved in the database.
      */
     private dbGuild!: DocumentType<DatabaseGuild>;
-    
+
     public async execute(): Promise<void> {
         if (!this.interaction.guild) {
             throw new InteractionNotInGuildError(this.interaction);
@@ -48,6 +48,12 @@ export default class QueueJoinCommand extends BaseCommand {
         }
     }
 
+    /**
+     * Mounts the join queue embed.
+     * 
+     * @param joinMessage - The message to be displayed in the embed.
+     * @returns The constructed EmbedBuilder object.
+    */
     private mountJoinQueueEmbed(joinMessage: string): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setTitle("Queue Joined")
@@ -56,6 +62,13 @@ export default class QueueJoinCommand extends BaseCommand {
         return embed
     }
 
+
+    /**
+     * Creates an error embed based on the given error.
+     * @param error - The error object.
+     * @returns The error embed.
+     * @throws The error object if it is not an instance of any known error types.
+     */
     private mountErrorEmbed(error: Error): EmbedBuilder {
         if (error instanceof AlreadyInQueueError || error instanceof CouldNotFindQueueError || error instanceof QueueLockedError || error instanceof UserHasActiveSessionError) {
             const embed = new EmbedBuilder()
@@ -67,6 +80,18 @@ export default class QueueJoinCommand extends BaseCommand {
         throw error;
     }
 
+    /**
+     * Joins the specified queue with the given parameters.
+     * 
+     * @param queueName - The name of the queue to join.
+     * @param intent - The intent of the user joining the queue.
+     * @param user - The user joining the queue.
+     * @returns A promise that resolves to a string representing the join message.
+     * @throws {CouldNotFindQueueError} if the specified queue does not exist.
+     * @throws {AlreadyInQueueError} if the user is already in a queue.
+     * @throws {UserHasActiveSessionError} if the user has an active tutor session.
+     * @throws {QueueLockedError} if the queue is locked.
+     */
     private async joinQueue(queueName: string, intent: string, user: User): Promise<string> {
         const queueData = this.dbGuild.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
         if (!queueData) {

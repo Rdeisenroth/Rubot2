@@ -24,6 +24,47 @@ export default class QueueInfoCommand extends BaseCommand {
         }
     }
 
+    /**
+     * Mounts an embed with queue information.
+     * @param queue - The queue document.
+     * @param position - The position of the user in the queue.
+     * @returns The embed with queue information.
+     */
+    private mountInfoEmbed(queue: DocumentType<Queue>, position: number): EmbedBuilder {
+        const embed = new EmbedBuilder()
+            .setTitle("Queue Information")
+            .addFields(
+                { name: "❯ Name", value: `${queue.name}` },
+                { name: "❯ Description", value: `${queue.description}` },
+                { name: "❯ Active Entries", value: `${queue.entries.length}` },
+                { name: "❯ Your Position", value: `${position}/${queue.entries.length}` },
+            )
+        return embed
+    }
+
+    /**
+     * Creates an error embed based on the given error.
+     * Throws an error if the given error is not an instance of NotInQueueError.
+     * @param error - The error object.
+     * @returns The error embed.
+     */
+    private mountErrorEmbed(error: Error): EmbedBuilder {
+        if (!(error instanceof NotInQueueError)) {
+            throw error;
+        }
+        const embed = new EmbedBuilder()
+            .setTitle("Error")
+            .setDescription(error.message)
+            .setColor(Colors.Red)
+        return embed
+    }
+
+    /**
+     * Loads the queue and position for the current user.
+     * @returns A promise that resolves to an object containing the queue and position.
+     * @throws {InteractionNotInGuildError} If the interaction is not in a guild.
+     * @throws {NotInQueueError} If the user is not in a queue.
+     */
     private async loadQueueAndPosition(): Promise<{ queue: DocumentType<Queue>, position: number }> {
         if (!this.interaction.guild) {
             throw new InteractionNotInGuildError(this.interaction);
@@ -40,27 +81,4 @@ export default class QueueInfoCommand extends BaseCommand {
         return { queue: queueData, position: queuePosition };
     }
 
-
-    private mountInfoEmbed(queue: DocumentType<Queue>, position: number): EmbedBuilder {
-        const embed = new EmbedBuilder()
-            .setTitle("Queue Information")
-            .addFields(
-                { name: "❯ Name", value: `${queue.name}` },
-                { name: "❯ Description", value: `${queue.description}` },
-                { name: "❯ Active Entries", value: `${queue.entries.length}` },
-                { name: "❯ Your Position", value: `${position}/${queue.entries.length}` },
-            )
-        return embed
-    }
-
-    private mountErrorEmbed(error: Error): EmbedBuilder {
-        if (!(error instanceof NotInQueueError)) {
-            throw error;
-        }
-        const embed = new EmbedBuilder()
-            .setTitle("Error")
-            .setDescription(error.message)
-            .setColor(Colors.Red)
-        return embed
-    }
 }
