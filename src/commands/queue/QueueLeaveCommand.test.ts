@@ -12,14 +12,6 @@ describe("QueueLeaveCommand", () => {
     beforeEach(() => {
         interaction = discord.mockInteraction();
         commandInstance = new command(interaction, discord.getApplication());
-        interaction.options.get = jest.fn().mockImplementation((option: string) => {
-            switch (option) {
-                case "queue":
-                    return { value: "test" }
-                default:
-                    return null;
-            }
-        })
     });
 
     it("should have the correct name", () => {
@@ -30,22 +22,14 @@ describe("QueueLeaveCommand", () => {
         expect(command.description).toBe("Leaves the queue.");
     })
 
-    it("should have the correct options", () => {
-        expect(command.options).toHaveLength(1);
-        expect(command.options[0]).toStrictEqual({
-            name: "queue",
-            description: "The queue to leave.",
-            type: 3,
-            required: true,
-        });
+    it("should have no options", () => {
+        expect(command.options).toHaveLength(0);
     })
 
-    it.each([true, false])("should leave the queue and reply with a success message (parameter is lowercase: %p)", async (isLowercase) => {
+    it("should leave the queue and reply with a success message", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const actualQueueName = interaction.options.get("queue")!.value as string
-        const queueName = isLowercase ? actualQueueName.toLowerCase() : actualQueueName.toUpperCase();
         const queue = {
-            name: queueName,
+            name: "test",
             description: "test description",
             tracks: [],
             leave_message: "You left the ${name} queue.",
@@ -72,30 +56,10 @@ describe("QueueLeaveCommand", () => {
         );
     })
 
-    it("should fail if the queue does not exist", async () => {
-        const replySpy = jest.spyOn(interaction, 'reply');
-        await commandInstance.execute();
-
-        expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith(
-            {
-                fetchReply: true,
-                embeds: [{
-                    data: {
-                        description: `Could not find the queue "test".`,
-                        color: Colors.Red,
-                        title: "Error"
-                    }
-                }]
-            }
-        );
-    })
-
-    it("should fail if the user is not in the queue", async () => {
+    it("should fail if the user is not in a queue", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queueName = interaction.options.get("queue")!.value as string
         const queue = {
-            name: queueName,
+            name: "test",
             description: "test description",
             tracks: [],
             leave_message: "You left the ${name} queue.",
@@ -112,7 +76,7 @@ describe("QueueLeaveCommand", () => {
                 fetchReply: true,
                 embeds: [{
                     data: {
-                        description: `You are currently not in the queue "test".`,
+                        description: `You are currently not in a queue.`,
                         color: Colors.Red,
                         title: "Error"
                     }

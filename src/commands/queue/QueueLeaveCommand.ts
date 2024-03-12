@@ -7,14 +7,6 @@ import { ApplicationCommandOptionType, Colors, EmbedBuilder, User } from "discor
 export default class QueueLeaveCommand extends BaseCommand {
     public static name = "leave";
     public static description = "Leaves the queue.";
-    public static options = [
-        {
-            name: "queue",
-            description: "The queue to leave.",
-            type: ApplicationCommandOptionType.String,
-            required: true,
-        },
-    ];
 
     /**
      * The guild saved in the database.
@@ -26,10 +18,9 @@ export default class QueueLeaveCommand extends BaseCommand {
             throw new InteractionNotInGuildError(this.interaction);
         }
         this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
-        const queueName = this.getOptionValue(QueueLeaveCommand.options[0])
         const user = this.interaction.user
         try {
-            let leaveMessage = await this.leaveQueue(queueName, user)
+            let leaveMessage = await this.leaveQueue(user)
             const embed = this.mountLeaveQueueEmbed(leaveMessage);
             await this.send({ embeds: [embed] })
         } catch (error) {
@@ -82,19 +73,14 @@ export default class QueueLeaveCommand extends BaseCommand {
      * @throws {CouldNotFindQueueError} If the queue with the given name does not exist.
      * @throws {NotInQueueError} If the user is not in the queue.
      */
-    private async leaveQueue(queueName: string, user: User): Promise<string> {
-        const queueData = await this.dbGuild.queues.find(queue => queue.name.toLowerCase() === queueName.toLowerCase())
+    private async leaveQueue(user: User): Promise<string> {
+        const queueData = await this.dbGuild.queues.find(queue => queue.contains(user.id))
         if (!queueData) {
-            throw new CouldNotFindQueueError(queueName);
-        }
-
-        // check if the user is in the queue
-        const userIndex = queueData.entries.findIndex(x => x.discord_id === user.id)
-        if (userIndex === -1) {
-            throw new NotInQueueError(queueData.name);
+            throw new NotInQueueError();
         }
 
         // remove the user from the queue
+        const userIndex = queueData.entries.findIndex(entry => entry.discord_id === user.id)
         queueData.entries.splice(userIndex, 1)
         await this.dbGuild.save()
 
