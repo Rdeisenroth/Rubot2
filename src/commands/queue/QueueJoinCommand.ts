@@ -68,7 +68,7 @@ export default class QueueJoinCommand extends BaseCommand {
     }
 
     private async joinQueue(queueName: string, intent: string, user: User): Promise<string> {
-        const queueData = this.dbGuild.queues.find(x => x.name === queueName);
+        const queueData = this.dbGuild.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
         if (!queueData) {
             throw new CouldNotFindQueueError(queueName);
         }

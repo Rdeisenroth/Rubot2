@@ -50,10 +50,12 @@ describe("QueueJoinCommand", () => {
         });
     })
 
-    it("should join the queue and reply with a success message", async () => {
+    it.each([true, false])("should join the queue and reply with a success message (parameter is lowercase: %p)", async (isLowercase) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
+        const actualQueueName = interaction.options.get("queue")!.value as string
+        const queueName = isLowercase ? actualQueueName.toLowerCase() : actualQueueName.toUpperCase();
         const queue = {
-            name: "test",
+            name: queueName,
             description: "test description",
             tracks: [],
             join_message: "You joined the ${name} queue.\n\\> Your Position: ${pos}/${total}\n\\> Total Time Spent: ${time_spent}",
