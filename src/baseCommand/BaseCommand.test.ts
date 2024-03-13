@@ -1,10 +1,10 @@
 import { MockDiscord } from "@tests/mockDiscord";
-import { ApplicationCommandOptionType, ChatInputCommandInteraction, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, Channel, ChatInputCommandInteraction, CommandInteraction, TextChannel } from "discord.js";
 import BaseCommand from "./BaseCommand";
 import { MissingOptionError, OptionRequirement } from "@types";
 
 describe("BaseCommand", () => {
-    describe.each([ApplicationCommandOptionType.String, ApplicationCommandOptionType.Integer, ApplicationCommandOptionType.Boolean])("getOptionValue with type %p", (optionType) => {
+    describe.each([ApplicationCommandOptionType.String, ApplicationCommandOptionType.Integer, ApplicationCommandOptionType.Boolean, ApplicationCommandOptionType.Channel])("getOptionValue with type %p", (optionType) => {
         const discord = new MockDiscord();
         let commandInstance: BaseCommand;
         let interaction: ChatInputCommandInteraction;
@@ -30,7 +30,11 @@ describe("BaseCommand", () => {
                 value = 5;
             } else if (optionType === ApplicationCommandOptionType.Boolean) {
                 value = true;
-            }    
+            } else if (optionType === ApplicationCommandOptionType.Channel) {
+                value = discord.mockChannel().id;
+            } else {
+                throw new Error("Invalid option type");
+            }
         });
 
         it.each([true, false])("should return the option value if it exists (option is required: %p)", (required) => {

@@ -2,11 +2,13 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { Application } from "@application";
 import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
-import { AlreadyInQueueError, CouldNotFindQueueError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
+import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
-import { QueueEntry, QueueEntryModel } from "@models/QueueEntry";
-import { User } from "discord.js";
+import { QueueEntryModel } from "@models/QueueEntry";
+import { TextChannel, User } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
+import { QueueEventType } from "@models/Event";
+import events from "events";
 
 @injectable()
 @singleton()
@@ -144,5 +146,50 @@ export default class QueueManager {
         return leaveMessage;
     }
 
+    /**
+     * Adds a queue info channel to the specified database guild.
+     * 
+     * @param dbGuild - The database guild to add the queue info channel to.
+     * @param queueName - The name of the queue.
+     * @param channel - The text channel to set as the info channel.
+     * @param eventStrings - An array of event strings.
+     * @throws {ChannelAlreadyInfoChannelError} If the channel is already an info channel for the queue.
+     * @throws {InvalidEventError} If an invalid event string is encountered.
+     */
+    public async addQueueInfoChannel(dbGuild: DocumentType<DatabaseGuild>, queueName: string, channel: TextChannel, eventStrings: string[]): Promise<void> {
+        const queue = this.getQueue(dbGuild, queueName);
+        try {
+            const events = this.validateAndConvertEventStrings(eventStrings);
+            if (queue.info_channels.some(infoChannel => infoChannel.channel_id === channel.id)) {
+                this.app.logger.debug(`Channel ${channel.name} (id: ${channel.id}) is already an info channel for queue ${queue.name}`);
+                throw new ChannelAlreadyInfoChannelError(queue.name, channel.name ?? channel.id);
+            }
+            queue.info_channels.push({ channel_id: channel.id, events: events });
+            await dbGuild.save();
+            this.app.logger.info(`Channel ${channel.name} (id: ${channel.id}) set as info channel for queue ${queue.name}`);
+
+        } catch (error) {
+            throw error
+        }
+
+    }
+
+    /**
+     * Validates and converts an array of event strings to an array of QueueEventType.
+     * 
+     * @param eventStrings - The array of event strings to validate and convert.
+     * @returns An array of QueueEventType.
+     * @throws {InvalidEventError} If an invalid event string is encountered.
+     */
+    private validateAndConvertEventStrings(eventStrings: string[]): QueueEventType[] {
+        return eventStrings.map(eventString => {
+            const eventKey = eventString.toUpperCase();
+            if (eventKey in QueueEventType) {
+                return QueueEventType[eventKey as keyof typeof QueueEventType];
+            }
+            this.app.logger.info(`Invalid event: ${eventString}`);
+            throw new InvalidEventError(eventString, Object.values(QueueEventType));
+        });
+    }
 
 }

@@ -16,7 +16,7 @@ export default class CouldNotFindChannelError extends Error {
      * @param channelType The type of the channel which was expected.
      */
     constructor(channelNameOrId: string, channelType?: ChannelType) {
-        super(`Could not find channel "${channelNameOrId}"${channelType ? ` with type "${ChannelType[channelType]}"` : ""}.`)
+        super(`Could not find channel "${channelNameOrId}"${channelType != undefined ? ` with type "${ChannelType[channelType]}"` : ""}.`)
         this.channelNameOrId = channelNameOrId
         this.channelType = channelType
     }
