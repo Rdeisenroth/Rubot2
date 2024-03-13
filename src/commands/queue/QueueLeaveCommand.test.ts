@@ -32,7 +32,7 @@ describe("QueueLeaveCommand", () => {
             name: "test",
             description: "test description",
             tracks: [],
-            leave_message: "You left the ${name} queue.",
+            leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
             entries: [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }],
         }
         dbGuild.queues.push(queue);
@@ -47,7 +47,7 @@ describe("QueueLeaveCommand", () => {
                 fetchReply: true,
                 embeds: [{
                     data: {
-                        description: queue.leave_message.replace("${name}", queue.name),
+                        description: expect.stringContaining(queue.leave_message.replace("${name}", queue.name).replace("${time_spent}", "0h 0m")),
                         color: Colors.Green,
                         title: "Queue Left"
                     }
@@ -62,7 +62,7 @@ describe("QueueLeaveCommand", () => {
             name: "test",
             description: "test description",
             tracks: [],
-            leave_message: "You left the ${name} queue.",
+            leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
         }
         dbGuild.queues.push(queue);
         await dbGuild.save();
