@@ -12,6 +12,7 @@ import CommandsLoader from "@utils/CommandsLoader"
 import { BaseEvent } from "@baseEvent"
 import { BaseCommandOrSubcommandsHandler } from "@baseCommand"
 import EventsLoader from "@utils/EventsLoader"
+import QueueManager from "./managers/QueueManager"
 
 /**
  * The main `Application` class.
@@ -29,6 +30,11 @@ export class Application {
      * The config manager responsible for managing the bot config in the database.
      */
     public configManager: ConfigManager  
+
+    /**
+     * The queue manager responsible for managing the queues in the database.
+     */
+    public queueManager: QueueManager
 
     /**
      * The user manager responsible for managing the users in the database.
@@ -77,12 +83,13 @@ export class Application {
      * @param client The Discord client.
      * @param token The bot token.
      */
-    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager, @inject(delay(() => UserManager)) userManager: UserManager) {
+    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager, @inject(delay(() => QueueManager)) queueManager: QueueManager, @inject(delay(() => UserManager)) userManager: UserManager) {
         this.client = new Client(options)
         this.token = token
         this.logger = createConsola({ level: Environment.logLevel })
         this.commandsManager = commandsManager
         this.configManager = configManager
+        this.queueManager = queueManager
         this.userManager = userManager
     }
 

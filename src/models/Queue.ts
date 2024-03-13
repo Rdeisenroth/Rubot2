@@ -113,19 +113,6 @@ export class Queue {
     entries!: mongoose.Types.DocumentArray<ArraySubDocumentType<QueueEntry>>;
 
     /**
-     * Put an Entry into the Queue
-     * @param entry The Queue Entry
-     */
-    public async join(this: DocumentType<Queue>, entry: QueueEntry): Promise<QueueEntry> {
-        if (this.entries.find(x => x.discord_id === entry.discord_id)) {
-            throw new Error("Dublicate Entry");
-        }
-        this.entries.push(entry);
-        await this.$parent()?.save();
-        return this.getEntry(entry.discord_id)!;
-    }
-
-    /**
      * Gets the Sorted Entries with the First ones being the ones with the highest Importance
      * @param limit How many entries should we get at most?
      */

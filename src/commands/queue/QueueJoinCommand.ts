@@ -21,16 +21,11 @@ export default class QueueJoinCommand extends BaseCommand {
             required: false,
         }
     ];
-    /**
-     * The guild saved in the database.
-     */
-    private dbGuild!: DocumentType<DatabaseGuild>;
 
     public async execute(): Promise<void> {
         if (!this.interaction.guild) {
             throw new InteractionNotInGuildError(this.interaction);
         }
-        this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
         const queueName = this.getOptionValue(QueueJoinCommand.options[0])
         const intent = this.getOptionValue(QueueJoinCommand.options[1])
         const user = this.interaction.user
@@ -93,36 +88,23 @@ export default class QueueJoinCommand extends BaseCommand {
      * @throws {QueueLockedError} if the queue is locked.
      */
     private async joinQueue(queueName: string, intent: string, user: User): Promise<string> {
-        const queueData = this.dbGuild.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
-        if (!queueData) {
-            throw new CouldNotFindQueueError(queueName);
-        }
+        const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild!)
+        const queueData = this.app.queueManager.getQueue(dbGuild, queueName);
 
-        // check if already in queue
-        const queueWithUser = this.dbGuild.queues.find(x => x.contains(user.id));
+        // check if already in any queue
+        const queueWithUser = this.app.queueManager.getQueueOfUser(dbGuild, user);
         if (queueWithUser) {
+            this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to join queue ${queueData.name} but is already in queue ${queueWithUser.name}`);
             throw new AlreadyInQueueError(queueWithUser.name);
         }
 
         // check if user has active tutor session
         const userData = await this.app.userManager.getUser(user);
         if (await userData.hasActiveSessions()) {
+            this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to join queue ${queueData.name} but has an active tutor session`);
             throw new UserHasActiveSessionError();
         }
 
-        // check if queue is locked
-        if (queueData.locked) {
-            throw new QueueLockedError(queueData.name);
-        }
-
-        // join the queue
-        await queueData.join({
-            discord_id: user.id,
-            joinedAt: Date.now().toString(),
-            importance: 1,
-            intent: intent,
-        })
-
-        return queueData.getJoinMessage(user.id);
+        return this.app.queueManager.joinQueue(queueData, user, intent);
     }
 }

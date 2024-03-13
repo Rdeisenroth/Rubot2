@@ -38,7 +38,7 @@ export default class CreateQueueCommand extends BaseCommand {
         const queueName = this.getOptionValue(CreateQueueCommand.options[0]);
         const queueDescription = this.getOptionValue(CreateQueueCommand.options[1]);
         try {
-            await this.createQueue(queueName, queueDescription);
+            await this.app.queueManager.createQueue(this.dbGuild, queueName, queueDescription);
         } catch (error) {
             if (error instanceof QueueAlreadyExistsError) {
                 const embed = this.mountCreateQueueFailedEmbed(error.queueName);
@@ -74,46 +74,5 @@ export default class CreateQueueCommand extends BaseCommand {
             .setDescription(`Queue with name "${duplicateQueueName}" already exists.`)
             .setColor(Colors.Red)
         return embed
-    }
-
-    /**
-     * Creates a queue on the database.
-     * @param queueName The queue name.
-     * @param queueDescription The queue description.
-     */
-    private async createQueue(queueName: string, queueDescription: string): Promise<void> {
-        if (this.checkQueueName(queueName)) {
-            this.app.logger.info(`Queue "${queueName}" already exists on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id}). Aborting.`)
-            throw new QueueAlreadyExistsError(queueName);
-        }
-        const queue: FilterOutFunctionKeys<Queue> = {
-            name: queueName,
-            description: queueDescription,
-            disconnect_timeout: 60000,
-            match_timeout: 120000,
-            limit: 150,
-            join_message: "You joined the ${name} queue.\n\\> Your Position: ${pos}/${total}\n\\> Total Time Spent: ${time_spent}",
-            match_found_message: "You have found a Match with ${match}. Please Join ${match_channel} if you are not moved automatically. If you don't join in ${timeout} seconds, your position in the queue is dropped.",
-            timeout_message: "Your queue Timed out after ${timeout} seconds.",
-            leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
-            entries: new mongoose.Types.DocumentArray([]),
-            opening_times: new mongoose.Types.DocumentArray([]),
-            info_channels: [],
-        }
-        this.app.logger.debug(`Creating queue "${queueName}" on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id})`)
-        this.dbGuild.queues.push(queue);
-        await this.dbGuild.save();
-        this.app.logger.info(`Queue "${queueName}" created on guild "${this.interaction.guild?.name}" (id: ${this.interaction.guild?.id})`)
-    }
-
-    /**
-     * Returns whether the queue name already exists on this guild.
-     * 
-     * The check is case insensitive.
-     * @param queueName The queue name to check.
-     * @returns Whether the queue name already exists on this guild.
-     */
-    private checkQueueName(queueName: string): boolean {
-        return this.dbGuild.queues.some((queue) => queue.name.toLowerCase === queueName.toLowerCase);
     }
 }

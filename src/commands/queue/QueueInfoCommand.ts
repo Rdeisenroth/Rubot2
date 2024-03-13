@@ -71,7 +71,7 @@ export default class QueueInfoCommand extends BaseCommand {
         }
         const user = this.interaction.user;
         const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild)
-        const queueData = dbGuild.queues.find(x => x.contains(user.id));
+        const queueData = this.app.queueManager.getQueueOfUser(dbGuild, user);
         if (!queueData) {
             this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to get queue info but is not in a queue`);
             throw new NotInQueueError();

@@ -25,3 +25,9 @@ export class QueueEntry {
     @prop({ required: false })
         intent?: string;
 }
+
+export const QueueEntryModel = getModelForClass(QueueEntry, {
+    schemaOptions: {
+        autoCreate: false,
+    },
+});
