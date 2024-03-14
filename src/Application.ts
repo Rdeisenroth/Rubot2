@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { Client, Partials, ClientOptions, Interaction } from 'discord.js'
 import { CronJob } from 'cron'
 import { ConsolaInstance, createConsola } from 'consola'
-import { CommandsManager, ConfigManager, UserManager } from "./managers"
+import { CommandsManager, ConfigManager, QueueManager, UserManager } from "./managers"
 import { container, delay, inject, injectable, singleton } from "tsyringe"
 import Environment from "./Environment"
 import mongoose from "mongoose"
@@ -12,7 +12,6 @@ import CommandsLoader from "@utils/CommandsLoader"
 import { BaseEvent } from "@baseEvent"
 import { BaseCommandOrSubcommandsHandler } from "@baseCommand"
 import EventsLoader from "@utils/EventsLoader"
-import QueueManager from "./managers/QueueManager"
 
 /**
  * The main `Application` class.

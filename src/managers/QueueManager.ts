@@ -5,9 +5,12 @@ import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { QueueEntryModel } from "@models/QueueEntry";
-import { TextChannel, User } from "discord.js";
+import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
+import { Session } from "inspector";
+import { InternalRoles } from "@models/BotRoles";
+import { SessionModel } from "@models/Session";
 
 @injectable()
 @singleton()
@@ -115,6 +118,7 @@ export default class QueueManager {
         await queue.$parent()?.save();
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) joined queue "${queue.name}"`);
 
+        this.logQueueActivity(queue, QueueEventType.JOIN, user);
         // Return the join message.
         return queue.getJoinMessage(user.id);
     }
@@ -142,6 +146,7 @@ export default class QueueManager {
         await queue.$parent()?.save()
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}"`);
 
+        this.logQueueActivity(queue, QueueEventType.LEAVE, user);
         return leaveMessage;
     }
 
@@ -215,4 +220,76 @@ export default class QueueManager {
         this.app.logger.info(`Channel "${channel.name}" (id: ${channel.id}) removed from info channels for queue "${queue.name}"`);
     }
 
+
+    /**
+     * Logs the activity of a queue.
+     * 
+     * @param queue - The queue on which the activity occurred.
+     * @param event - The type of queue event.
+     * @param user - The user associated with the event.
+     * @param targets - Optional array of users to target with the event.
+     * @returns A promise that resolves when the activity is logged.
+     */
+    private async logQueueActivity(queue: DocumentType<Queue>, event: QueueEventType, user: User, targets?: User[]): Promise<void> {
+        const dbGuild = queue.$parent() as DocumentType<DatabaseGuild>;
+        const activeSessionRole = dbGuild.guild_settings.roles?.find(role => role.internal_name === InternalRoles.ACTIVE_SESSION);
+        const queueSessions: DocumentType<Session>[] = await SessionModel.find({ queue: queue._id, active: true });
+
+        for (const infoChannel of queue.info_channels) {
+            if (infoChannel.events.includes(event)) {
+                const discordChannel = this.app.client.channels.cache.get(infoChannel.channel_id)! as TextChannel;
+                if (!discordChannel) {
+                    this.app.logger.debug(`Channel with id ${infoChannel.channel_id} not found in guild ${dbGuild.name} (id: ${dbGuild._id})`);
+                    continue;
+                }
+                const emebed = this.getEventEmbed(user, event, queue, queueSessions, targets);
+                const message = await discordChannel.send(`<@&${activeSessionRole?.role_id}>`);
+                await message.edit({ embeds: [emebed] });
+            }
+        }
+    }
+
+    /**
+     * Generates an embed message for a queue event.
+     * 
+     * @param user - The user associated with the event.
+     * @param event - The type of queue event.
+     * @param queue - The queue on which the event occurred.
+     * @param sessions - The array of active sessions.
+     * @param targets - Optional. The array of users affected by the event.
+     * @returns The generated EmbedBuilder object.
+     */
+    private getEventEmbed(user: User, event: QueueEventType, queue: DocumentType<Queue>, sessions: DocumentType<Session>[], targets?: User[]): EmbedBuilder {
+        let eventDescription: string = "";
+        switch (event) {
+            case QueueEventType.JOIN:
+                eventDescription = `${user} joined the queue ${queue.name}.`;
+                break;
+            case QueueEventType.LEAVE:
+                eventDescription = `${user} left the queue ${queue.name}.`;
+                break;
+            case QueueEventType.NEXT:
+                eventDescription = `${user} picked ${targets?.join(", ")} from the queue ${queue.name}.`;
+                break;
+            case QueueEventType.TUTOR_SESSION_START:
+                eventDescription = `${user} started a new tutor session on the queue ${queue.name}.`;
+                break;
+            case QueueEventType.TUTOR_SESSION_QUIT:
+                eventDescription = `${user} ended the tutor session on the queue ${queue.name}.`;
+                break;
+            case QueueEventType.KICK:
+                eventDescription = `${targets?.join(", ")} were kicked from the queue ${queue.name} by ${user}.`;
+                break;
+        }
+        let sessionsDescription = `There ${sessions.length === 1 ? "is" : "are"} ${sessions.length} active session${sessions.length === 1 ? "" : "s"} in the queue ${queue.name}.`;
+        let membersDescription = `There ${queue.entries.length === 1 ? "is" : "are"} ${queue.entries.length} member${queue.entries.length === 1 ? "" : "s"} in the queue ${queue.name}.`;
+
+        return new EmbedBuilder()
+            .setTitle("Queue Activity")
+            .addFields(
+                { name: "❯ Event", value: eventDescription },
+                { name: "❯ Active Sessions", value: sessionsDescription },
+                { name: "❯ Members", value: membersDescription },
+            )
+    }
 }

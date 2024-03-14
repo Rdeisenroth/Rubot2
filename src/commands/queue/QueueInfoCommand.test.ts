@@ -6,6 +6,7 @@ import { EmbedBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction, Colors } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEntry } from "@models/QueueEntry";
+import { QueueManager } from "@managers";
 
 describe("InfoCommand", () => {
     const command = QueueInfoCommand;
