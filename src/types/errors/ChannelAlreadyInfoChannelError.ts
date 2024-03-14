@@ -3,7 +3,7 @@
  */
 export default class ChannelAlreadyInfoChannelError extends Error {
     /**
-     * The name of the queue which is already an info channel.
+     * The name of the queue for which the channel is already an info channel.
      */
     public queueName: string
 

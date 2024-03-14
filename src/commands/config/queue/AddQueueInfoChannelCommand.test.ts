@@ -38,7 +38,7 @@ describe("AddQueueInfoChannelCommand", () => {
                     type: ChannelType.GuildVoice,
                 }
             } else {
-                return undefined;
+                return null;
             }
         })
     });
@@ -74,15 +74,6 @@ describe("AddQueueInfoChannelCommand", () => {
     })
 
     it("should defer the interaction", async () => {
-        const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = {
-            name: interaction.options.get("queue")!.value as string,
-            description: "test description",
-            tracks: [],
-        }
-        dbGuild.queues.push(queue);
-        await dbGuild.save();
-
         const deferSpy = jest.spyOn(interaction, 'deferReply')
         await commandInstance.execute()
 

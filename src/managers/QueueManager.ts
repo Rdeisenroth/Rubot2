@@ -2,13 +2,12 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { Application } from "@application";
 import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
-import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
+import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { QueueEntryModel } from "@models/QueueEntry";
 import { TextChannel, User } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
-import events from "events";
 
 @injectable()
 @singleton()
@@ -63,10 +62,10 @@ export default class QueueManager {
     public getQueue(dbGuild: DatabaseGuild, queueName: string): DocumentType<Queue> {
         const queue = dbGuild.queues.find(queue => queue.name.toLowerCase() === queueName.toLowerCase());
         if (!queue) {
-            this.app.logger.debug(`Queue ${queueName} not found in guild ${dbGuild.name} (id: ${dbGuild._id})`);
+            this.app.logger.debug(`Queue "${queueName}" not found in guild "${dbGuild.name}" (id: ${dbGuild._id})`);
             throw new CouldNotFindQueueError(queueName);
         }
-        this.app.logger.debug(`Queue ${queueName} found in guild ${dbGuild.name} (id: ${dbGuild._id})`);
+        this.app.logger.debug(`Queue "${queueName}" found in guild "${dbGuild.name}" (id: ${dbGuild._id})`);
         return queue;
     }
 
@@ -78,7 +77,7 @@ export default class QueueManager {
      * @returns The Queue object associated with the user, or undefined if not found.
      */
     public getQueueOfUser(dbGuild: DatabaseGuild, user: User): DocumentType<Queue> | undefined {
-        this.app.logger.debug(`Retrieving queue of user ${user.username} (id: ${user.id}) in guild ${dbGuild.name} (id: ${dbGuild._id})`);
+        this.app.logger.debug(`Retrieving queue of user "${user.username}" (id: ${user.id}) in guild "${dbGuild.name}" (id: ${dbGuild._id})`);
         return dbGuild.queues.find(queue => queue.contains(user.id));
     }
 
@@ -95,13 +94,13 @@ export default class QueueManager {
     public async joinQueue(queue: DocumentType<Queue>, user: User, intent: string): Promise<string> {
         // Check if the user is already in the queue they are trying to join.
         if (queue.contains(user.id)) {
-            this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to join queue ${queue.name} but is already in it`);
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to join queue "${queue.name}" but is already in it`);
             throw new AlreadyInQueueError(queue.name);
         }
 
         // Check if the queue is locked.
         if (queue.locked) {
-            this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to join queue ${queue.name} but it is locked`);
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to join queue "${queue.name}" but it is locked`);
             throw new QueueLockedError(queue.name);
         }
 
@@ -114,7 +113,7 @@ export default class QueueManager {
         });
         queue.entries.push(newEntry);
         await queue.$parent()?.save();
-        this.app.logger.info(`User ${user.username} (id: ${user.id}) joined queue ${queue.name}`);
+        this.app.logger.info(`User "${user.username}" (id: ${user.id}) joined queue "${queue.name}"`);
 
         // Return the join message.
         return queue.getJoinMessage(user.id);
@@ -131,7 +130,7 @@ export default class QueueManager {
     public async leaveQueue(guild: DatabaseGuild, user: User): Promise<string> {
         const queue = this.getQueueOfUser(guild, user);
         if (!queue) {
-            this.app.logger.info(`User ${user.username} (id: ${user.id}) tried to leave queue but is not in a queue`);
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to leave queue but is not in a queue`);
             throw new NotInQueueError();
         }
 
@@ -141,7 +140,7 @@ export default class QueueManager {
         const userIndex = queue.entries.findIndex(entry => entry.discord_id === user.id)
         queue.entries.splice(userIndex, 1)
         await queue.$parent()?.save()
-        this.app.logger.info(`User ${user.username} (id: ${user.id}) left queue ${queue.name}`);
+        this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}"`);
 
         return leaveMessage;
     }
@@ -155,23 +154,22 @@ export default class QueueManager {
      * @param eventStrings - An array of event strings.
      * @throws {ChannelAlreadyInfoChannelError} If the channel is already an info channel for the queue.
      * @throws {InvalidEventError} If an invalid event string is encountered.
+     * @throws {CouldNotFindQueueError} If the specified queue cannot be found.
      */
     public async addQueueInfoChannel(dbGuild: DocumentType<DatabaseGuild>, queueName: string, channel: TextChannel, eventStrings: string[]): Promise<void> {
         const queue = this.getQueue(dbGuild, queueName);
-        try {
-            const events = this.validateAndConvertEventStrings(eventStrings);
-            if (queue.info_channels.some(infoChannel => infoChannel.channel_id === channel.id)) {
-                this.app.logger.debug(`Channel ${channel.name} (id: ${channel.id}) is already an info channel for queue ${queue.name}`);
-                throw new ChannelAlreadyInfoChannelError(queue.name, channel.name ?? channel.id);
-            }
-            queue.info_channels.push({ channel_id: channel.id, events: events });
-            await dbGuild.save();
-            this.app.logger.info(`Channel ${channel.name} (id: ${channel.id}) set as info channel for queue ${queue.name}`);
+        const events = this.validateAndConvertEventStrings(eventStrings);
 
-        } catch (error) {
-            throw error
+        // Check if the channel is already an info channel for the queue
+        if (queue.info_channels.some(infoChannel => infoChannel.channel_id === channel.id)) {
+            this.app.logger.debug(`Channel "${channel.name}" (id: ${channel.id}) is already an info channel for queue "${queue.name}"`);
+            throw new ChannelAlreadyInfoChannelError(queue.name, channel.name ?? channel.id);
         }
 
+        // Add the channel to the queue info channels
+        queue.info_channels.push({ channel_id: channel.id, events: events });
+        await dbGuild.save();
+        this.app.logger.info(`Channel "${channel.name}" (id: ${channel.id}) set as info channel for queue "${queue.name}"`);
     }
 
     /**
@@ -187,9 +185,34 @@ export default class QueueManager {
             if (eventKey in QueueEventType) {
                 return QueueEventType[eventKey as keyof typeof QueueEventType];
             }
-            this.app.logger.info(`Invalid event: ${eventString}`);
+            this.app.logger.info(`Invalid event: "${eventString}"`);
             throw new InvalidEventError(eventString, Object.values(QueueEventType));
         });
+    }
+
+    /**
+     * Removes a queue info channel from the specified database guild.
+     * 
+     * @param dbGuild - The database guild to remove the queue info channel from.
+     * @param queueName - The name of the queue.
+     * @param channel - The text channel to remove from the info channels.
+     * @throws {ChannelNotInfoChannelError} If the channel is not an info channel for the queue.
+     * @throws {CouldNotFindQueueError} If the specified queue cannot be found.
+     */
+    public async removeQueueInfoChannel(dbGuild: DocumentType<DatabaseGuild>, queueName: string, channel: TextChannel): Promise<void> {
+        const queue = this.getQueue(dbGuild, queueName);
+        const channelIndex = queue.info_channels.findIndex(infoChannel => infoChannel.channel_id === channel.id);
+
+        // Check if the channel is an info channel for the queue
+        if (channelIndex === -1) {
+            this.app.logger.debug(`Channel "${channel.name}" (id: ${channel.id}) is not an info channel for queue "${queue.name}"`);
+            throw new ChannelNotInfoChannelError(queue.name, channel.name ?? channel.id);
+        }
+
+        // Remove the channel from the queue info channels
+        queue.info_channels.splice(channelIndex, 1);
+        await dbGuild.save();
+        this.app.logger.info(`Channel "${channel.name}" (id: ${channel.id}) removed from info channels for queue "${queue.name}"`);
     }
 
 }

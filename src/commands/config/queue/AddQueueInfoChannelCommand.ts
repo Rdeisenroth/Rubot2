@@ -73,7 +73,7 @@ export default class AddQueueInfoChannelCommand extends BaseCommand {
      * @returns - The built embed.
      */
     private mountAddQueueInfoChannelEmbed(channel: TextChannel, queueName: string, events: string[]): EmbedBuilder {
-        const embed = new EmbedBuilder()
+        return new EmbedBuilder()
             .setTitle("Queue Info Channel Added")
             .setDescription(`The channel ${channel.name ?? channel.id} was added to the queue ${queueName} info channels.`)
             .addFields({
@@ -81,7 +81,6 @@ export default class AddQueueInfoChannelCommand extends BaseCommand {
                 value: events.join(", ")
             })
             .setColor(Colors.Green)
-        return embed
     }
 
     /**
@@ -93,11 +92,10 @@ export default class AddQueueInfoChannelCommand extends BaseCommand {
      */
     private mountErrorEmbed(error: Error): EmbedBuilder {
         if (error instanceof CouldNotFindChannelError || error instanceof CouldNotFindQueueError || error instanceof ChannelAlreadyInfoChannelError || error instanceof InvalidEventError) {
-            const embed = new EmbedBuilder()
+            return new EmbedBuilder()
                 .setTitle("Error")
                 .setDescription(error.message)
                 .setColor(Colors.Red)
-            return embed
         }
         throw error;
     }

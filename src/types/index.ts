@@ -2,6 +2,7 @@ import OptionRequirement from "./OptionRequirement";
 import { StringReplacements } from "./StringReplacements";
 import AlreadyInQueueError from "./errors/AlreadyInQueueError";
 import ChannelAlreadyInfoChannelError from "./errors/ChannelAlreadyInfoChannelError";
+import ChannelNotInfoChannelError from "./errors/ChannelNotInfoChannelError";
 import CouldNotFindChannelError from "./errors/CouldNotFindChannelError";
 import CouldNotFindQueueError from "./errors/CouldNotFindQueueError";
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
@@ -32,4 +33,5 @@ export {
     QueueLockedError,
     InvalidEventError,
     ChannelAlreadyInfoChannelError,
+    ChannelNotInfoChannelError,
 }
