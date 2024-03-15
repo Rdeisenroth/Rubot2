@@ -2,7 +2,7 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { Application } from "@application";
 import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
-import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError } from "@types";
+import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError, UserHasActiveSessionError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { QueueEntryModel } from "@models/QueueEntry";
 import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild } from "discord.js";
@@ -10,7 +10,7 @@ import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
 import { Session } from "inspector";
 import { InternalRoles } from "@models/BotRoles";
-import { SessionModel } from "@models/Session";
+import { SessionModel, SessionRole } from "@models/Session";
 
 @injectable()
 @singleton()
@@ -148,6 +148,33 @@ export default class QueueManager {
 
         this.logQueueActivity(queue, QueueEventType.LEAVE, user);
         return leaveMessage;
+    }
+
+    public async startTutorSession(queue: DocumentType<Queue>, user: User): Promise<void> {
+        const dbGuild = queue.$parent() as DocumentType<DatabaseGuild>;
+        const dbUser = await this.app.userManager.getUser(user);
+
+        // Check if user has active session
+        if (await dbUser.hasActiveSessions()) {
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to start a tutor session but has an active session`);
+            throw new UserHasActiveSessionError();
+        }
+
+        const userSession = await SessionModel.create({
+            user: user.id,
+            queue: queue._id,
+            guild: dbGuild._id,
+            role: SessionRole.coach,
+            active: true,
+            started_at: Date.now(),
+            end_certain: false,
+            rooms: [],
+        });
+        await userSession.save();
+        dbUser.sessions.push(userSession);
+        await dbUser.save();
+        this.app.logger.info(`User "${user.username}" (id: ${user.id}) started a tutor session on queue "${queue.name}"`);
+        this.logQueueActivity(queue, QueueEventType.TUTOR_SESSION_START, user);
     }
 
     /**

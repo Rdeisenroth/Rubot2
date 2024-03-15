@@ -5,10 +5,11 @@ import {
     mockGuildMember,
     mockTextChannel,
     mockUser,
+    mockRole,
     mockChatInputCommandInteraction
 } from '@shoginn/discordjs-mock';
 import "reflect-metadata"
-import { ChatInputCommandInteraction, Guild, GuildMember, TextBasedChannel, TextChannel, User } from 'discord.js';
+import { APIRole, ChatInputCommandInteraction, Guild, GuildMember, Role, TextBasedChannel, TextChannel, User } from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { randomInt } from 'crypto';
 import assert from 'assert';
@@ -49,6 +50,10 @@ export class MockDiscord {
     public mockUser(): User {
         const userId = randomInt(281474976710655).toString();
         return mockUser(this.app.client, { id: userId, username: userId, global_name: userId, discriminator: randomInt(9999).toString() });
+    }
+
+    public mockRole(guild: Guild = this.mockGuild(), role: Partial<APIRole>): Role {
+        return mockRole(this.app.client, "0", guild, role);
     }
 
     public mockGuildMember(user: User = this.mockUser(), guild: Guild = this.mockGuild()): GuildMember {

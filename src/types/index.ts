@@ -3,10 +3,12 @@ import { StringReplacements } from "./StringReplacements";
 import AlreadyInQueueError from "./errors/AlreadyInQueueError";
 import ChannelAlreadyInfoChannelError from "./errors/ChannelAlreadyInfoChannelError";
 import ChannelNotInfoChannelError from "./errors/ChannelNotInfoChannelError";
+import CouldNotAssignRoleError from "./errors/CouldNotAssignRoleError";
 import CouldNotFindChannelError from "./errors/CouldNotFindChannelError";
 import CouldNotFindQueueError from "./errors/CouldNotFindQueueError";
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
 import CouldNotFindTypeInFileError from "./errors/CouldNotFindTypeError";
+import GuildHasNoQueueError from "./errors/GuildHasNoQueueError";
 import InteractionNotInGuildError from "./errors/InteractionNotInGuildError";
 import InvalidEventError from "./errors/InvalidEventError";
 import MissingOptionError from "./errors/MissingOptionError";
@@ -24,6 +26,7 @@ export {
     CouldNotFindChannelError,
     CouldNotFindQueueError,
     CouldNotFindRoleError,
+    CouldNotAssignRoleError,
     RoleNotInDatabaseError,
     CouldNotFindTypeInFileError,
     NotInQueueError,
@@ -34,4 +37,5 @@ export {
     InvalidEventError,
     ChannelAlreadyInfoChannelError,
     ChannelNotInfoChannelError,
+    GuildHasNoQueueError,
 }

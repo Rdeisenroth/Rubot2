@@ -1,4 +1,4 @@
-import { DBRole, DBRoleModel, RoleScopes } from "@models/BotRoles";
+import { DBRole, DBRoleModel, InternalRoles, RoleScopes } from "@models/BotRoles";
 import { Guild } from "@models/Guild"
 import { Queue, QueueModel } from "@models/Queue";
 import { VoiceChannel, VoiceChannelModel } from "@models/VoiceChannel";
@@ -12,7 +12,7 @@ export const config = {
     Database: 'test'
 }
 
-export async function createQueue(guild: DocumentType<Guild>, name: string, description: string): Promise<Queue> {
+export async function createQueue(guild: DocumentType<Guild>, name: string, description: string): Promise<DocumentType<Queue>> {
     const queue = new QueueModel({
         name: name,
         description: description,
@@ -32,10 +32,10 @@ export async function createQueue(guild: DocumentType<Guild>, name: string, desc
     return queue;
 }
 
-export async function createRole(guild: DocumentType<Guild>, name: string): Promise<DBRole> {
+export async function createRole(guild: DocumentType<Guild>, name: string, internalName: string = "tutor"): Promise<DBRole> {
     if (!guild.guild_settings.roles) guild.guild_settings.roles = new mongoose.Types.DocumentArray([]);
     const role = new DBRoleModel({
-        internal_name: "tutor",
+        internal_name: internalName,
         role_id: name,
         scope: RoleScopes.SERVER,
         server_id: guild.id,
