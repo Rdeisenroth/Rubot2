@@ -8,10 +8,10 @@ import { container, delay, inject, injectable, singleton } from "tsyringe"
 import Environment from "./Environment"
 import mongoose from "mongoose"
 import path from "path"
-import CommandsLoader from "@utils/CommandsLoader"
 import { BaseEvent } from "@baseEvent"
 import { BaseCommandOrSubcommandsHandler } from "@baseCommand"
-import EventsLoader from "@utils/EventsLoader"
+import CommandsLoader from "@loaders/CommandsLoader"
+import EventsLoader from "@loaders/EventsLoader"
 
 /**
  * The main `Application` class.

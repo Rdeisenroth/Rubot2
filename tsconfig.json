@@ -18,6 +18,7 @@
       "@managers": ["src/managers"],
       "@types": ["src/types"],
       "@utils/*": ["src/utils/*"],
+      "@loaders/*": ["src/loaders/*"],
       "@tests/*": ["tests/*"],
       "@models/*": ["src/models/*"],
       "@commands/*": ["src/commands/*"],
