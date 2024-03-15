@@ -3,6 +3,7 @@ import CreateQueueCommand from "./CreateQueueCommand"
 import { container } from "tsyringe"
 import { Application, ApplicationCommandOptionType, BaseMessageOptions, ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js"
 import { OptionRequirement } from "@types"
+import { createQueue } from "@tests/testutils"
 
 describe("CreateQueueCommand", () => {
     const command = CreateQueueCommand
@@ -16,7 +17,7 @@ describe("CreateQueueCommand", () => {
         interaction.options.get = jest.fn().mockImplementation((option: string) => {
             switch (option) {
                 case "name":
-                    return { value: "test name"  }
+                    return { value: "test name" }
                 case "description":
                     return { value: "test description" }
                 default:
@@ -61,18 +62,14 @@ describe("CreateQueueCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-
-        expect(embedData).toEqual({
-            title: "Queue Created",
-            description: expect.stringContaining(`Queue "${interaction.options.get("name")?.value}" created.`),
-            color: Colors.Green
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Queue Created",
+                    description: `Queue "${interaction.options.get("name")?.value}" created.`,
+                    color: Colors.Green
+                }
+            }]
         })
     })
 
@@ -82,71 +79,55 @@ describe("CreateQueueCommand", () => {
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         expect(dbGuild.queues).toHaveLength(1)
-        expect(dbGuild.queues[0].name).toBe("test name")
-        expect(dbGuild.queues[0].description).toBe("test description")
+        expect(dbGuild.queues[0]).toMatchObject({
+            name: "test name",
+            description: "test description",
+        })
     })
 
     it("should fail if the queue name is already taken on the same guild", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        const queue = {
-            name: "test name",
-            description: "test description",
-            tracks: []
-        }
-        dbGuild.queues.push(queue)
-        await dbGuild.save()
+        const queue = await createQueue(dbGuild, "test name", "test description")
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Queue Creation Failed",
-            description: expect.stringContaining(`Queue with name "${queue.name}" already exists.`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Queue Creation Failed",
+                    description: `Queue with name "${queue.name}" already exists.`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 
     it("should create a queue if the queue name is already taken on another guild", async () => {
-        const queue = {
-            name: "test name",
-            description: "test description",
-            tracks: []
-        }
         const otherGuild = discord.mockGuild()
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(otherGuild)
-        dbGuild.queues.push(queue)
-        await dbGuild.save()
+        await createQueue(dbGuild, "test name", "test description")
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
         expect(dbGuild.queues).toHaveLength(1)
-        expect(dbGuild.queues[0].name).toBe("test name")
-        expect(dbGuild.queues[0].description).toBe("test description")
+        expect(dbGuild.queues[0]).toMatchObject({
+            name: "test name",
+            description: "test description",
+        })
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-
-        expect(embedData).toEqual({
-            title: "Queue Created",
-            description: expect.stringContaining("Queue"),
-            color: Colors.Green
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Queue Created",
+                    description: `Queue "${interaction.options.get("name")?.value}" created.`,
+                    color: Colors.Green
+                }
+            }]
         })
     })
 

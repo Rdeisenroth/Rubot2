@@ -38,28 +38,24 @@ describe("PingCommand", () => {
         await commandInstance.execute()
 
         expect(editSpy).toHaveBeenCalledTimes(1)
-        expect(editSpy).toHaveBeenCalledWith({ content: "Pong.", embeds: expect.anything() })
-
-        const messageContent = editSpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-
-        expect(embedData).toEqual({
-            title: "__Response Times__",
-            fields: expect.arrayContaining([
-                expect.objectContaining({
-                    name: "Bot Latency:",
-                    value: expect.stringContaining(":hourglass_flowing_sand:"),
-                }),
-                expect.objectContaining({
-                    name: "API Latency:",
-                    value: expect.stringContaining(":hourglass_flowing_sand:"),
-                }),
-            ]),
-            color: interaction.guild?.members.me?.roles.highest.color || 0x7289da
+        expect(editSpy).toHaveBeenCalledWith({
+            content: "Pong.",
+            embeds: [{
+                data: {
+                    title: "__Response Times__",
+                    fields: expect.arrayContaining([
+                        expect.objectContaining({
+                            name: "Bot Latency:",
+                            value: expect.stringContaining(":hourglass_flowing_sand:"),
+                        }),
+                        expect.objectContaining({
+                            name: "API Latency:",
+                            value: expect.stringContaining(":hourglass_flowing_sand:"),
+                        }),
+                    ]),
+                    color: interaction.guild?.members.me?.roles.highest.color || 0x7289da
+                }
+            }]
         })
     })
 

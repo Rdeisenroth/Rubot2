@@ -2,6 +2,8 @@ import { MockDiscord } from "@tests/mockDiscord";
 import { ChatInputCommandInteraction, Colors } from "discord.js";
 import { container } from "tsyringe";
 import QueueLeaveCommand from "./QueueLeaveCommand";
+import { GuildModel } from "@models/Guild";
+import { createQueue } from "@tests/testutils";
 
 describe("QueueLeaveCommand", () => {
     const command = QueueLeaveCommand;
@@ -28,26 +30,22 @@ describe("QueueLeaveCommand", () => {
 
     it("should leave the queue and reply with a success message", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = {
-            name: "test",
-            description: "test description",
-            tracks: [],
-            leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
-            entries: [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }],
-        }
-        dbGuild.queues.push(queue);
-        await dbGuild.save();
+        const queue = await createQueue(dbGuild, "test", "test description", [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }]);
 
         const replySpy = jest.spyOn(interaction, 'reply');
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
         await commandInstance.execute();
 
+        expect(saveSpy).toHaveBeenCalledTimes(1);
+        const saveSpyRes = await saveSpy.mock.results[0].value;
+        expect(saveSpyRes.queues.entries).toHaveLength(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
         expect(replySpy).toHaveBeenCalledWith(
             {
                 fetchReply: true,
                 embeds: [{
                     data: {
-                        description: expect.stringContaining(queue.leave_message.replace("${name}", queue.name).replace("${time_spent}", "0h 0m")),
+                        description: expect.stringContaining(queue.leave_message!.replace("${name}", queue.name).replace("${time_spent}", "0h 0m")),
                         color: Colors.Green,
                         title: "Queue Left"
                     }
@@ -58,18 +56,14 @@ describe("QueueLeaveCommand", () => {
 
     it("should fail if the user is not in a queue", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = {
-            name: "test",
-            description: "test description",
-            tracks: [],
-            leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
-        }
-        dbGuild.queues.push(queue);
-        await dbGuild.save();
+        await createQueue(dbGuild, "test", "test description");
 
+        jest.clearAllMocks();
         const replySpy = jest.spyOn(interaction, 'reply');
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
         await commandInstance.execute();
 
+        expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
         expect(replySpy).toHaveBeenCalledWith(
             {

@@ -1,6 +1,8 @@
 import { DBRole, DBRoleModel, InternalRoles, RoleScopes } from "@models/BotRoles";
+import { QueueEventType } from "@models/Event";
 import { Guild } from "@models/Guild"
 import { Queue, QueueModel } from "@models/Queue";
+import { QueueEntry } from "@models/QueueEntry";
 import { VoiceChannel, VoiceChannelModel } from "@models/VoiceChannel";
 import { DocumentType, mongoose } from "@typegoose/typegoose"
 import { ChannelType } from "discord.js";
@@ -12,7 +14,10 @@ export const config = {
     Database: 'test'
 }
 
-export async function createQueue(guild: DocumentType<Guild>, name: string, description: string): Promise<DocumentType<Queue>> {
+export async function createQueue(guild: DocumentType<Guild>, name: string, description: string, entries: QueueEntry[] = [], locked: boolean = false, info_channels: {
+    channel_id: string;
+    events: QueueEventType[];
+}[] = []): Promise<DocumentType<Queue>> {
     const queue = new QueueModel({
         name: name,
         description: description,
@@ -23,9 +28,10 @@ export async function createQueue(guild: DocumentType<Guild>, name: string, desc
         match_found_message: "You have found a Match with ${match}. Please Join ${match_channel} if you are not moved automatically. If you don't join in ${timeout} seconds, your position in the queue is dropped.",
         timeout_message: "Your queue Timed out after ${timeout} seconds.",
         leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
-        entries: [],
+        entries: entries,
         opening_times: [],
-        info_channels: [],
+        info_channels: info_channels,
+        locked: locked,
     });
     guild.queues.push(queue);
     await guild.save();

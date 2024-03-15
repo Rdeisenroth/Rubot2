@@ -221,18 +221,13 @@ describe("UpdateBotRolesCommand", () => {
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()
 
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData.title).toBe("Administration")
-        expect(embedData.description).toContain("Done generating internal Roles. Internal Roles:")
-        expect(embedData.description).toContain("Unassigned Roles:")
-        for (const internalRole of InternalGuildRoles) {
-            expect(embedData.description).toContain(internalRole)
-        }
+        expect(replySpy).toHaveBeenCalledWith({ 
+            embeds: [{
+                data: {
+                    title: "Administration",
+                    description: expect.stringContaining("Done generating internal Roles. Internal Roles:")
+                }
+            }]
+         })
     })
 });

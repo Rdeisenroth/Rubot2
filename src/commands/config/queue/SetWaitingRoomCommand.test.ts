@@ -3,6 +3,7 @@ import SetWaitingRoomCommand from "./SetWaitingRoomCommand"
 import { container } from "tsyringe"
 import { BaseMessageOptions, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js"
 import { createQueue, createRole, createWaitingRoom } from "@tests/testutils"
+import { GuildModel } from "@models/Guild"
 
 describe("SetWaitingRoomCommand", () => {
     const command = SetWaitingRoomCommand
@@ -92,22 +93,28 @@ describe("SetWaitingRoomCommand", () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
+
+        jest.clearAllMocks();
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()
 
+        expect(saveSpy).toHaveBeenCalledTimes(1)
+        const saveSpyRes = await saveSpy.mock.results[0].value
+        expect(saveSpyRes.voice_channels).toHaveLength(1)
+        expect(saveSpyRes.voice_channels[0]).toMatchObject({
+            id: "test channel",
+            supervisors: [`test supervisor ${interaction.guild}`],
+        })
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-
-        expect(embedData).toEqual({
-            title: "Waiting Room Set",
-            description: expect.stringContaining(`:white_check_mark: Waiting room [object Object] set for queue "${interaction.options.get("queue")?.value}".`),
-            color: Colors.Green
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Waiting Room Set",
+                    description: expect.stringContaining(`:white_check_mark: Waiting room [object Object] set for queue "${interaction.options.get("queue")?.value}".`),
+                    color: Colors.Green
+                }
+            }]
         })
     })
 
@@ -166,18 +173,14 @@ describe("SetWaitingRoomCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`Could not find channel "test channel" with type "GuildVoice".`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Could Not Set Waiting Room",
+                    description: `:x: Could not find channel "test channel" with type "GuildVoice".`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 
@@ -196,18 +199,14 @@ describe("SetWaitingRoomCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`:x: Could not find channel "test channel" with type "GuildVoice".`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Could Not Set Waiting Room",
+                    description: `:x: Could not find channel "test channel" with type "GuildVoice".`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 
@@ -219,18 +218,14 @@ describe("SetWaitingRoomCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`:x: Could not find the queue "test queue".`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Could Not Set Waiting Room",
+                    description: `:x: Could not find the queue "test queue".`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 
@@ -243,18 +238,14 @@ describe("SetWaitingRoomCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`:x: Could not find role "test supervisor ${interaction.guild}".`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({ 
+            embeds: [{
+                data: {
+                    title: "Could Not Set Waiting Room",
+                    description: `:x: Could not find role "test supervisor ${interaction.guild}".`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 
@@ -266,18 +257,14 @@ describe("SetWaitingRoomCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData).toEqual({
-            title: "Could Not Set Waiting Room",
-            description: expect.stringContaining(`:x: Role [object Object] is not an internal role. Try running \`/admin update_bot_roles\` to update the internal roles.`),
-            color: Colors.Red
+        expect(replySpy).toHaveBeenCalledWith({ 
+            embeds: [{
+                data: {
+                    title: "Could Not Set Waiting Room",
+                    description: `:x: Role [object Object] is not an internal role. Try running \`/admin update_bot_roles\` to update the internal roles.`,
+                    color: Colors.Red
+                }
+            }]
         })
     })
 })

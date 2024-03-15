@@ -53,29 +53,25 @@ describe("QueueListCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ fetchReply: true, embeds: expect.anything() })
-
-        const messageContent = replySpy.mock.calls[0][0] as { embeds: EmbedBuilder[] };
-        expect(messageContent.embeds).toBeDefined();
-        const embeds = messageContent.embeds;
-        expect(embeds).toHaveLength(1);
-        const embed = embeds[0];
-        const embedData = embed.data;
-
-        expect(embedData).toEqual({
-            title: "Queue List",
-            description: "Here are all the queues available in this server.",
-            fields: [
-                {
-                    name: "test",
-                    value: "test description",
-                },
-                {
-                    name: "test2",
-                    value: "another description 2",
-                },
-            ],
-            color: Colors.Green,
-        })
+        expect(replySpy).toHaveBeenCalledWith({ 
+            fetchReply: true,
+             embeds: [{
+                data: {
+                    title: "Queue List",
+                    description: "Here are all the queues available in this server.",
+                    fields: [
+                        {
+                            name: "test",
+                            value: "test description",
+                        },
+                        {
+                            name: "test2",
+                            value: "another description 2",
+                        },
+                    ],
+                    color: Colors.Green,
+                }
+            }]
+        });
     })
 })

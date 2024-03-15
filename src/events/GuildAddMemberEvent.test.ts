@@ -61,15 +61,14 @@ describe("GuildAddMemberEvent", () => {
         await eventInstance.execute(member)
 
         expect(sendSpy).toHaveBeenCalledTimes(1)
-        expect(sendSpy).toHaveBeenCalledWith({ embeds: expect.anything() })
-        const messageContent = sendSpy.mock.calls[0][0] as BaseMessageOptions
-        expect(messageContent.embeds).toBeDefined()
-        const embeds = messageContent.embeds as EmbedBuilder[]
-        expect(embeds).toHaveLength(1)
-        const embed = embeds[0]
-        const embedData = embed.data
-        expect(embedData.title).toBe(`Welcome to ${discordGuild.name}!`)
-        expect(embedData.description).toBe(`Welcome to ${discordGuild.name}, ${member}!`)
+        expect(sendSpy).toHaveBeenCalledWith({ 
+            embeds: [{
+                data: {
+                    title: `Welcome to ${discordGuild.name}!`,
+                    description: `Welcome to ${discordGuild.name}, ${member}!`
+                }
+            }]
+        })
     })
 
     it("should not send a welcome message to the new member, when it is not set for the guild", async () => {
