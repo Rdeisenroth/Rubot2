@@ -37,7 +37,7 @@ describe("ReadyEvent", () => {
         await discord.getApplication().configManager.getGuildConfig(guild)
 
         const findSpy = jest.spyOn(GuildModel, 'findById')
-        const saveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save')
         await eventInstance.execute()
 
         expect(findSpy).toHaveBeenCalledWith(guild.id)
@@ -47,7 +47,7 @@ describe("ReadyEvent", () => {
 
     it("should create a new guild entry in the database if it does not exist", async () => {
         const findSpy = jest.spyOn(GuildModel, 'findById')
-        const saveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save')
         await eventInstance.execute()
 
         expect(findSpy).toHaveBeenCalledWith(guild.id)

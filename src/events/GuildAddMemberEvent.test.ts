@@ -33,7 +33,7 @@ describe("GuildAddMemberEvent", () => {
     })
 
     it("should create a new user in the database if it doesn't exist", async () => {
-        const saveSpy = jest.spyOn(UserModel.prototype, 'save')
+        const saveSpy = jest.spyOn(UserModel.prototype as any, 'save')
         await eventInstance.execute(member)
 
         expect(saveSpy).toHaveBeenCalledTimes(1)
@@ -44,7 +44,7 @@ describe("GuildAddMemberEvent", () => {
     it("should not create a new user in the database if it already exists", async () => {
         await discord.getApplication().userManager.getUser(member.user)
         jest.clearAllMocks() // seems to be necessary here because the saveSpy is still set from the previous test
-        const saveSpy = jest.spyOn(UserModel.prototype, 'save')
+        const saveSpy = jest.spyOn(UserModel.prototype as any, 'save')
         
         await eventInstance.execute(member)
 

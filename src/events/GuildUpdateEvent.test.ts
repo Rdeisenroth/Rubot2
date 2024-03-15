@@ -32,7 +32,7 @@ describe("GuildUpdateEvent", () => {
 
     it ("should update the guild name in the database if the name changed", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(oldGuild)
-        const saveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save')
         const newGuild = { ...oldGuild } as Guild
         newGuild.name = "new name"
         await eventInstance.execute(oldGuild, newGuild)

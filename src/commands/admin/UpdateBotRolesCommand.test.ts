@@ -202,7 +202,7 @@ describe("UpdateBotRolesCommand", () => {
         }
         await dbGuild.save()
 
-        const guildSaveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        const guildSaveSpy = jest.spyOn(GuildModel.prototype as any, 'save')
         await commandInstance.execute()
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 

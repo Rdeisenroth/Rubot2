@@ -198,7 +198,7 @@ describe("QueueJoinCommand", () => {
 
         expect(embedData).toEqual({
             title: "Error",
-            description: `You have an active session and cannot join the queue.`,
+            description: `You have an active session and cannot perform this action.`,
             color: Colors.Red,
         });
     })

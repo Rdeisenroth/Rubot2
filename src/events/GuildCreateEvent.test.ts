@@ -31,7 +31,7 @@ describe("GuildCreateEvent", () => {
 
     it("should create a new guild in the database", async () => {
         const findSpy = jest.spyOn(GuildModel, 'findById')
-        const saveSpy = jest.spyOn(GuildModel.prototype, 'save')
+        const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save')
         await eventInstance.execute(guild)
 
         expect(findSpy).toHaveBeenCalledTimes(1)
