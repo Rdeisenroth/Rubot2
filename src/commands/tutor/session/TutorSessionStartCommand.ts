@@ -5,6 +5,9 @@ import { ApplicationCommandOptionType, Colors, EmbedBuilder } from "discord.js";
 import { DocumentType } from "@typegoose/typegoose";
 import { InternalRoles } from "@models/BotRoles";
 
+/**
+ * Represents a command to start a tutor session.
+ */
 export default class TutorSessionStartCommand extends BaseCommand {
     public static name = "start";
     public static description = "Starts a tutor session.";
@@ -33,6 +36,12 @@ export default class TutorSessionStartCommand extends BaseCommand {
         }
     }
 
+    /**
+     * Mounts the embed for a successful tutor session start.
+     * 
+     * @param queue - The queue for the tutor session.
+     * @returns The embed builder for the tutor session start.
+     */
     private mountStartTutorSessionEmbed(queue: DocumentType<Queue>): EmbedBuilder {
         return new EmbedBuilder()
             .setTitle("Tutor Session Started")
@@ -40,6 +49,12 @@ export default class TutorSessionStartCommand extends BaseCommand {
             .setColor(Colors.Green)
     }
 
+    /**
+     * Mounts the embed for an error during tutor session start.
+     * 
+     * @param error - The error that occurred.
+     * @returns The embed builder for the error.
+     */
     private mountErrorEmbed(error: Error): EmbedBuilder {
         if (error instanceof GuildHasNoQueueError || error instanceof CouldNotFindQueueError || error instanceof CouldNotAssignRoleError || error instanceof CouldNotFindRoleError || error instanceof UserHasActiveSessionError) {
             return new EmbedBuilder()
@@ -50,6 +65,11 @@ export default class TutorSessionStartCommand extends BaseCommand {
         throw error
     }
 
+    /**
+     * Starts the tutor session.
+     * 
+     * @returns The queue for the tutor session.
+     */
     private async startTutorSession(): Promise<DocumentType<Queue>> {
         if (!this.interaction.guild) {
             throw new InteractionNotInGuildError(this.interaction);
