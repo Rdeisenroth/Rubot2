@@ -4,7 +4,6 @@ import { Severity, setGlobalOptions } from "@typegoose/typegoose"
 setGlobalOptions({ options: { allowMixed: Severity.ALLOW } });
 
 import { mongoose } from "@typegoose/typegoose";
-import { after } from "node:test";
 
 beforeAll(async () => {
     // put your client connection code here, example with mongoose:
