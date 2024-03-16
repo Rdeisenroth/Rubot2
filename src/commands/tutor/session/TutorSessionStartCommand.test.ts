@@ -2,7 +2,7 @@ import { MockDiscord } from "@tests/mockDiscord";
 import { ChatInputCommandInteraction, Colors, GuildMemberRoleManager } from "discord.js";
 import TutorSessionStartCommand from "./TutorSessionStartCommand";
 import { InternalRoles, RoleScopes } from "@models/BotRoles";
-import { createQueue, createRole } from "@tests/testutils";
+import { createQueue, createRole, createSession } from "@tests/testutils";
 import { Session, SessionModel, SessionRole } from "@models/Session";
 
 describe("TutorSessionStartCommand", () => {
@@ -55,6 +55,28 @@ describe("TutorSessionStartCommand", () => {
         }
 
         const replySpy = jest.spyOn(interaction, 'editReply');
+        await commandInstance.execute();
+
+        expect(replySpy).toHaveBeenCalledTimes(1);
+        expect(replySpy).toHaveBeenCalledWith({
+            embeds: [{
+                data: {
+                    title: "Tutor Session Started",
+                    description: `You have started a tutor session for queue "test".`,
+                    color: Colors.Green,
+                }
+            }]
+        })
+    })
+
+    it.each([true, false])("should start a tutor session save it in the database (queue parameter is provided: %p)", async (parameterSet) => {
+        const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
+        const queue = await createQueue(dbGuild, "test", "test description");
+
+        if (parameterSet) {
+            interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
+        }
+
         const saveSpy = jest.spyOn(SessionModel.prototype as any, 'save');
         await commandInstance.execute();
 
@@ -69,17 +91,20 @@ describe("TutorSessionStartCommand", () => {
             end_certain: false,
             rooms: []
         });
+    })
 
-        expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            embeds: [{
-                data: {
-                    title: "Tutor Session Started",
-                    description: `You have started a tutor session for queue "test".`,
-                    color: Colors.Green,
-                }
-            }]
-        })
+    it.each([true, false])("should add the active session role to the user (queue parameter is provided: %p)", async (parameterSet) => {
+        const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
+        const queue = await createQueue(dbGuild, "test", "test description");
+
+        if (parameterSet) {
+            interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
+        }
+
+        const addSpy = jest.spyOn(GuildMemberRoleManager.prototype, 'add');
+        await commandInstance.execute();
+        expect(addSpy).toHaveBeenCalledTimes(1);
+        expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ id: InternalRoles.ACTIVE_SESSION.toString() }));
     })
 
     it("should fail if the guild has no queue", async () => {
@@ -122,17 +147,7 @@ describe("TutorSessionStartCommand", () => {
     it("should fail if the user has an active session", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
         const queue = await createQueue(dbGuild, "test", "test description");
-
-        await SessionModel.create({
-            queue: queue,
-            user: interaction.user.id,
-            guild: interaction.guild!.id,
-            role: SessionRole.coach,
-            active: true,
-            started_at: new Date(),
-            end_certain: false,
-            rooms: [],
-        })
+        await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         const replySpy = jest.spyOn(interaction, 'editReply');
         await commandInstance.execute();
