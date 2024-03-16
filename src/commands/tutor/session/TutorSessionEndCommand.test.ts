@@ -57,6 +57,23 @@ describe("TutorSessionEndCommand", () => {
                 data: {
                     title: "Tutor Session Ended",
                     description: `You have ended the tutor session for queue "${queue.name}".`,
+                    fields: expect.arrayContaining([
+                        {
+                            name: "Time Spent",
+                            value: expect.any(String),
+                            inline: true,
+                        }, 
+                        {
+                            name: "Channels Visited",
+                            value: expect.any(String),
+                            inline: true,
+                        },
+                        {
+                            name: "Participants",
+                            value: expect.any(String),
+                            inline: true,
+                        }
+                    ]),
                     color: Colors.Green
                 }
             }]

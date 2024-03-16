@@ -4,6 +4,8 @@ import { Colors, EmbedBuilder } from "discord.js";
 import { DocumentType } from "@typegoose/typegoose";
 import { CouldNotFindQueueError, CouldNotFindQueueForSessionError, CouldNotFindRoleError, CouldNotRemoveRoleError, InteractionNotInGuildError, UserHasNoActiveSessionError } from "@types";
 import { InternalRoles } from "@models/BotRoles";
+import { formatDuration } from "@utils/formatDuration";
+import { Session } from "@models/Session";
 
 /**
  * Represents a command to end a tutor session.
@@ -15,8 +17,8 @@ export default class TutorSessionEndCommand extends BaseCommand {
     public async execute(): Promise<void> {
         await this.defer();
         try {
-            const queue = await this.endTutorSession();
-            const embed = this.mountEndTutorSessionEmbed(queue);
+            const { queue, timeSpent, channelsVisited, participants } = await this.endTutorSession();
+            const embed = this.mountEndTutorSessionEmbed(queue, timeSpent, channelsVisited, participants);
             await this.send({ embeds: [embed] });
         } catch (error) {
             if (error instanceof Error) {
@@ -34,10 +36,23 @@ export default class TutorSessionEndCommand extends BaseCommand {
      * @param queue - The queue for the tutor session.
      * @returns The embed builder for the end of the tutor session.
      */
-    private mountEndTutorSessionEmbed(queue: DocumentType<Queue>): EmbedBuilder {
+    private mountEndTutorSessionEmbed(queue: DocumentType<Queue>, timeSpent: string, channelsVisited: number, participants: number): EmbedBuilder {
         return new EmbedBuilder()
             .setTitle("Tutor Session Ended")
             .setDescription(`You have ended the tutor session for queue "${queue.name}".`)
+            .addFields({
+                name: "Time Spent",
+                value: timeSpent,
+                inline: true
+            }, {
+                name: "Channels Visited",
+                value: channelsVisited.toString(),
+                inline: true
+            }, {
+                name: "Participants",
+                value: participants.toString(),
+                inline: true
+            })
             .setColor(Colors.Green);
     }
 
@@ -66,7 +81,7 @@ export default class TutorSessionEndCommand extends BaseCommand {
      * @throws {UserHasNoActiveSessionError} if the user does not have an active session.
      * @throws {CouldNotFindQueueForSessionError} if the queue for the session could not be found.
      */
-    private async endTutorSession(): Promise<DocumentType<Queue>> {
+    private async endTutorSession(): Promise<{queue: DocumentType<Queue>, timeSpent: string, channelsVisited: number, participants: number}> {
         if (!this.interaction.guild) {
             throw new InteractionNotInGuildError(this.interaction);
         }
@@ -92,6 +107,16 @@ export default class TutorSessionEndCommand extends BaseCommand {
         // end tutor session
         await this.app.queueManager.endTutorSession(queue, session, this.interaction.user);
 
-        return queue;
+        const timeSpent = this.getTimeSpent(session);
+        const channelsVisited = session.rooms.length;
+        const participants = await session.getNumberOfParticipants();
+
+        return { queue, timeSpent, channelsVisited, participants };
+    }
+
+    private getTimeSpent(session: DocumentType<Session>): string {
+        const start = session.started_at!;
+        const diff = Date.now() - (+start);
+        return formatDuration(diff);
     }
 }
