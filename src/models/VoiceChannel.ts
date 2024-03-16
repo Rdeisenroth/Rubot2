@@ -61,9 +61,3 @@ export class VoiceChannel implements Channel {
     @prop({ type: String, default: [] })
         supervisors?: mongoose.Types.Array<string>;
 }
-
-export const VoiceChannelModel = getModelForClass(VoiceChannel, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

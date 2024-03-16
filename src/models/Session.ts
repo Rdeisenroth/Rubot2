@@ -1,4 +1,5 @@
-import { getModelForClass, prop, mongoose } from "@typegoose/typegoose";
+import { DocumentType, prop, mongoose } from "@typegoose/typegoose";
+import { RoomModel } from "./Models";
 
 export enum SessionRole {
     "participant" = "participant",
@@ -52,10 +53,19 @@ export class Session {
      */
     @prop({ required: true, type: () => [String], default: [] })
         rooms!: mongoose.Types.Array<string>;
-}
 
-export const SessionModel = getModelForClass(Session, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});
+    public getNumberOfRooms(this: DocumentType<Session>): number {
+        return this.rooms.length;
+    }
+
+    public async getNumberOfParticipants(this: DocumentType<Session>): Promise<number> {
+        let count = 0;
+        for (const room of this.rooms) {
+            const roomData = await RoomModel.findById(room);
+            if (roomData) {
+                count += (await roomData.getNumberOfParticipants());
+            }
+        }
+        return count;
+    }
+}

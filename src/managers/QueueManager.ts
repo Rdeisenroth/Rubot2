@@ -4,12 +4,12 @@ import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError, UserHasActiveSessionError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
-import { QueueEntryModel } from "@models/QueueEntry";
 import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
 import { InternalRoles } from "@models/BotRoles";
-import { SessionModel, SessionRole, Session } from "@models/Session";
+import { SessionRole, Session } from "@models/Session";
+import { QueueEntryModel, SessionModel } from "@models/Models";
 
 @injectable()
 @singleton()

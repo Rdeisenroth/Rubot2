@@ -3,7 +3,7 @@ import GuildCreateEvent from "./GuildCreateEvent"
 import { MockDiscord } from "@tests/mockDiscord"
 import { Guild } from "discord.js"
 import { CommandsManager } from "@managers"
-import { GuildModel } from "@models/Guild"
+import { GuildModel } from "@models/Models"
 
 describe("GuildCreateEvent", () => {
     const event = GuildCreateEvent

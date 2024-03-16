@@ -1,10 +1,10 @@
 import { MockDiscord } from "@tests/mockDiscord"
 import GuildAddMemberEvent from "./GuildAddMemberEvent"
 import { container } from "tsyringe"
-import { BaseMessageOptions, Guild as DiscordGuild, EmbedBuilder, GuildMember } from "discord.js"
+import { Guild as DiscordGuild, GuildMember } from "discord.js"
 import { Guild as DatabaseGuild } from "@models/Guild"
-import { UserModel } from "@models/User"
 import { DocumentType } from "@typegoose/typegoose"
+import { UserModel } from "@models/Models"
 
 describe("GuildAddMemberEvent", () => {
     const event = GuildAddMemberEvent
@@ -18,7 +18,7 @@ describe("GuildAddMemberEvent", () => {
         eventInstance = new event(discord.getApplication())
         discordGuild = discord.mockGuild()
         member = discord.mockGuildMember(discord.mockUser(), discordGuild)
-        databaseGuild = await discord.getApplication().configManager.getDefaultGuildConfig(discordGuild)
+        databaseGuild = await discord.getApplication().configManager.getGuildConfig(discordGuild)
     })
 
     it("should have the correct name", () => {

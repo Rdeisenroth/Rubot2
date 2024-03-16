@@ -1,10 +1,11 @@
-import { DBRole, DBRoleModel, InternalRoles, RoleScopes } from "@models/BotRoles";
+import { DBRole, RoleScopes } from "@models/BotRoles";
 import { QueueEventType } from "@models/Event";
 import { Guild } from "@models/Guild"
-import { Queue, QueueModel } from "@models/Queue";
+import { QueueModel, SessionModel, DBRoleModel, VoiceChannelModel } from "@models/Models";
+import { Queue } from "@models/Queue";
 import { QueueEntry } from "@models/QueueEntry";
-import { SessionModel, SessionRole, Session } from "@models/Session";
-import { VoiceChannel, VoiceChannelModel } from "@models/VoiceChannel";
+import {SessionRole, Session } from "@models/Session";
+import { VoiceChannel } from "@models/VoiceChannel";
 import { DocumentType, mongoose } from "@typegoose/typegoose"
 import { ChannelType, } from "discord.js";
 

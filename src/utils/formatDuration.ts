@@ -7,8 +7,20 @@
  */
 export function formatDuration(duration: number): string {
     duration = duration / 1000;
-    const hours = Math.floor(duration / 3600);
+    const days = Math.floor(duration / 86400);
+    const hours = Math.floor((duration % 86400) / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
     const seconds = duration % 60;
-    return `${hours}h ${minutes}m ${seconds}s`;
+
+    const parts = [];
+
+    if (days > 1) {
+        parts.push(`${days}d`);
+    }
+
+    parts.push(`${hours}h`);
+    parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+
+    return parts.join(' ');
 }

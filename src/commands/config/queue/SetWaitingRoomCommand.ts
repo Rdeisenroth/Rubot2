@@ -4,7 +4,7 @@ import { CouldNotFindChannelError, CouldNotFindQueueError, CouldNotFindRoleError
 import { Guild as DatabaseGuild } from "@models/Guild";
 import { ArraySubDocumentType, DocumentType, mongoose } from "@typegoose/typegoose";
 import { ApplicationCommandOptionType, ChannelType, Colors, EmbedBuilder, Role, VoiceChannel } from "discord.js";
-import { VoiceChannelModel } from "@models/VoiceChannel";
+import { VoiceChannelModel } from "@models/Models";
 
 export default class SetWaitingRoomCommand extends BaseCommand {
     public static name = "set_waiting_room";

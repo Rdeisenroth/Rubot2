@@ -2,7 +2,7 @@ import { container } from "tsyringe"
 import GuildUpdateEvent from "./GuildUpdateEvent"
 import { MockDiscord } from "@tests/mockDiscord"
 import { Guild } from "discord.js"
-import { GuildModel } from "@models/Guild"
+import { GuildModel } from "@models/Models"
 
 describe("GuildUpdateEvent", () => {
     const event = GuildUpdateEvent

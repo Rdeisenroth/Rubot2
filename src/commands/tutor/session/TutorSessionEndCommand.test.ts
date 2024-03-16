@@ -3,7 +3,7 @@ import { MockDiscord } from "@tests/mockDiscord";
 import { createQueue, createRole, createSession } from "@tests/testutils";
 import { ChatInputCommandInteraction, Colors, DataManager, GuildMember, GuildMemberRoleManager, Role } from "discord.js";
 import TutorSessionEndCommand from "./TutorSessionEndCommand";
-import { SessionModel } from "@models/Session";
+import { SessionModel } from "@models/Models";
 
 describe("TutorSessionEndCommand", () => {
     const command = TutorSessionEndCommand;

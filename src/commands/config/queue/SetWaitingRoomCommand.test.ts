@@ -3,7 +3,7 @@ import SetWaitingRoomCommand from "./SetWaitingRoomCommand"
 import { container } from "tsyringe"
 import { BaseMessageOptions, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js"
 import { createQueue, createRole, createWaitingRoom } from "@tests/testutils"
-import { GuildModel } from "@models/Guild"
+import { GuildModel } from "@models/Models"
 
 describe("SetWaitingRoomCommand", () => {
     const command = SetWaitingRoomCommand

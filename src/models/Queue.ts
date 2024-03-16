@@ -299,9 +299,3 @@ export class Queue {
         }
     }
 }
-
-export const QueueModel = getModelForClass(Queue, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

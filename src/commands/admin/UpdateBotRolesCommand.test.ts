@@ -4,7 +4,7 @@ import UpdateBotRolesCommand from "./UpdateBotRolesCommand";
 import { container } from "tsyringe";
 import { mockRole } from "@shoginn/discordjs-mock";
 import { InternalGuildRoles } from "@models/BotRoles";
-import { GuildModel } from "@models/Guild";
+import { GuildModel } from "@models/Models";
 
 describe("UpdateBotRolesCommand", () => {
     const command = UpdateBotRolesCommand

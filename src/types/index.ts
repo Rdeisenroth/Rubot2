@@ -1,3 +1,4 @@
+import { EventDate } from "./EventDate";
 import OptionRequirement from "./OptionRequirement";
 import { StringReplacements } from "./StringReplacements";
 import AlreadyInQueueError from "./errors/AlreadyInQueueError";
@@ -44,4 +45,5 @@ export {
     ChannelAlreadyInfoChannelError,
     ChannelNotInfoChannelError,
     GuildHasNoQueueError,
+    EventDate,
 }

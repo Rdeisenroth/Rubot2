@@ -3,7 +3,8 @@ import { ChatInputCommandInteraction, Colors, GuildMemberRoleManager } from "dis
 import TutorSessionStartCommand from "./TutorSessionStartCommand";
 import { InternalRoles, RoleScopes } from "@models/BotRoles";
 import { createQueue, createRole, createSession } from "@tests/testutils";
-import { Session, SessionModel, SessionRole } from "@models/Session";
+import { Session, SessionRole } from "@models/Session";
+import { SessionModel } from "@models/Models";
 
 describe("TutorSessionStartCommand", () => {
     const command = TutorSessionStartCommand;

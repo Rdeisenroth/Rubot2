@@ -54,9 +54,3 @@ export class Guild {
     @prop()
         welcome_title?: string;
 }
-
-export const GuildModel = getModelForClass(Guild, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});

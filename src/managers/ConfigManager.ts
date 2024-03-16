@@ -1,8 +1,9 @@
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { Guild as DiscordGuild } from "discord.js";
-import { Guild, GuildModel } from "@models/Guild";
+import { Guild } from "@models/Guild";
 import { DocumentType } from "@typegoose/typegoose";
 import { Application } from "@application";
+import { GuildModel } from "@models/Models";
 
 @injectable()
 @singleton()

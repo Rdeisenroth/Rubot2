@@ -2,8 +2,8 @@ import { MockDiscord } from "@tests/mockDiscord";
 import { ChatInputCommandInteraction, Colors } from "discord.js";
 import { container } from "tsyringe";
 import QueueLeaveCommand from "./QueueLeaveCommand";
-import { GuildModel } from "@models/Guild";
 import { createQueue } from "@tests/testutils";
+import { GuildModel } from "@models/Models";
 
 describe("QueueLeaveCommand", () => {
     const command = QueueLeaveCommand;

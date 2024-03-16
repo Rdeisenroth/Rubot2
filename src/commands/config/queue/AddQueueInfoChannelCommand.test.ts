@@ -3,9 +3,8 @@ import { ApplicationCommandOptionType, ChannelType, ChatInputCommandInteraction,
 import { container } from "tsyringe";
 import AddQueueInfoChannelCommand from "./AddQueueInfoChannelCommand";
 import { QueueEventType } from "@models/Event";
-import { eventNames } from "process";
 import { createQueue } from "@tests/testutils";
-import { GuildModel } from "@models/Guild";
+import { GuildModel } from "@models/Models";
 
 describe("AddQueueInfoChannelCommand", () => {
     const command = AddQueueInfoChannelCommand;

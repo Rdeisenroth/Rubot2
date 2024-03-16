@@ -1,6 +1,7 @@
 import { getModelForClass, prop, mongoose, Ref, DocumentType } from "@typegoose/typegoose";
-import { Session, SessionModel } from "./Session";
+import { Session, SessionRole } from "./Session";
 import { DBRole } from "./BotRoles";
+import { SessionModel } from "./Models";
 
 /**
  * A User from the Database
@@ -51,10 +52,23 @@ export class User {
     public async getActiveSessions(this: DocumentType<User>): Promise<DocumentType<Session>[]> {
         return SessionModel.find({ user: (this._id as string), active: true });
     }
-}
 
-export const UserModel = getModelForClass(User, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});
+    /**
+     * Gets The Role a User had at the given Time
+     * @param guildID The Guild That is associated With the Session
+     * @param timestamp The Timestamp (defaults to Date.now())
+     */
+    public async getRole(this: DocumentType<User>, guildID: string, timestamp?: number): Promise<SessionRole | null> {
+        if (!timestamp) {
+            timestamp = Date.now();
+        }
+        // Get Session(s) at Timestamp
+        const sessions = await SessionModel.find({ guild: guildID, user: (this._id as string), started_at: { $lte: timestamp.toString() }, $or: [{ ended_at: { $exists: false } }, { ended_at: { $gte: timestamp.toString() } }] });
+        // We assume that there is at most One Session per guild at a time
+        if (!sessions.length) {
+            return null;
+        } else {
+            return sessions[0].role;
+        }
+    }
+}

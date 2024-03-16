@@ -2,10 +2,11 @@ import { Application } from "@application";
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { User as DiscordUser, Guild, GuildMember, Role } from "discord.js";
 import { DocumentType } from "@typegoose/typegoose";
-import { User, UserModel } from "@models/User";
+import { User } from "@models/User";
 import { InternalRoles } from "@models/BotRoles";
 import { CouldNotFindRoleError, CouldNotAssignRoleError, CouldNotRemoveRoleError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
+import { UserModel } from "@models/Models";
 
 /**
  * Manages user-related operations such as retrieving users, creating new users, and assigning roles to users.

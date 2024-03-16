@@ -4,7 +4,7 @@ import { container } from "tsyringe";
 import RemoveQueueInfoChannelCommand from "./RemoveQueueInfoChannelCommand";
 import { QueueEventType } from "@models/Event";
 import { createQueue } from "@tests/testutils";
-import { GuildModel } from "@models/Guild";
+import { GuildModel } from "@models/Models";
 
 describe("RemoveQueueInfoChannelCommand", () => {
     const command = RemoveQueueInfoChannelCommand;
