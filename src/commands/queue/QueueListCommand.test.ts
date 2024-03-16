@@ -53,9 +53,8 @@ describe("QueueListCommand", () => {
         await commandInstance.execute()
 
         expect(replySpy).toHaveBeenCalledTimes(1)
-        expect(replySpy).toHaveBeenCalledWith({ 
-            fetchReply: true,
-             embeds: [{
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
+            embeds: [{
                 data: {
                     title: "Queue List",
                     description: "Here are all the queues available in this server.",
@@ -72,6 +71,6 @@ describe("QueueListCommand", () => {
                     color: Colors.Green,
                 }
             }]
-        });
+        }));
     })
 })

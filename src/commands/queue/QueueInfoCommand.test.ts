@@ -34,8 +34,7 @@ describe("InfoCommand", () => {
         await commandInstance.execute();
 
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({ 
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({ 
              embeds: [{
                 data: {
                     title: "Error",
@@ -43,7 +42,7 @@ describe("InfoCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 
     it("should reply with the queue info if the user is in a queue", async () => {
@@ -58,8 +57,7 @@ describe("InfoCommand", () => {
         await commandInstance.execute();
 
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
             embeds: [{
                 data: {
                     title: "Queue Information",
@@ -83,6 +81,6 @@ describe("InfoCommand", () => {
                     ]),
                 }
             }]
-        });
+        }));
     })
 });

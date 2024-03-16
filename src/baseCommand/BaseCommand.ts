@@ -19,7 +19,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
      * @param content The message content.
      * @returns The sent message.1
      */
-    protected async send(content: BaseMessageOptions | string): Promise<Message> {
+    protected async send(content: BaseMessageOptions | string, ephemeral: boolean = true): Promise<Message> {
         try {
             const interaction = this.interaction as CommandInteraction
             const messageContent = typeof content === "string" ? { content } : content
@@ -31,7 +31,7 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
                 return sentContent as Message
             } else {
                 this.app.logger.debug(`Replying to interaction ${interaction.id}`)
-                const sentContent = await interaction.reply({ ...messageContent, fetchReply: true })
+                const sentContent = await interaction.reply({ ...messageContent, fetchReply: true, ephemeral: ephemeral })
                 this.app.logger.debug(`Finished reply to interaction ${interaction.id}`)
                 return sentContent as Message
             }
@@ -48,11 +48,11 @@ export default abstract class BaseCommand extends BaseCommandOrSubcommandsHandle
     /**
      * Defers the reply to the interaction.
      */
-    protected async defer(): Promise<void> {
+    protected async defer(ephemeral: boolean = true): Promise<void> {
         try {
             this.app.logger.debug(`Deferring reply to interaction ${this.interaction.id}`)
             const interaction = this.interaction as CommandInteraction
-            await interaction.deferReply()
+            await interaction.deferReply({ ephemeral: ephemeral })
         } catch (error) {
             if (error instanceof Error) {
                 handleInteractionError(error, this.interaction, this.app.logger)

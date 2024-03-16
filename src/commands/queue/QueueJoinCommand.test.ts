@@ -67,8 +67,7 @@ describe("QueueJoinCommand", () => {
         expect(saveSpyRes.queues[0].entries).toHaveLength(1);
         expect(saveSpyRes.queues[0].entries[0].discord_id).toBe(interaction.user.id);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
             embeds: [{
                 data: {
                     description: expect.stringContaining(queue.join_message!.replace("${name}", queue.name).replace("${pos}", "1").replace("${total}", "1").replace("${time_spent}", "0h 0m")),
@@ -76,7 +75,7 @@ describe("QueueJoinCommand", () => {
                     title: "Queue Joined"
                 }
             }]
-        });
+        }));
     })
 
     it("should fail if the queue does not exist", async () => {
@@ -84,8 +83,7 @@ describe("QueueJoinCommand", () => {
         await commandInstance.execute();
 
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
             embeds: [{
                 data: {
                     title: "Error",
@@ -93,7 +91,7 @@ describe("QueueJoinCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 
     it("should fail if the user is already in the same queue", async () => {
@@ -107,8 +105,7 @@ describe("QueueJoinCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
             embeds: [{
                 data: {
                     title: "Error",
@@ -116,7 +113,7 @@ describe("QueueJoinCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 
     it("should fail if the user is already in another queue", async () => {
@@ -131,8 +128,7 @@ describe("QueueJoinCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
             embeds: [{
                 data: {
                     title: "Error",
@@ -140,7 +136,7 @@ describe("QueueJoinCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 
     it("should fail if the user has an active session", async () => {
@@ -156,8 +152,7 @@ describe("QueueJoinCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({ 
-            fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({ 
              embeds: [{
                 data: {
                     title: "Error",
@@ -165,7 +160,7 @@ describe("QueueJoinCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 
     it("should fail if the queue is locked", async () => {
@@ -179,8 +174,7 @@ describe("QueueJoinCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-             fetchReply: true,
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
               embeds: [{
                 data: {
                     title: "Error",
@@ -188,6 +182,6 @@ describe("QueueJoinCommand", () => {
                     color: Colors.Red,
                 }
             }]
-        });
+        }));
     })
 })

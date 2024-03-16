@@ -30,7 +30,7 @@ describe("PingCommand", () => {
         const replySpy = jest.spyOn(interaction, 'reply')
         await commandInstance.execute()
 
-        expect(replySpy).toHaveBeenCalledWith({ content: "Pinging...", fetchReply: true })
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({ content: "Pinging..." }))
     })
 
     it("should edit the reply with pong and message embed", async () => {

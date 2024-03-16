@@ -40,18 +40,15 @@ describe("QueueLeaveCommand", () => {
         const saveSpyRes = await saveSpy.mock.results[0].value;
         expect(saveSpyRes.queues.entries).toHaveLength(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith(
-            {
-                fetchReply: true,
-                embeds: [{
-                    data: {
-                        description: expect.stringContaining(queue.leave_message!.replace("${name}", queue.name).replace("${time_spent}", "0h 0m")),
-                        color: Colors.Green,
-                        title: "Queue Left"
-                    }
-                }]
-            }
-        );
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
+            embeds: [{
+                data: {
+                    description: expect.stringContaining(queue.leave_message!.replace("${name}", queue.name).replace("${time_spent}", "0h 0m")),
+                    color: Colors.Green,
+                    title: "Queue Left"
+                }
+            }]
+        }));
     })
 
     it("should fail if the user is not in a queue", async () => {
@@ -65,17 +62,14 @@ describe("QueueLeaveCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith(
-            {
-                fetchReply: true,
-                embeds: [{
-                    data: {
-                        description: `You are currently not in a queue.`,
-                        color: Colors.Red,
-                        title: "Error"
-                    }
-                }]
-            }
-        );
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
+            embeds: [{
+                data: {
+                    description: `You are currently not in a queue.`,
+                    color: Colors.Red,
+                    title: "Error"
+                }
+            }]
+        }));
     })
 })
