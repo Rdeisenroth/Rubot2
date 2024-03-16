@@ -26,7 +26,7 @@ export class MockDiscord {
     public constructor() {
         this.app = this.mockApplication();
     }
-    
+
     private mockApplication(): Application {
         const clientOptions = { intents: [] };
         container.register("options", { useValue: clientOptions })
@@ -56,16 +56,17 @@ export class MockDiscord {
         return mockRole(this.app.client, "0", guild, role);
     }
 
-    public mockGuildMember(user: User = this.mockUser(), guild: Guild = this.mockGuild()): GuildMember {
+    public mockGuildMember(user: User = this.mockUser(), guild: Guild = this.mockGuild(), roles?: string[]): GuildMember {
         return mockGuildMember({
             client: this.app.client,
             user: user,
             guild: guild,
+            data: roles ? { roles: roles } : undefined
         });
     }
 
     public mockInteraction(commandName: string = "ping", channel?: TextChannel, guildMember?: GuildMember): ChatInputCommandInteraction {
-        const guild = this.mockGuild();
+        const guild = guildMember?.guild ?? this.mockGuild();
         channel = channel ? channel : this.mockChannel(guild);
         guildMember = guildMember ? guildMember : this.mockGuildMember(this.mockUser(), guild);
         assert(guildMember.guild === guild);

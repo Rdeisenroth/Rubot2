@@ -8,9 +8,8 @@ import { QueueEntryModel } from "@models/QueueEntry";
 import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
-import { Session } from "inspector";
 import { InternalRoles } from "@models/BotRoles";
-import { SessionModel, SessionRole } from "@models/Session";
+import { SessionModel, SessionRole, Session } from "@models/Session";
 
 @injectable()
 @singleton()
@@ -73,6 +72,24 @@ export default class QueueManager {
     }
 
     /**
+     * Retrieves a queue by its ID from the specified guild.
+     * 
+     * @param dbGuild - The database guild object.
+     * @param queueId - The ID of the queue to retrieve.
+     * @returns The queue object with the specified ID.
+     * @throws {CouldNotFindQueueError} if the queue with the specified ID is not found.
+     */
+    public getQueueById(dbGuild: DatabaseGuild, queueId: mongoose.Types.ObjectId): DocumentType<Queue> {
+        const queue = dbGuild.queues.find(queue => queue._id.equals(queueId));
+        if (!queue) {
+            this.app.logger.debug(`Queue with id "${queueId}" not found in guild "${dbGuild.name}" (id: ${dbGuild._id})`);
+            throw new CouldNotFindQueueError(queueId.toString());
+        }
+        this.app.logger.debug(`Queue with id "${queueId}" found in guild "${dbGuild.name}" (id: ${dbGuild._id})`);
+        return queue;
+    }
+
+    /**
      * Retrieves the queue associated with a specific user.
      * 
      * @param dbGuild - The database guild object.
@@ -118,7 +135,7 @@ export default class QueueManager {
         await queue.$parent()?.save();
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) joined queue "${queue.name}"`);
 
-        this.logQueueActivity(queue, QueueEventType.JOIN, user);
+        await this.logQueueActivity(queue, QueueEventType.JOIN, user);
         // Return the join message.
         return queue.getJoinMessage(user.id);
     }
@@ -146,7 +163,7 @@ export default class QueueManager {
         await queue.$parent()?.save()
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}"`);
 
-        this.logQueueActivity(queue, QueueEventType.LEAVE, user);
+        await this.logQueueActivity(queue, QueueEventType.LEAVE, user);
         return leaveMessage;
     }
 
@@ -174,7 +191,23 @@ export default class QueueManager {
         dbUser.sessions.push(userSession);
         await dbUser.save();
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) started a tutor session on queue "${queue.name}"`);
-        this.logQueueActivity(queue, QueueEventType.TUTOR_SESSION_START, user);
+        await this.logQueueActivity(queue, QueueEventType.TUTOR_SESSION_START, user);
+    }
+
+    /**
+     * Ends a tutor session.
+     * 
+     * @param queue - The queue for which the tutor session is ended.
+     * @param session - The session to end.
+     * @param user - The user ending the tutor session.
+     */
+    public async endTutorSession(queue: DocumentType<Queue>, session: DocumentType<Session>, user: User): Promise<void> {
+        session.active = false;
+        session.ended_at = Date.now().toString();
+        session.end_certain = true;
+        await session.save();
+        this.app.logger.info(`Tutor session for user "${session.user}" on queue "${session.queue}" ended`);
+        await this.logQueueActivity(queue, QueueEventType.TUTOR_SESSION_QUIT, user);
     }
 
     /**

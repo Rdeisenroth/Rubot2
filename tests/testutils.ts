@@ -3,9 +3,10 @@ import { QueueEventType } from "@models/Event";
 import { Guild } from "@models/Guild"
 import { Queue, QueueModel } from "@models/Queue";
 import { QueueEntry } from "@models/QueueEntry";
+import { SessionModel, SessionRole, Session } from "@models/Session";
 import { VoiceChannel, VoiceChannelModel } from "@models/VoiceChannel";
 import { DocumentType, mongoose } from "@typegoose/typegoose"
-import { ChannelType } from "discord.js";
+import { ChannelType, } from "discord.js";
 
 export const config = {
     Memory: true,
@@ -36,6 +37,20 @@ export async function createQueue(guild: DocumentType<Guild>, name: string, desc
     guild.queues.push(queue);
     await guild.save();
     return queue;
+}
+
+export async function createSession(queue: DocumentType<Queue>, userId: string, guildId: string, active: boolean = true): Promise<DocumentType<Session>> {
+    const session = await SessionModel.create({
+        queue: queue,
+        user: userId,
+        guild: guildId,
+        role: SessionRole.coach,
+        active: active,
+        started_at: new Date(),
+        end_certain: !active,
+        rooms: [],
+    })
+    return session;
 }
 
 export async function createRole(guild: DocumentType<Guild>, name: string, internalName: string = "tutor"): Promise<DBRole> {

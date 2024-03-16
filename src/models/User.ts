@@ -44,6 +44,13 @@ export class User {
     public async hasActiveSessions(this: DocumentType<User>): Promise<boolean> {
         return !!(await SessionModel.findOne({ user: (this._id as string), active: true }));
     }
+
+    /**
+     * Returns the Active Sessions
+     */
+    public async getActiveSessions(this: DocumentType<User>): Promise<DocumentType<Session>[]> {
+        return SessionModel.find({ user: (this._id as string), active: true });
+    }
 }
 
 export const UserModel = getModelForClass(User, {
