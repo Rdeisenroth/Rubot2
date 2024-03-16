@@ -46,7 +46,7 @@ describe("TutorSessionStartCommand", () => {
         expect(deferSpy).toHaveBeenCalledTimes(1);
     })
 
-    it.each([true, false])("should reply with the started tutor session (queue parameter is provided: %p)", async (parameterSet) => {
+    it.each([true, false])("should start a tutor session and reply with it (queue parameter is provided: %p)", async (parameterSet) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
         const queue = await createQueue(dbGuild, "test", "test description");
 
@@ -69,40 +69,6 @@ describe("TutorSessionStartCommand", () => {
             end_certain: false,
             rooms: []
         });
-
-        expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith({
-            embeds: [{
-                data: {
-                    title: "Tutor Session Started",
-                    description: `You have started a tutor session for queue "test".`,
-                    color: Colors.Green,
-                }
-            }]
-        })
-    })
-
-    it.each([true, false])("should reply with the started tutor session (queue parameter is provided: %p)", async (parameterSet) => {
-        const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
-
-        if (parameterSet) {
-            interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
-        }
-
-        const replySpy = jest.spyOn(interaction, 'editReply');
-        const saveSpy = jest.spyOn(SessionModel.prototype as any, 'save');
-        await commandInstance.execute();
-
-        expect(saveSpy).toHaveBeenCalledTimes(1);
-        const saveSpyRes = await saveSpy.mock.results[0].value as Session;
-        expect(saveSpyRes.user).toBe(interaction.user.id);
-        expect(saveSpyRes.queue).toStrictEqual(queue._id);
-        expect(saveSpyRes.guild).toBe(interaction.guild!.id);
-        expect(saveSpyRes.role).toBe(SessionRole.coach);
-        expect(saveSpyRes.active).toBe(true);
-        expect(saveSpyRes.end_certain).toBe(false);
-        expect(saveSpyRes.rooms).toStrictEqual([]);
 
         expect(replySpy).toHaveBeenCalledTimes(1);
         expect(replySpy).toHaveBeenCalledWith({
