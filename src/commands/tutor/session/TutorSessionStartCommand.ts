@@ -75,6 +75,14 @@ export default class TutorSessionStartCommand extends BaseCommand {
             throw new InteractionNotInGuildError(this.interaction);
         }
         const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild);
+        const user = this.interaction.user;
+        const dbUser = await this.app.userManager.getUser(user);
+
+        // Check if user has active session
+        if (await dbUser.hasActiveSessions()) {
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to start a tutor session but has an active session`);
+            throw new UserHasActiveSessionError();
+        }
 
         // check if guild has a queue
         if (!dbGuild.queues || dbGuild.queues.length === 0) {

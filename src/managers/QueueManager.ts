@@ -155,17 +155,10 @@ export default class QueueManager {
      * 
      * @param queue - The queue for which the tutor session is started.
      * @param user - The user starting the tutor session.
-     * @throws {UserHasActiveSessionError} if the user already has an active session.
      */
     public async startTutorSession(queue: DocumentType<Queue>, user: User): Promise<void> {
         const dbGuild = queue.$parent() as DocumentType<DatabaseGuild>;
         const dbUser = await this.app.userManager.getUser(user);
-
-        // Check if user has active session
-        if (await dbUser.hasActiveSessions()) {
-            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to start a tutor session but has an active session`);
-            throw new UserHasActiveSessionError();
-        }
 
         const userSession = await SessionModel.create({
             user: user.id,
