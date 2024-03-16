@@ -44,7 +44,7 @@ export default class UserManager {
      * @param user The Discord user.
      * @returns A Promise that resolves to the created user.
      */
-    public async getDefaultUser(user: DiscordUser): Promise<DocumentType<User>> {
+    private async getDefaultUser(user: DiscordUser): Promise<DocumentType<User>> {
         const newUser = new UserModel({
             _id: user.id,
         });

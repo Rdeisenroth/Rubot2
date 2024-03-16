@@ -23,7 +23,7 @@ export default class ConfigManager {
         return guildModel;
     }
 
-    public async getDefaultGuildConfig(guild: DiscordGuild): Promise<DocumentType<Guild>> {
+    private async getDefaultGuildConfig(guild: DiscordGuild): Promise<DocumentType<Guild>> {
         const newGuildData = new GuildModel({
             _id: guild.id,
             name: guild.name,
