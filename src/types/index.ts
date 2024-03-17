@@ -19,6 +19,7 @@ import NotInQueueError from "./errors/NotInQueueError";
 import QueueAlreadyExistsError from "./errors/QueueAlreadyExistsError";
 import QueueLockedError from "./errors/QueueLockedError";
 import RoleNotInDatabaseError from "./errors/RoleNotInDatabaseError";
+import SessionHasNoQueueError from "./errors/SessionHasNoQueueError";
 import UserHasActiveSessionError from "./errors/UserHasActiveSessionError";
 import UserHasNoActiveSessionError from "./errors/UserHasNoActiveSessionError";
 
@@ -40,6 +41,7 @@ export {
     AlreadyInQueueError,
     UserHasActiveSessionError,
     UserHasNoActiveSessionError,
+    SessionHasNoQueueError,
     QueueLockedError,
     InvalidEventError,
     ChannelAlreadyInfoChannelError,

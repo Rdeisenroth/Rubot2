@@ -40,7 +40,7 @@ export async function createQueue(guild: DocumentType<Guild>, name: string, desc
     return queue;
 }
 
-export async function createSession(queue: DocumentType<Queue>, userId: string, guildId: string, active: boolean = true): Promise<DocumentType<Session>> {
+export async function createSession(queue: DocumentType<Queue> | null, userId: string, guildId: string, active: boolean = true): Promise<DocumentType<Session>> {
     const session = await SessionModel.create({
         queue: queue,
         user: userId,
