@@ -54,6 +54,16 @@ export class User {
     }
 
     /**
+     * Retrieves the sessions associated with the user in a specific guild.
+     * 
+     * @param guildID - The ID of the guild.
+     * @returns A promise that resolves to an array of sessions.
+     */
+    public async getSessions(this: DocumentType<User>, guildID: string): Promise<DocumentType<Session>[]> {
+        return SessionModel.find({ user: (this._id as string), guild: guildID });
+    }
+
+    /**
      * Gets The Role a User had at the given Time
      * @param guildID The Guild That is associated With the Session
      * @param timestamp The Timestamp (defaults to Date.now())
