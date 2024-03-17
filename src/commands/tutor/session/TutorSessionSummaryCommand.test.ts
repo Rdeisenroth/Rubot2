@@ -43,7 +43,6 @@ describe("TutorSessionSummaryCommand", () => {
                         {
                             name: "Time Spent",
                             value: expect.any(String),
-                            inline: true,
                         }, 
                         {
                             name: "Channels Visited",

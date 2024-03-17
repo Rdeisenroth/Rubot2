@@ -30,7 +30,6 @@ export default class TutorSessionSummaryCommand extends BaseCommand {
             .addFields({
                 name: "Time Spent",
                 value: timeSpent,
-                inline: true
             }, {
                 name: "Channels Visited",
                 value: channelsVisited.toString(),
