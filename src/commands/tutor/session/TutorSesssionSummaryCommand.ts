@@ -63,6 +63,7 @@ export default class TutorSessionSummaryCommand extends BaseCommand {
 
         // Check if the user has an active session
         if (!session) {
+            this.app.logger.error(`User ${this.interaction.user.displayName} (id: ${this.interaction.user.id}) has no active session.`);
             throw new UserHasNoActiveSessionError();
         }
 

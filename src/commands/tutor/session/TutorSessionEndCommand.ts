@@ -92,11 +92,13 @@ export default class TutorSessionEndCommand extends BaseCommand {
 
         // Check if the user has an active session
         if (!session) {
+            this.app.logger.info(`User ${user.displayName} (id: ${user.id}) has no active session.`);
             throw new UserHasNoActiveSessionError();
         }
 
         // Get the queue
         if (!session.queue) {
+            this.app.logger.info(`Session ${session.id} has no queue.`);
             throw new CouldNotFindQueueForSessionError();
         }
         const queue = this.app.queueManager.getQueueById(dbGuild, session.queue._id);

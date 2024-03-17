@@ -63,8 +63,10 @@ export default class TutorQueueSummaryCommand extends BaseCommand {
 
         // Check if the user has an active session
         if (!session) {
+            this.app.logger.info(`User ${this.interaction.user.displayName} (id: ${this.interaction.user.id}) has no active session.`);
             throw new UserHasNoActiveSessionError();
         } else if (!session.queue) {
+            this.app.logger.info(`Session ${session.id} has no queue.`);
             throw new SessionHasNoQueueError(session);
         }
 
