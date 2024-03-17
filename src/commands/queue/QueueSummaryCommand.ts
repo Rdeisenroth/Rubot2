@@ -4,8 +4,8 @@ import { DocumentType } from "@typegoose/typegoose";
 import { InteractionNotInGuildError, NotInQueueError } from "@types";
 import { Colors, EmbedBuilder } from "discord.js";
 
-export default class QueueInfoCommand extends BaseCommand {
-    public static name = "info";
+export default class QueueSummaryCommand extends BaseCommand {
+    public static name = "summary";
     public static description = "Displays information about the queue.";
     public static options = [];
 

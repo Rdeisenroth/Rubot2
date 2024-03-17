@@ -1,4 +1,4 @@
-import QueueInfoCommand from "./QueueInfoCommand";
+import QueueSummaryCommand from "./QueueSummaryCommand";
 import { MockDiscord } from "@tests/mockDiscord";
 import { EmbedBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction, Colors } from "discord.js";
@@ -7,9 +7,9 @@ import { QueueEntry } from "@models/QueueEntry";
 import { createQueue } from "@tests/testutils";
 
 describe("InfoCommand", () => {
-    const command = QueueInfoCommand;
+    const command = QueueSummaryCommand;
     const discord = new MockDiscord();
-    let commandInstance: QueueInfoCommand;
+    let commandInstance: QueueSummaryCommand;
     let interaction: ChatInputCommandInteraction;
 
     beforeEach(() => {
@@ -18,7 +18,7 @@ describe("InfoCommand", () => {
     });
 
     it("should have the correct name", () => {
-        expect(command.name).toBe("info");
+        expect(command.name).toBe("summary");
     })
 
     it("should have the correct description", () => {
