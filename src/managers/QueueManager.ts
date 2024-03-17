@@ -293,7 +293,7 @@ export default class QueueManager {
     private async logQueueActivity(queue: DocumentType<Queue>, event: QueueEventType, user: User, targets?: User[]): Promise<void> {
         const dbGuild = queue.$parent() as DocumentType<DatabaseGuild>;
         const activeSessionRole = dbGuild.guild_settings.roles?.find(role => role.internal_name === InternalRoles.ACTIVE_SESSION);
-        const queueSessions: DocumentType<Session>[] = await SessionModel.find({ queue: queue._id, active: true });
+        const numberOfQueueSessions = await SessionModel.find({ queue: queue._id, active: true }).countDocuments();
 
         for (const infoChannel of queue.info_channels) {
             if (infoChannel.events.includes(event)) {
@@ -302,7 +302,7 @@ export default class QueueManager {
                     this.app.logger.debug(`Channel with id ${infoChannel.channel_id} not found in guild ${dbGuild.name} (id: ${dbGuild._id})`);
                     continue;
                 }
-                const emebed = this.getEventEmbed(user, event, queue, queueSessions, targets);
+                const emebed = this.getEventEmbed(user, event, queue, numberOfQueueSessions, targets);
                 const message = await discordChannel.send(`<@&${activeSessionRole?.role_id}>`);
                 await message.edit({ embeds: [emebed] });
             }
@@ -319,7 +319,7 @@ export default class QueueManager {
      * @param targets - Optional. The array of users affected by the event.
      * @returns The generated EmbedBuilder object.
      */
-    private getEventEmbed(user: User, event: QueueEventType, queue: DocumentType<Queue>, sessions: DocumentType<Session>[], targets?: User[]): EmbedBuilder {
+    private getEventEmbed(user: User, event: QueueEventType, queue: DocumentType<Queue>, numberOfQueueSessions: number, targets?: User[]): EmbedBuilder {
         let eventDescription: string = "";
         switch (event) {
             case QueueEventType.JOIN:
@@ -341,7 +341,7 @@ export default class QueueManager {
                 eventDescription = `${targets?.join(", ")} were kicked from the queue ${queue.name} by ${user}.`;
                 break;
         }
-        let sessionsDescription = `There ${sessions.length === 1 ? "is" : "are"} ${sessions.length} active session${sessions.length === 1 ? "" : "s"} in the queue ${queue.name}.`;
+        let sessionsDescription = `There ${numberOfQueueSessions === 1 ? "is" : "are"} ${numberOfQueueSessions} active session${numberOfQueueSessions === 1 ? "" : "s"} in the queue ${queue.name}.`;
         let membersDescription = `There ${queue.entries.length === 1 ? "is" : "are"} ${queue.entries.length} member${queue.entries.length === 1 ? "" : "s"} in the queue ${queue.name}.`;
 
         return new EmbedBuilder()
