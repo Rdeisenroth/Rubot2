@@ -57,7 +57,7 @@ export default class SetWaitingRoomCommand extends BaseCommand {
         }
     }
 
-    private mountSetWaitingRoomEmbed(channel: VoiceChannel, queue: ArraySubDocumentType<Queue>, supervisor: Role): EmbedBuilder {
+    private mountSetWaitingRoomEmbed(channel: VoiceChannel, queue: DocumentType<Queue>, supervisor: Role): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setTitle("Waiting Room Set")
             .setDescription(`:white_check_mark: Waiting room ${channel} set for queue "${queue.name}".`)
@@ -77,7 +77,7 @@ export default class SetWaitingRoomCommand extends BaseCommand {
         return embed
     }
 
-    private async createWaitingRoom(channel: VoiceChannel, queue: ArraySubDocumentType<Queue>, supervisor: Role): Promise<void> {
+    private async createWaitingRoom(channel: VoiceChannel, queue: DocumentType<Queue>, supervisor: Role): Promise<void> {
         const existingWaitingRoom = this.dbGuild.voice_channels.find(voiceChannel => voiceChannel.queue == queue.id)
         if (existingWaitingRoom) {
             this.app.logger.debug(`Found existing waiting room for queue ${queue.name}. Overwriting.`)
@@ -101,11 +101,11 @@ export default class SetWaitingRoomCommand extends BaseCommand {
         }
     }
 
-    private getOptionValues(): { channel: VoiceChannel, queue: ArraySubDocumentType<Queue>, supervisor: Role } {
+    private getOptionValues(): { channel: VoiceChannel, queue: DocumentType<Queue>, supervisor: Role } {
         const channelId = this.getOptionValue(SetWaitingRoomCommand.options[0]);
         const channel = this.getVoiceChannel(channelId);
-        const queueId = this.getOptionValue(SetWaitingRoomCommand.options[1]);
-        const queue = this.getQueue(queueId);
+        const queueName = this.getOptionValue(SetWaitingRoomCommand.options[1]);
+        const queue = this.app.queueManager.getQueue(this.dbGuild, queueName);
         const supervisorId = this.getOptionValue(SetWaitingRoomCommand.options[2]);
         const supervisor = this.getRole(supervisorId);
         return { channel, queue, supervisor };
@@ -119,16 +119,6 @@ export default class SetWaitingRoomCommand extends BaseCommand {
             throw error;
         }
         return channel;
-    }
-
-    private getQueue(queueName: string): ArraySubDocumentType<Queue> {
-        const queue = this.dbGuild.queues.find(x => x.name.toLowerCase() === queueName.toLowerCase());
-        if (!queue) {
-            const error = new CouldNotFindQueueError(queueName);
-            this.app.logger.debug(error.message);
-            throw error;
-        }
-        return queue;
     }
 
     private getRole(roleId: string): Role {
