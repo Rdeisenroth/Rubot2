@@ -30,7 +30,7 @@ export default class QueueJoinCommand extends BaseCommand {
         const intent = this.getOptionValue(QueueJoinCommand.options[1])
         const user = this.interaction.user
         try {
-            let joinMessage = await this.joinQueue(queueName, intent, user)
+            const joinMessage = await this.joinQueue(queueName, intent, user)
             const embed = this.mountJoinQueueEmbed(joinMessage);
             await this.send({ embeds: [embed] })
         } catch (error) {
