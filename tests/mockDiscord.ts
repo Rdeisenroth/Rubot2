@@ -9,7 +9,7 @@ import {
     mockChatInputCommandInteraction
 } from '@shoginn/discordjs-mock';
 import "reflect-metadata"
-import { APIRole, ChatInputCommandInteraction, Guild, GuildMember, Role, TextBasedChannel, TextChannel, User } from 'discord.js';
+import { APIRole, ChatInputCommandInteraction, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceState } from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { randomInt } from 'crypto';
 import assert from 'assert';
@@ -47,6 +47,10 @@ export class MockDiscord {
         return mockTextChannel(this.app.client, guild);
     }
 
+    public mockDMChannel(): DMChannel {
+        return Reflect.construct(DMChannel, [this.app.client, {}]) as DMChannel;
+    }
+
     public mockUser(): User {
         const userId = randomInt(281474976710655).toString();
         return mockUser(this.app.client, { id: userId, username: userId, global_name: userId, discriminator: randomInt(9999).toString() });
@@ -71,5 +75,18 @@ export class MockDiscord {
         guildMember = guildMember ? guildMember : this.mockGuildMember(this.mockUser(), guild);
         assert(guildMember.guild === guild);
         return mockChatInputCommandInteraction({ client: this.app.client, name: commandName, id: "test", channel: channel, member: guildMember })
+    }
+
+    // public mockVoiceState(guild: Guild = this.mockGuild(), channelID: string | null = "123", member: GuildMember = this.mockGuildMember(this.mockUser(), guild)): VoiceState {
+    public mockVoiceState({
+        guild = this.mockGuild(),
+        channelID = "123",
+        member = this.mockGuildMember(this.mockUser(), guild)
+    }: {
+        guild?: Guild,
+        channelID?: string | null,
+        member?: GuildMember
+    }): VoiceState {
+        return Reflect.construct(VoiceState, [guild, { channelID: channelID, member: member }]);
     }
 }

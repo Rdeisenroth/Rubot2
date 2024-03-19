@@ -12,6 +12,7 @@ import { BaseEvent } from "@baseEvent"
 import { BaseCommandOrSubcommandsHandler } from "@baseCommand"
 import CommandsLoader from "@loaders/CommandsLoader"
 import EventsLoader from "@loaders/EventsLoader"
+import DmManager from "./managers/DmManager"
 
 /**
  * The main `Application` class.
@@ -39,6 +40,11 @@ export class Application {
      * The user manager responsible for managing the users in the database.
      */
     public userManager: UserManager
+
+    /**
+     * The DM manager responsible for managing the direct messages.
+     */
+    public dmManager: DmManager
 
     /**
      * The commands manager responsible for managing the bot commands.
@@ -82,7 +88,7 @@ export class Application {
      * @param client The Discord client.
      * @param token The bot token.
      */
-    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager, @inject(delay(() => QueueManager)) queueManager: QueueManager, @inject(delay(() => UserManager)) userManager: UserManager) {
+    constructor(@inject("options") options: ClientOptions, @inject("token") token: string, @inject(delay(() => CommandsManager)) commandsManager: CommandsManager, @inject(delay(() => ConfigManager)) configManager: ConfigManager, @inject(delay(() => QueueManager)) queueManager: QueueManager, @inject(delay(() => UserManager)) userManager: UserManager, @inject(delay(() => DmManager)) dmManager: DmManager){
         this.client = new Client(options)
         this.token = token
         this.logger = createConsola({ level: Environment.logLevel })
@@ -90,6 +96,7 @@ export class Application {
         this.configManager = configManager
         this.queueManager = queueManager
         this.userManager = userManager
+        this.dmManager = dmManager
     }
 
     private loadEvents(): void {

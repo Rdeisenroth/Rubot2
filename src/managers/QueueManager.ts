@@ -4,7 +4,7 @@ import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError, UserHasActiveSessionError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
-import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild } from "discord.js";
+import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild, Collection } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
 import { InternalRoles } from "@models/BotRoles";
@@ -15,6 +15,10 @@ import { QueueEntryModel, SessionModel } from "@models/Models";
 @singleton()
 export default class QueueManager {
     protected app: Application;
+    /**
+     * A collection of pending queue stays. The key is the queue ID and the value is an array of user IDs.
+     */
+    private pendingQueueStays: Collection<string, Collection<string, void>> = new Collection();
 
     constructor(@inject(delay(() => Application)) app: Application) {
         this.app = app;
@@ -39,7 +43,7 @@ export default class QueueManager {
             disconnect_timeout: 60000,
             match_timeout: 120000,
             limit: 150,
-            join_message: "You joined the ${name} queue.\n\\> Your Position: ${pos}/${total}",
+            join_message: "You joined the ${name} queue.\n\\> Your Position: ${pos}/${total}\n\\> Total Time Spent: ${time_spent}",
             match_found_message: "You have found a Match with ${match}. Please Join ${match_channel} if you are not moved automatically. If you don't join in ${timeout} seconds, your position in the queue is dropped.",
             timeout_message: "Your queue Timed out after ${timeout} seconds.",
             leave_message: "You Left the `${name}` queue.\nTotal Time Spent: ${time_spent}",
@@ -111,7 +115,7 @@ export default class QueueManager {
      * @throws {AlreadyInQueueError} If the user is already in the queue.
      * @throws {QueueLockedError} If the queue is locked.
      */
-    public async joinQueue(queue: DocumentType<Queue>, user: User, intent: string): Promise<string> {
+    public async joinQueue(queue: DocumentType<Queue>, user: User, intent?: string): Promise<string> {
         // Check if the user is already in the queue they are trying to join.
         if (queue.contains(user.id)) {
             this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to join queue "${queue.name}" but is already in it`);
@@ -140,6 +144,37 @@ export default class QueueManager {
         return queue.getJoinMessage(user.id);
     }
 
+    public async leaveQueueWithTimeout(guild: DatabaseGuild, user: User): Promise<string> {
+        const queue = this.getQueueOfUser(guild, user);
+        if (!queue) {
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) tried to leave queue with timeout but is not in a queue`);
+            throw new NotInQueueError();
+        }
+
+        // Add the user to the pending queue stays
+        let pendingQueueStays = this.pendingQueueStays.get(queue.id);
+        if (!pendingQueueStays) {
+            this.pendingQueueStays.set(queue.id, new Collection([[user.id, undefined]]));
+            pendingQueueStays = this.pendingQueueStays.get(queue.id)!;
+        }
+        pendingQueueStays.set(user.id, undefined);
+
+        const leftRoomMessage = queue.getLeaveRoomMessage(user.id);
+
+        setTimeout(async () => {
+            let pendingQueueStays = this.pendingQueueStays.get(queue.id);
+            if (pendingQueueStays && pendingQueueStays.has(user.id)) {
+                await this.leaveQueue(guild, user);
+
+                if (pendingQueueStays && pendingQueueStays.has(user.id)) {
+                    pendingQueueStays.delete(user.id);
+                }
+            }
+        }, queue.disconnect_timeout);
+
+        return leftRoomMessage;
+    }
+
     /**
      * Removes a user from the queue he is in and returns the leave message.
      *
@@ -165,6 +200,14 @@ export default class QueueManager {
 
         await this.logQueueActivity(queue, QueueEventType.LEAVE, user);
         return leaveMessage;
+    }
+
+    public async stayInQueue(queue: DocumentType<Queue>, user: User): Promise<void> {
+        const pendingQueueStays = this.pendingQueueStays.get(queue.id);
+        if (pendingQueueStays && pendingQueueStays.has(user.id)) {
+            pendingQueueStays.delete(user.id);
+            this.app.logger.info(`User "${user.username}" (id: ${user.id}) stayed in queue "${queue.name}"`);
+        }
     }
 
     /**
