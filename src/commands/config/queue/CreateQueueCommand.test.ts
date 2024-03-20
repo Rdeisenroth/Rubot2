@@ -87,7 +87,7 @@ describe("CreateQueueCommand", () => {
 
     it("should fail if the queue name is already taken on the same guild", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        const queue = await createQueue(dbGuild, "test name", "test description")
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("name")?.value as string })
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()
@@ -107,7 +107,7 @@ describe("CreateQueueCommand", () => {
     it("should create a queue if the queue name is already taken on another guild", async () => {
         const otherGuild = discord.mockGuild()
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(otherGuild)
-        await createQueue(dbGuild, "test name", "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("name")?.value as string })
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()

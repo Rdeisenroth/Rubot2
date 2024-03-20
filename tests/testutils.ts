@@ -20,7 +20,7 @@ export const config = {
 }
 
 export async function createQueue(guild: DocumentType<Guild>, {
-    name = "test queue",
+    name = `test-queue-${randomInt(1000)}`,
     description = "test description",
     entries = [],
     locked = false,

@@ -2,7 +2,7 @@ import { MockDiscord } from "@tests/mockDiscord"
 import SetWaitingRoomCommand from "./SetWaitingRoomCommand"
 import { container } from "tsyringe"
 import { BaseMessageOptions, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder } from "discord.js"
-import { createQueue, createRole, createWaitingRoom } from "@tests/testutils"
+import { createQueue, createRole, createVoiceChannel } from "@tests/testutils"
 import { GuildModel } from "@models/Models"
 
 describe("SetWaitingRoomCommand", () => {
@@ -91,7 +91,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should edit the reply with the created waiting room", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
 
         jest.clearAllMocks();
@@ -120,7 +120,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should set the waiting room on the database", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
         await commandInstance.execute()
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
@@ -133,9 +133,9 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should overwrite the waiting room on the database if it already exists for the queue", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        const queue = await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
-        await createWaitingRoom(dbGuild, "another channel", queue, `another supervisor ${interaction.guild}`)
+        await createVoiceChannel(dbGuild, { queue: queue, supervisor: `another supervisor ${interaction.guild}` })
         await commandInstance.execute()
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
 
@@ -148,11 +148,12 @@ describe("SetWaitingRoomCommand", () => {
     it("should add another waiting room on the database if it is for another queue", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
         // create other waiting room
-        const queue = await createQueue(dbGuild, "another channel", "another description")
+        const queue = await createQueue(dbGuild)
         await createRole(dbGuild, "another supervisor")
-        await createWaitingRoom(dbGuild, "another channel", queue, `another supervisor ${interaction.guild}`)
+        await createVoiceChannel(dbGuild, { queue: queue, supervisor: `another supervisor ${interaction.guild}` })
+
         // preparations for the command
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
         await commandInstance.execute()
         dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
@@ -165,7 +166,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should fail if the channel does not exist", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
 
         interaction.guild!.channels.cache.get = jest.fn().mockReturnValue(null)
@@ -186,7 +187,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should fail if the channel is not a voice channel", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
         await createRole(dbGuild, interaction.options.get("supervisor")!.value as string)
 
         interaction.guild!.channels.cache.get = jest.fn().mockImplementation(() => {
@@ -231,7 +232,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should fail if the role does not exist", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
 
         interaction.guild!.roles.cache.get = jest.fn().mockReturnValue(null)
         const replySpy = jest.spyOn(interaction, 'editReply')
@@ -251,7 +252,7 @@ describe("SetWaitingRoomCommand", () => {
 
     it("should fail if the role is not in the database", async () => {
         let dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!)
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description")
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string })
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute()

@@ -45,7 +45,7 @@ describe("TutorSessionEndCommand", () => {
 
     it("should end the tutor session and reply with it", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         const replySpy = jest.spyOn(interaction, 'editReply');
@@ -82,7 +82,7 @@ describe("TutorSessionEndCommand", () => {
 
     it("should end the tutor session on the database", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         const saveSpy = jest.spyOn(SessionModel.prototype as any, 'save');
@@ -98,7 +98,7 @@ describe("TutorSessionEndCommand", () => {
 
     it("should remove the active session role from the user", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         const removeSpy = jest.spyOn(GuildMemberRoleManager.prototype, 'remove');

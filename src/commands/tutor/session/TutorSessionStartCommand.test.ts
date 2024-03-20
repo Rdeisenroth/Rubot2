@@ -49,7 +49,7 @@ describe("TutorSessionStartCommand", () => {
 
     it.each([true, false])("should start a tutor session and reply with it (queue parameter is provided: %p)", async (parameterSet) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
 
         if (parameterSet) {
             interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
@@ -63,7 +63,7 @@ describe("TutorSessionStartCommand", () => {
             embeds: [{
                 data: {
                     title: "Tutor Session Started",
-                    description: `You have started a tutor session for queue "test".`,
+                    description: `You have started a tutor session for queue "${queue.name}".`,
                     color: Colors.Green,
                 }
             }]
@@ -72,7 +72,7 @@ describe("TutorSessionStartCommand", () => {
 
     it.each([true, false])("should start a tutor session save it in the database (queue parameter is provided: %p)", async (parameterSet) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
 
         if (parameterSet) {
             interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
@@ -96,7 +96,7 @@ describe("TutorSessionStartCommand", () => {
 
     it.each([true, false])("should add the active session role to the user (queue parameter is provided: %p)", async (parameterSet) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
 
         if (parameterSet) {
             interaction.options.get = jest.fn().mockReturnValue({ value: queue.name });
@@ -126,7 +126,7 @@ describe("TutorSessionStartCommand", () => {
 
     it("should fail if the queue does not exist", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, "test", "test description");
+        await createQueue(dbGuild);
 
         interaction.options.get = jest.fn().mockReturnValue({ value: "nonexistent" });
 
@@ -147,7 +147,7 @@ describe("TutorSessionStartCommand", () => {
 
     it("should fail if the user has an active session", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         const replySpy = jest.spyOn(interaction, 'editReply');

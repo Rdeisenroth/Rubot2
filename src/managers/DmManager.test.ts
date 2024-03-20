@@ -18,7 +18,7 @@ describe("DmManager", () => {
         user = discord.mockUser()
         const guild = discord.mockGuild()
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(guild)
-        queue = await createQueue(dbGuild, "test", "test description")
+        queue = await createQueue(dbGuild)
     })
 
     describe("sendQueueJoinMessage", () => {

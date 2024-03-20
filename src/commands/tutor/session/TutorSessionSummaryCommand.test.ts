@@ -28,7 +28,7 @@ describe("TutorSessionSummaryCommand", () => {
 
     it("should reply with a summary of the current session", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         await createSession(queue, interaction.user.id, interaction.guild!.id);
         
         const replySpy = jest.spyOn(interaction, 'reply');

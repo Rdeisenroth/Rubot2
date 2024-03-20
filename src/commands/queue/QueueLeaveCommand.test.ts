@@ -30,7 +30,7 @@ describe("QueueLeaveCommand", () => {
 
     it("should leave the queue and reply with a success message", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description", [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }]);
+        const queue = await createQueue(dbGuild, { entries: [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }] });
 
         const replySpy = jest.spyOn(interaction, 'reply');
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -53,7 +53,7 @@ describe("QueueLeaveCommand", () => {
 
     it("should fail if the user is not in a queue", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, "test", "test description");
+        await createQueue(dbGuild);
 
         jest.clearAllMocks();
         const replySpy = jest.spyOn(interaction, 'reply');

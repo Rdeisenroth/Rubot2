@@ -44,7 +44,7 @@ describe("TutorQueueListCommand", () => {
             discord_id: member.id,
             joinedAt: Date.now().toString(),
         }));
-        const queue = await createQueue(dbGuild, "test", "test description", queueEntries);
+        const queue = await createQueue(dbGuild, { entries: queueEntries });
         await createSession(queue, interaction.user.id, interaction.guild!.id);
 
         if (amount) {

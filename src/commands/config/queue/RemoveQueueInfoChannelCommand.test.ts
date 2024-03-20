@@ -72,7 +72,7 @@ describe("RemoveQueueInfoChannelCommand", () => {
         const channelName = interaction.options.get("channel")!.value as string;
         const queueName = interaction.options.get("queue")!.value as string;
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, queueName, "test description", [], false, [{ channel_id: channelName, events: Object.values(QueueEventType) }]);
+        await createQueue(dbGuild, { name: queueName, info_channels: [{ channel_id: channelName, events: Object.values(QueueEventType) }] });
 
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -101,7 +101,7 @@ describe("RemoveQueueInfoChannelCommand", () => {
         const channelName = "this channel does not exist";
         const queueName = interaction.options.get("queue")!.value as string;
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, queueName, "test description");
+        await createQueue(dbGuild, { name: queueName });
 
         interaction.options.get = jest.fn().mockImplementation((option: string) => {
             switch (option) {
@@ -135,7 +135,7 @@ describe("RemoveQueueInfoChannelCommand", () => {
         const channelName = "another channel";
         const queueName = interaction.options.get("queue")!.value as string;
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, queueName, "test description");
+        await createQueue(dbGuild, { name: queueName });
 
         interaction.options.get = jest.fn().mockImplementation((option: string) => {
             switch (option) {
@@ -190,7 +190,7 @@ describe("RemoveQueueInfoChannelCommand", () => {
         const channelName = interaction.options.get("channel")!.value as string;
         const queueName = interaction.options.get("queue")!.value as string;
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, queueName, "test description");
+        await createQueue(dbGuild, { name: queueName });
 
         const replySpy = jest.spyOn(interaction, 'editReply');
         await commandInstance.execute();

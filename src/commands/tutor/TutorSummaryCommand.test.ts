@@ -44,7 +44,7 @@ describe("TutorSummaryCommand", () => {
 
     it.each([1, 2, 3])(`should reply with a summary of all your Sessions when you had %s sessions`, async (numberOfSessions) => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        const queue = await createQueue(dbGuild);
         const sessions = [];
         for (let i = 0; i < numberOfSessions; i++) {
             const session = await createSession(queue, interaction.user.id, interaction.guild!.id);

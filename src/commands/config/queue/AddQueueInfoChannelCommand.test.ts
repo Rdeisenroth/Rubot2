@@ -83,7 +83,7 @@ describe("AddQueueInfoChannelCommand", () => {
 
     it("should set the queue info channel and reply with a success message", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description");
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("queue")?.value as string })
 
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -116,7 +116,7 @@ describe("AddQueueInfoChannelCommand", () => {
 
     it("should fail if the channel is not found", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description");
+        await createQueue(dbGuild, { name: interaction.options.get("queue")?.value as string })
 
         interaction.options.get = jest.fn().mockImplementation((option: string) => {
             switch (option) {
@@ -178,7 +178,7 @@ describe("AddQueueInfoChannelCommand", () => {
         })
 
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description");
+        await createQueue(dbGuild, { name: interaction.options.get("queue")?.value as string })
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute();
@@ -211,7 +211,7 @@ describe("AddQueueInfoChannelCommand", () => {
         })
 
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description");
+        await createQueue(dbGuild, { name: interaction.options.get("queue")?.value as string })
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute();
@@ -231,7 +231,7 @@ describe("AddQueueInfoChannelCommand", () => {
 
     it("should fail if the channel is already a queue info channel", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, interaction.options.get("queue")!.value as string, "test description", [], false, [{ channel_id: "test channel", events: Object.values(QueueEventType) }]);
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string, info_channels: [{ channel_id: "test channel", events: Object.values(QueueEventType) }] });
 
         const replySpy = jest.spyOn(interaction, 'editReply')
         await commandInstance.execute();

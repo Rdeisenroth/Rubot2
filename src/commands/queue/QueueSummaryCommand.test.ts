@@ -51,7 +51,7 @@ describe("InfoCommand", () => {
             discord_id: interaction.user.id,
             joinedAt: Date.now().toString(),
         };
-        const queue = await createQueue(dbGuild, "test", "test description", [queueEntry]);
+        const queue = await createQueue(dbGuild, { entries: [queueEntry] });
 
         const replySpy = jest.spyOn(interaction, 'reply');
         await commandInstance.execute();

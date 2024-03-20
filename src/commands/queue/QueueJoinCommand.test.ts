@@ -55,7 +55,7 @@ describe("QueueJoinCommand", () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
         const actualQueueName = interaction.options.get("queue")!.value as string
         const queueName = isLowercase ? actualQueueName.toLowerCase() : actualQueueName.toUpperCase();
-        const queue = await createQueue(dbGuild, queueName, "test description");
+        const queue = await createQueue(dbGuild, { name: queueName });
 
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -96,7 +96,7 @@ describe("QueueJoinCommand", () => {
 
     it("should fail if the user is already in the same queue", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description", [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }]);
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string, entries: [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }] });
 
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -118,8 +118,8 @@ describe("QueueJoinCommand", () => {
 
     it("should fail if the user is already in another queue", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
-        const otherQueue = await createQueue(dbGuild, "another test", "another test description", [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }]);
+        await createQueue(dbGuild);
+        const otherQueue = await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string, entries: [{ discord_id: interaction.user.id, joinedAt: (Date.now()).toString() }] });
 
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
@@ -141,7 +141,7 @@ describe("QueueJoinCommand", () => {
 
     it("should fail if the user has an active session", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description");
+        await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string });
 
         await SessionModel.create({ active: true, user: interaction.user.id, guild: interaction.guild?.id, role: SessionRole.coach, started_at: Date.now(), end_certain: false, rooms: [] });
 
@@ -152,8 +152,8 @@ describe("QueueJoinCommand", () => {
 
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
-        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({ 
-             embeds: [{
+        expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
+            embeds: [{
                 data: {
                     title: "Error",
                     description: `You have an active session and cannot perform this action.`,
@@ -165,8 +165,8 @@ describe("QueueJoinCommand", () => {
 
     it("should fail if the queue is locked", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
-        const queue = await createQueue(dbGuild, "test", "test description", [], true);
-        
+        const queue = await createQueue(dbGuild, { name: interaction.options.get("queue")!.value as string, locked: true });
+
         jest.clearAllMocks();
         const saveSpy = jest.spyOn(GuildModel.prototype as any, 'save');
         const replySpy = jest.spyOn(interaction, 'reply');
@@ -175,7 +175,7 @@ describe("QueueJoinCommand", () => {
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(replySpy).toHaveBeenCalledTimes(1);
         expect(replySpy).toHaveBeenCalledWith(expect.objectContaining({
-              embeds: [{
+            embeds: [{
                 data: {
                     title: "Error",
                     description: `The queue "${queue.name}" is locked and cannot be joined.`,
