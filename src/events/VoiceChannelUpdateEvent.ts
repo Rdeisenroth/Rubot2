@@ -16,16 +16,17 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
 
     public async execute(oldState: VoiceState, newState: VoiceState) {
         this.app.logger.info(`Voice state updated for user ${newState.member?.user.tag} (id: ${newState.member?.id}) in guild ${newState.guild.name} (id: ${newState.guild.id})`);
-        this.handleVoiceStateUpdate(oldState, newState);
+        await this.handleVoiceStateUpdate(oldState, newState);
     }
 
     private async handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
         const oldUserChannel = oldState.channel;
         const newUserChannel = newState.channel;
 
-        if (newUserChannel && newUserChannel.guild && newUserChannel.id != oldUserChannel?.id) {
+        if (newUserChannel && newUserChannel.guild && newUserChannel.id && newUserChannel.id != oldUserChannel?.id) {
             await this.handleVoiceJoin(newState)
-        } else if (oldUserChannel && oldUserChannel.guild && oldUserChannel.id != newUserChannel?.id) {
+        } 
+        if (oldUserChannel && oldUserChannel.guild && oldUserChannel.id && oldUserChannel.id != newUserChannel?.id) {
             await this.handleVoiceLeave(oldState)
         }
     }
@@ -73,6 +74,7 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
             if (queue.locked && !queue.contains(member.id)) {
                 await member.voice.setChannel(null);
                 this.app.dmManager.sendQueueLockedMessage(member.user, queue);
+                return
             }
 
             const joinMessage = await this.app.queueManager.joinQueue(queue, member.user);
@@ -82,7 +84,7 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
                 this.app.logger.error(`Could not add user ${member.user.tag} (id: ${member.id}) to queue ${queue.name} (id: ${dbChannel.queue.id}) in guild ${this.dbGuild.name} (id: ${this.dbGuild.id}). Error: ${error}`);
                 this.app.dmManager.sendErrorMessage(member.user, error);
                 return
-            } 
+            }
             this.app.logger.error(`Could not add user ${member.user.tag} (id: ${member.id}) to queue ${queue.name} (id: ${dbChannel.queue.id}) in guild ${this.dbGuild.name} (id: ${this.dbGuild.id}). Error: ${error}`);
             this.app.dmManager.sendErrorMessage(member.user, new Error("An unknown error occurred while adding you to the queue. Please try again later."));
             return
@@ -98,7 +100,7 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
         const dbChannel = this.dbGuild.voice_channels.find(channel => channel.id === oldUserChannel.id)
 
         if (dbChannel && dbChannel.temporary && oldUserChannel.members.size === 0) {
-            await this.removeTemporaryChannel(oldUserChannel, dbChannel);
+            await this.removeTemporaryChannel(oldUserChannel);
             return
         } else if (dbChannel && dbChannel.queue) {
             await this.handleQueueLeave(oldUserChannel, dbChannel, oldState.member!);
@@ -111,7 +113,7 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
         }
     }
 
-    private async removeTemporaryChannel(channel: VoiceBasedChannel, dbChannel: ArraySubDocumentType<VoiceChannel>): Promise<void> {
+    private async removeTemporaryChannel(channel: VoiceBasedChannel): Promise<void> {
         if (channel.deletable) {
             await channel.delete();
             this.app.logger.info(`Removed temporary channel ${channel.name} (id: ${channel.id}) in guild ${channel.guild.name} (id: ${channel.guild.id})`);
@@ -154,7 +156,7 @@ export default class VoiceChannelUpdateEvent extends BaseEvent {
     private memberIsTutor(member: GuildMember): boolean {
         const dbTutorRole = this.dbGuild.guild_settings.roles?.find(role => role.internal_name = InternalRoles.TUTOR);
         if (dbTutorRole) {
-            return member.roles.cache.some(role => role.id === dbTutorRole.id);
+            return member.roles.cache.some(role => role.id === dbTutorRole.role_id);
         }
         return false
     }

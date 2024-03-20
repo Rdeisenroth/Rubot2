@@ -18,7 +18,7 @@ export default class QueueManager {
     /**
      * A collection of pending queue stays. The key is the queue ID and the value is an array of user IDs.
      */
-    private pendingQueueStays: Collection<string, Collection<string, void>> = new Collection();
+    private pendingQueueStays: Collection<string, string[]> = new Collection();
 
     constructor(@inject(delay(() => Application)) app: Application) {
         this.app = app;
@@ -152,23 +152,20 @@ export default class QueueManager {
         }
 
         // Add the user to the pending queue stays
-        let pendingQueueStays = this.pendingQueueStays.get(queue.id);
-        if (!pendingQueueStays) {
-            this.pendingQueueStays.set(queue.id, new Collection([[user.id, undefined]]));
-            pendingQueueStays = this.pendingQueueStays.get(queue.id)!;
+        if (!this.pendingQueueStays.get(queue.id)) {
+            this.pendingQueueStays.set(queue.id, [user.id]);
         }
-        pendingQueueStays.set(user.id, undefined);
+        this.pendingQueueStays.get(queue.id)!.push(user.id);
 
         const leftRoomMessage = queue.getLeaveRoomMessage(user.id);
 
         setTimeout(async () => {
-            let pendingQueueStays = this.pendingQueueStays.get(queue.id);
-            if (pendingQueueStays && pendingQueueStays.has(user.id)) {
+            const pendingQueueStays = this.pendingQueueStays.get(queue.id);
+            if (pendingQueueStays && pendingQueueStays.includes(user.id)) {
                 await this.leaveQueue(guild, user);
-
-                if (pendingQueueStays && pendingQueueStays.has(user.id)) {
-                    pendingQueueStays.delete(user.id);
-                }
+                // Remove the user from the pending queue stays
+                this.pendingQueueStays.set(queue.id, this.pendingQueueStays.get(queue.id)!.filter(id => id !== user.id));
+                this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}" after disconnect timeout`);
             }
         }, queue.disconnect_timeout);
 
@@ -204,8 +201,8 @@ export default class QueueManager {
 
     public async stayInQueue(queue: DocumentType<Queue>, user: User): Promise<void> {
         const pendingQueueStays = this.pendingQueueStays.get(queue.id);
-        if (pendingQueueStays && pendingQueueStays.has(user.id)) {
-            pendingQueueStays.delete(user.id);
+        if (pendingQueueStays && pendingQueueStays.includes(user.id)) {
+            this.pendingQueueStays.set(queue.id, pendingQueueStays.filter(id => id !== user.id));
             this.app.logger.info(`User "${user.username}" (id: ${user.id}) stayed in queue "${queue.name}"`);
         }
     }

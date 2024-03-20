@@ -9,7 +9,7 @@ import {
     mockChatInputCommandInteraction
 } from '@shoginn/discordjs-mock';
 import "reflect-metadata"
-import { APIRole, ChatInputCommandInteraction, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceState } from 'discord.js';
+import { APIGuildMember, APIRole, APIUser, ChannelType, ChatInputCommandInteraction, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceState } from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { randomInt } from 'crypto';
 import assert from 'assert';
@@ -77,16 +77,67 @@ export class MockDiscord {
         return mockChatInputCommandInteraction({ client: this.app.client, name: commandName, id: "test", channel: channel, member: guildMember })
     }
 
-    // public mockVoiceState(guild: Guild = this.mockGuild(), channelID: string | null = "123", member: GuildMember = this.mockGuildMember(this.mockUser(), guild)): VoiceState {
-    public mockVoiceState({
-        guild = this.mockGuild(),
-        channelID = "123",
-        member = this.mockGuildMember(this.mockUser(), guild)
+    public mockVoiceState(guild: Guild, {
+        channelID = randomInt(281474976710655).toString(),
+        member = this.mockGuildMember(this.mockUser(), this.mockGuild()),
+        numberOfMembersOfChannel = 1
     }: {
-        guild?: Guild,
         channelID?: string | null,
-        member?: GuildMember
+        member?: GuildMember,
+        numberOfMembersOfChannel?: number
     }): VoiceState {
-        return Reflect.construct(VoiceState, [guild, { channelID: channelID, member: member }]);
+        const apiMember = this.guildMemberToAPIGuildMember(member);
+        const voiceState = Reflect.construct(VoiceState, [member.guild, {
+            channel_id: channelID,
+            user_id: member.id,
+            member: apiMember,
+            session_id: "test",
+            deaf: false,
+            mute: false,
+            self_deaf: false,
+            self_mute: false,
+            self_video: false,
+            suppress: false,
+        }]) as VoiceState;
+        Object.defineProperty(voiceState, "channel", {
+            value: {
+                type: ChannelType.GuildVoice,
+                guild: guild,
+                id: channelID,
+                name: "test",
+                members: { size: numberOfMembersOfChannel },
+                deletable: true,
+                delete: jest.fn(() => Promise.resolve())
+            }
+        })
+        return voiceState;
+    }
+
+    private guildMemberToAPIGuildMember(member: GuildMember): APIGuildMember {
+        return {
+            user: this.userToAPIUser(member.user),
+            nick: member.nickname,
+            avatar: member.avatar,
+            roles: member.roles.cache.map(role => role.id),
+            joined_at: member.joinedAt!.toString(),
+            premium_since: member.premiumSince?.toString(),
+            deaf: member.voice.deaf ?? false,
+            mute: member.voice.mute ?? false,
+            flags: member.flags.bitfield,
+        }
+    }
+
+    private userToAPIUser(user: User): APIUser {
+        return {
+            id: user.id,
+            username: user.username,
+            discriminator: user.discriminator,
+            global_name: user.globalName,
+            avatar: user.avatar,
+            bot: user.bot,
+            system: user.system,
+            banner: user.banner,
+            accent_color: user.accentColor,
+        }
     }
 }

@@ -1,13 +1,16 @@
 import { DBRole, RoleScopes } from "@models/BotRoles";
 import { QueueEventType } from "@models/Event";
 import { Guild } from "@models/Guild"
-import { QueueModel, SessionModel, DBRoleModel, VoiceChannelModel } from "@models/Models";
+import { QueueModel, SessionModel, DBRoleModel, VoiceChannelModel, RoomModel } from "@models/Models";
 import { Queue } from "@models/Queue";
 import { QueueEntry } from "@models/QueueEntry";
+import { Room } from "@models/Room";
 import {SessionRole, Session } from "@models/Session";
 import { VoiceChannel } from "@models/VoiceChannel";
 import { DocumentType, mongoose } from "@typegoose/typegoose"
+import { randomInt } from "crypto";
 import { ChannelType, } from "discord.js";
+import events from "events";
 
 export const config = {
     Memory: true,
@@ -16,14 +19,28 @@ export const config = {
     Database: 'test'
 }
 
-export async function createQueue(guild: DocumentType<Guild>, name: string, description: string, entries: QueueEntry[] = [], locked: boolean = false, info_channels: {
-    channel_id: string;
-    events: QueueEventType[];
-}[] = []): Promise<DocumentType<Queue>> {
+export async function createQueue(guild: DocumentType<Guild>, {
+    name = "test queue",
+    description = "test description",
+    entries = [],
+    locked = false,
+    disconnect_timeout = 1,
+    info_channels = []
+}: {
+    name?: string,
+    description?: string,
+    entries?: QueueEntry[],
+    locked?: boolean,
+    disconnect_timeout?: number,
+    info_channels?: {
+        channel_id: string;
+        events: QueueEventType[];
+    }[]
+} = {}): Promise<DocumentType<Queue>> {
     const queue = new QueueModel({
         name: name,
         description: description,
-        disconnect_timeout: 60000,
+        disconnect_timeout: disconnect_timeout,
         match_timeout: 120000,
         limit: 150,
         join_message: "You joined the ${name} queue.\n\\> Your Position: ${pos}/${total}\n\\> Total Time Spent: ${time_spent}",
@@ -68,17 +85,58 @@ export async function createRole(guild: DocumentType<Guild>, name: string, inter
     return role;
 }
 
-export async function createWaitingRoom(guild: DocumentType<Guild>, channel: string, queue: Queue, supervisor: string): Promise<VoiceChannel> {
+// export async function createVoiceChannel(guild: DocumentType<Guild>, channelId: string, queue: Queue, supervisor: string): Promise<VoiceChannel> {
+export async function createVoiceChannel(guild: DocumentType<Guild>, {
+    queue = null,
+    channelID = randomInt(281474976710655).toString(),
+    supervisor = null,
+    temporary = false,
+}: {
+    queue?: DocumentType<Queue> | null,
+    channelID?: string,
+    supervisor?: string | null,
+    temporary?: boolean,
+} = {}): Promise<DocumentType<VoiceChannel>> {
     const waitingRoomChannel = new VoiceChannelModel({
-        _id: channel,
+        _id: channelID,
         channel_type: ChannelType.GuildVoice,
         locked: false,
         managed: true,
         permitted: [],
         queue: queue,
         supervisors: [supervisor],
+        temporary: temporary,
     });
+
     guild.voice_channels.push(waitingRoomChannel);
     await guild.save();
     return waitingRoomChannel;
+}
+
+export async function createRoom(guild: DocumentType<Guild>, { 
+    roomId = randomInt(281474976710655).toString(),
+    active = true,
+    tampered = false,
+    endCertain = false,
+    events = []
+}: {
+    roomId?: string,
+    active?: boolean,
+    tampered?: boolean,
+    endCertain?: boolean,
+    events?: {
+        emitted_by: string,
+        type: string,
+        timestamp: string
+    }[]
+} = {}): Promise<DocumentType<Room>> {
+    const room = await RoomModel.create({
+        _id: roomId,
+        active: active,
+        tampered: tampered,
+        end_certain: endCertain,
+        guild: guild.id,
+        events: events,
+    });
+    return room;
 }
