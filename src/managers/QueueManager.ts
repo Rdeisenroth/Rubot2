@@ -4,12 +4,13 @@ import { Queue } from "@models/Queue";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { AlreadyInQueueError, ChannelAlreadyInfoChannelError, ChannelNotInfoChannelError, CouldNotFindQueueError, InvalidEventError, NotInQueueError, QueueAlreadyExistsError, QueueLockedError, UserHasActiveSessionError } from "@types";
 import { Guild as DatabaseGuild } from "@models/Guild";
-import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild, Collection } from "discord.js";
+import { EmbedBuilder, TextChannel, User, Guild as DiscordGuild, Collection, GuildMember, VoiceChannel } from "discord.js";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
 import { QueueEventType } from "@models/Event";
 import { InternalRoles } from "@models/BotRoles";
 import { SessionRole, Session } from "@models/Session";
 import { QueueEntryModel, SessionModel } from "@models/Models";
+import { QueueEntry } from "@models/QueueEntry";
 
 @injectable()
 @singleton()
@@ -189,21 +190,87 @@ export default class QueueManager {
 
         const leaveMessage = queue.getLeaveMessage(user.id);
 
-        // remove the user from the queue
-        const userIndex = queue.entries.findIndex(entry => entry.discord_id === user.id)
-        queue.entries.splice(userIndex, 1)
-        await queue.$parent()?.save()
+        await this.removeUserFromQueue(queue, user.id);
         this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}"`);
 
         await this.logQueueActivity(queue, QueueEventType.LEAVE, user);
         return leaveMessage;
     }
 
+    /**
+     * Removes a user from the queue.
+     * @param queue - The queue document.
+     * @param userId - The ID of the user to remove.
+     * @returns A promise that resolves when the user is removed from the queue.
+     */
+    private async removeUserFromQueue(queue: DocumentType<Queue>, userId: string): Promise<void> {
+        const userIndex = queue.entries.findIndex(entry => entry.discord_id === userId);
+        if (userIndex === -1) {
+            this.app.logger.debug(`User with id "${userId}" not found in queue "${queue.name}"`);
+            return;
+        }
+        if (!queue.$parent()) {
+            this.app.logger.debug(`Could not find parent guild for queue "${queue.name}"`);
+            return;
+        }
+        queue.entries.splice(userIndex, 1);
+        await queue.$parent()?.save();
+        this.app.logger.info(`User with id "${userId}" removed from queue "${queue.name}"`);
+    }
+
+    /**
+     * Removes the user from the pending queue stays for the specified queue.
+     * If the user is found in the pending queue stays, they are removed and a log message is generated.
+     * 
+     * @param queue - The queue from which the user should be removed.
+     * @param user - The user to be removed from the pending queue stays.
+     * @returns A Promise that resolves to void.
+     */
     public async stayInQueue(queue: DocumentType<Queue>, user: User): Promise<void> {
         const pendingQueueStays = this.pendingQueueStays.get(queue.id);
         if (pendingQueueStays && pendingQueueStays.includes(user.id)) {
             this.pendingQueueStays.set(queue.id, pendingQueueStays.filter(id => id !== user.id));
             this.app.logger.info(`User "${user.username}" (id: ${user.id}) stayed in queue "${queue.name}"`);
+        }
+    }
+
+    /**
+     * Kicks members from the queue who are not on the server.
+     * @param guildMembers - A collection of guild members on the server.
+     * @param queue - The queue document.
+     * @returns A promise that resolves when all members have been kicked from the queue.
+     */
+    public async kickNonServerMembers(guildMembers: Collection<string, GuildMember>, queue: DocumentType<Queue>): Promise<void> {
+        const queueMembersNotOnServer = queue.entries.filter(entry => !guildMembers.has(entry.discord_id));
+        if (queueMembersNotOnServer.length == 0) {
+            this.app.logger.debug(`No members to kick from queue "${queue.name}". Everyone is on the server.`);
+            return;
+        }
+        this.app.logger.info(`Kicking ${queueMembersNotOnServer.length} members (${queueMembersNotOnServer.map(memberNotOnServer => memberNotOnServer.discord_id).join(", ")}) from queue "${queue.name}" who are not on the server`);
+        for (const memberNotOnServer of queueMembersNotOnServer) {
+            await this.removeUserFromQueue(queue, memberNotOnServer.discord_id);
+        }
+        this.app.logger.debug(`Finished: Kicked ${queueMembersNotOnServer.length} members from queue "${queue.name}" who were not on the server`);
+    }
+
+    /**
+     * Notifies the picked students that they were picked by a tutor from the queue.
+     * 
+     * @param queue - The queue from which the students were picked.
+     * @param students - An array of students who were picked.
+     * @param tutor - The tutor who picked the students.
+     * @param room - The voice channel where the tutoring session will take place.
+     * @returns A Promise that resolves when all notifications have been sent.
+     */
+    public async notifyPickedStudents(queue: DocumentType<Queue>, students: GuildMember[], tutor: GuildMember, room: VoiceChannel): Promise<void> {
+        for (const student of students) {
+            this.app.logger.info(`Notifying student "${student.user.username}" (id: ${student.id}) that they were picked by tutor "${tutor.user.username}" (id: ${tutor.id}) from queue "${queue.name}" to room "${room.name}" (id: ${room.id})`);
+            const user = await this.app.client.users.fetch(student.id);
+
+            await this.removeUserFromQueue(queue, student.id);
+            await this.app.dmManager.sendQueuePickedMessage(user, queue, room);
+
+            await this.logQueueActivity(queue, QueueEventType.NEXT, tutor.user, [user]);
         }
     }
 

@@ -13,7 +13,7 @@ export function handleInteractionError(error: Error, interaction: Interaction, l
     const authorName = interaction.user.username
     const authorTag = interaction.user.tag
     const errorText = error.toString() || ''
-    logger.error(`${error.name}: ${interaction.isCommand() && interaction.commandName} on guild "${guildName}", channel "${channelName}" by ${authorName}(${authorTag})`)
+    logger.error(`${error.name}: ${interaction.isCommand() && interaction.commandName} on guild "${guildName}", channel "${channelName}" by ${authorName}(${authorTag})\n ${error} \n ${error.stack}`)
     if (errorText.includes('TypeError') || errorText.includes('RangeError')) {
         logger.error(error)
     }

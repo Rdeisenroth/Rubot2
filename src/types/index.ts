@@ -4,6 +4,7 @@ import { QueueListItem } from "./QueueListItem";
 import { StringReplacements } from "./StringReplacements";
 import AlreadyInQueueError from "./errors/AlreadyInQueueError";
 import ChannelAlreadyInfoChannelError from "./errors/ChannelAlreadyInfoChannelError";
+import ChannelCouldNotBeCreatedError from "./errors/ChannelCouldNotBeCreatedError";
 import ChannelNotInfoChannelError from "./errors/ChannelNotInfoChannelError";
 import CouldNotAssignRoleError from "./errors/CouldNotAssignRoleError";
 import CouldNotFindChannelError from "./errors/CouldNotFindChannelError";
@@ -18,6 +19,7 @@ import InvalidEventError from "./errors/InvalidEventError";
 import MissingOptionError from "./errors/MissingOptionError";
 import NotInQueueError from "./errors/NotInQueueError";
 import QueueAlreadyExistsError from "./errors/QueueAlreadyExistsError";
+import QueueIsEmptyError from "./errors/QueueIsEmptyError";
 import QueueLockedError from "./errors/QueueLockedError";
 import RoleNotInDatabaseError from "./errors/RoleNotInDatabaseError";
 import SessionHasNoQueueError from "./errors/SessionHasNoQueueError";
@@ -28,6 +30,7 @@ export {
     OptionRequirement,
     StringReplacements,
     QueueAlreadyExistsError,
+    QueueIsEmptyError,
     MissingOptionError,
     CouldNotFindChannelError,
     CouldNotFindQueueError,
@@ -47,6 +50,7 @@ export {
     InvalidEventError,
     ChannelAlreadyInfoChannelError,
     ChannelNotInfoChannelError,
+    ChannelCouldNotBeCreatedError,
     GuildHasNoQueueError,
     EventDate,
     QueueListItem,

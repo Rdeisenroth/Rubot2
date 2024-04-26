@@ -2,7 +2,7 @@ import { MockDiscord } from "@tests/mockDiscord"
 import { container } from "tsyringe"
 import DmManager from "./DmManager"
 import { createQueue } from "@tests/testutils"
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, DMChannel, MessageCreateOptions, MessagePayload, User } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, DMChannel, MessageCreateOptions, MessagePayload, User, VoiceChannel } from "discord.js"
 import { Queue } from "@models/Queue"
 import { DocumentType } from "@typegoose/typegoose"
 
@@ -151,6 +151,31 @@ describe("DmManager", () => {
                     data: {
                         title: "Queue Update",
                         description: `The queue "${queue.name}" is currently locked. You can't join it at the moment.`
+                    }
+                }],
+            }));
+        })
+    })
+
+    describe("sendQueuePickedMessage", () => {
+        it("should send a message to the user", async () => {
+            const dmSpy = jest.spyOn(user, "createDM").mockResolvedValue(dmChannel);
+            const sendSpy = jest.spyOn(dmChannel, "send").mockImplementation(() => Promise.resolve({} as any))
+            const room: VoiceChannel = { 
+                id: "123",
+                type: ChannelType.GuildVoice,
+                name: "Room",
+            } as any
+
+            await dmManager.sendQueuePickedMessage(user, queue, room)
+
+            expect(dmSpy).toHaveBeenCalledTimes(1)
+            expect(sendSpy).toHaveBeenCalledTimes(1)
+            expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({
+                embeds: [{
+                    data: {
+                        title: "You found a Coach!",
+                        description: `You found a Coach.\nPlease join ${room} if you are not automatically moved.`
                     }
                 }],
             }));

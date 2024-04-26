@@ -1,6 +1,6 @@
 import { Application } from "@application";
 import { Queue } from "@models/Queue";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, User, VoiceChannel } from "discord.js";
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { DocumentType } from "@typegoose/typegoose";
 
@@ -98,6 +98,17 @@ export default class DmManager {
         const embed = new EmbedBuilder()
             .setTitle("Queue Update")
             .setDescription(`The queue "${queue.name}" is currently locked. You can't join it at the moment.`)
+
+        await dmChannel.send({ embeds: [embed] });
+    }
+
+    public async sendQueuePickedMessage(user: User, queue: DocumentType<Queue>, room: VoiceChannel): Promise<void> {
+        this.app.logger.debug(`Sending picked message to user "${user.tag}" (id: ${user.id}) for queue "${queue.name}" (id: ${queue._id}) and room "${room.name}" (id: ${room.id})`);
+        const dmChannel = await user.createDM();
+
+        const embed = new EmbedBuilder()
+            .setTitle("You found a Coach!")
+            .setDescription(`You found a Coach.\nPlease join ${room} if you are not automatically moved.`)
 
         await dmChannel.send({ embeds: [embed] });
     }

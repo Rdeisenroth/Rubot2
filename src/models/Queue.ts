@@ -134,6 +134,13 @@ export class Queue {
     }
 
     /**
+     * Returns `true` if the Queue is Empty
+     */
+    public isEmpty(this: DocumentType<Queue>): boolean {
+        return this.entries.length < 1;
+    }
+
+    /**
      * Gets The Entry that has the given Discord ID
      * @param discord_id The Discord ID of the Entry
      */
