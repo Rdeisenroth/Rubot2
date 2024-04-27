@@ -50,7 +50,7 @@ export default class RoomManager {
                 } as VoiceChannelEvent);
                 this.app.logger.info(`Moved member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`)    
             } catch (error) {
-                this.app.logger.error(`Could not move member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
+                this.app.logger.info(`Could not move member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
                 continue;
             }
         }
