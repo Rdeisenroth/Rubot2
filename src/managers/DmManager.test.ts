@@ -161,11 +161,7 @@ describe("DmManager", () => {
         it("should send a message to the user", async () => {
             const dmSpy = jest.spyOn(user, "createDM").mockResolvedValue(dmChannel);
             const sendSpy = jest.spyOn(dmChannel, "send").mockImplementation(() => Promise.resolve({} as any))
-            const room: VoiceChannel = { 
-                id: "123",
-                type: ChannelType.GuildVoice,
-                name: "Room",
-            } as any
+            const room = discord.mockVoiceChannel(discord.mockGuild())
 
             await dmManager.sendQueuePickedMessage(user, queue, room)
 

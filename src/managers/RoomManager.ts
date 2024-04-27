@@ -251,6 +251,7 @@ export default class RoomManager {
             afkhell: false,
             category: options.parent,
             temporary: true,
+            supervisors: options.supervisor_roles,
         } as FilterOutFunctionKeys<DatabaseVoiceChannel>);
         await dbGuild.save();
         this.app.logger.info(`Created database entry for managed voice channel "${createdVoiceChannel.name}" in guild "${guild.name}" (id: ${guild.id})`);

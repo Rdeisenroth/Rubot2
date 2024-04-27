@@ -3,7 +3,7 @@ import { Guild } from "@models/Guild";
 import { QueueEntry } from "@models/QueueEntry";
 import { Session } from "@models/Session";
 import { ChannelCouldNotBeCreatedError, InteractionNotInGuildError, QueueIsEmptyError, SessionHasNoQueueError, UserHasNoActiveSessionError } from "@types";
-import { ApplicationCommandOptionType, EmbedBuilder, GuildMember, VoiceChannel } from "discord.js";
+import { ApplicationCommandOptionType, Colors, EmbedBuilder, GuildMember, VoiceChannel } from "discord.js";
 import { DocumentType } from "@typegoose/typegoose";
 import { Queue } from "@models/Queue";
 
@@ -34,6 +34,7 @@ export default class TutorQueueNextCommand extends BaseCommand {
     private dbSession!: DocumentType<Session>;
 
     public async execute(): Promise<void> {
+        await this.defer();
         try {
             const amount = parseInt(this.getOptionValue(TutorQueueNextCommand.options[0]));
             await this.loadGuildAndQueue();
@@ -54,21 +55,23 @@ export default class TutorQueueNextCommand extends BaseCommand {
             } else {
                 throw error;
             }
-        }        
+        }
     }
 
     private mountTutorQueueNextEmbed(students: GuildMember[], tutoringVoiceChannel: VoiceChannel): EmbedBuilder {
         const studentsString = students.join(", ");
         return new EmbedBuilder()
-            .setTitle("Next Students")
-            .setDescription(`Please join ${tutoringVoiceChannel} if you are not automatically moved.\nYour Participant${students.length > 1 ? "s" : ""}: ${studentsString}`);
+            .setTitle(`Next ${students.length > 1 ? "Students" : "Student"}`)
+            .setDescription(`Please join ${tutoringVoiceChannel} if you are not automatically moved.\nYour Participant${students.length > 1 ? "s" : ""}: ${studentsString}`)
+            .setColor(Colors.Green);
     }
 
     private mountErrorEmbed(error: Error): EmbedBuilder {
         if (error instanceof UserHasNoActiveSessionError || error instanceof SessionHasNoQueueError || error instanceof QueueIsEmptyError || error instanceof ChannelCouldNotBeCreatedError) {
             return new EmbedBuilder()
                 .setTitle("Error")
-                .setDescription(error.message);
+                .setDescription(error.message)
+                .setColor(Colors.Red);
         }
         throw error;
     }
@@ -109,7 +112,7 @@ export default class TutorQueueNextCommand extends BaseCommand {
         const queueMembers = this.dbQueue.getSortedEntries(amount);
 
         // Get discord members
-        return queueMembers.map(queueMember => this.interaction.guild!.members.resolve(queueMember.discord_id)!);
+        return await Promise.all(queueMembers.map(async queueMember => this.interaction.guild!.members.fetch(queueMember.discord_id)!));
     }
 
     private getNextRoomNumber(): number {
