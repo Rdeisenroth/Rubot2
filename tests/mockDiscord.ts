@@ -9,7 +9,7 @@ import {
     mockChatInputCommandInteraction
 } from '@shoginn/discordjs-mock';
 import "reflect-metadata"
-import { APIGuildMember, APIRole, APIUser, ChannelType, ChatInputCommandInteraction, Collection, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceChannel, VoiceState } from 'discord.js';
+import { APIGuildMember, APIRole, APIUser, ChannelType, ChatInputCommandInteraction, Collection, DMChannel, Guild, GuildMember, PermissionOverwriteManager, Role, TextChannel, User, VoiceChannel, VoiceState } from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { randomInt } from 'crypto';
 import assert from 'assert';
@@ -52,14 +52,19 @@ export class MockDiscord {
     }: {
         members?: GuildMember[],
     } = {}): VoiceChannel {
-        return {
+        const voiceChannel = {
             id: randomInt(281474976710655).toString(),
             type: ChannelType.GuildVoice,
             name: "test voice channel",
             guild: guild,
             members: new Collection(members.map(member => [member.id, member])),
-
         } as any;
+        Object.defineProperty(voiceChannel, "permissionOverwrites", {
+            value: {
+                delete: jest.fn(() => Promise.resolve())
+            }
+        });
+        return voiceChannel;
     }
 
     public mockDMChannel(): DMChannel {

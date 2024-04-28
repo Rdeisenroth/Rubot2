@@ -10,10 +10,11 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError, CouldNotKickAllUsersError } from "@types";
+import { ChannelCouldNotBeCreatedError, CouldNotKickUserError, NotInVoiceChannelError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
+import { emit } from "process";
 
 @injectable()
 @singleton()
@@ -58,11 +59,47 @@ export default class RoomManager {
     }
 
     /**
+     * Kicks a member from a room.
+     * 
+     * @param member - The member to be kicked from the room.
+     * @param room - The room from which the member will be kicked.
+     * @param emmitedBy - The member who initiated the kick action.
+     * @throws {NotInVoiceChannelError} If the member is not in the specified voice channel.
+     * @throws {CouldNotKickUserError} If the member could not be kicked from the room.
+     */
+    public async kickMemberFromRoom(member: GuildMember, room: VoiceBasedChannel, emmitedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        if (!room.members.has(member.id)) {
+            this.app.logger.info(`Member "${member.displayName}" (id: ${member.id}) is not in room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
+            throw new NotInVoiceChannelError(member.id, room.id);
+        }
+
+        try {
+            await member.voice.setChannel(null);
+            roomData.events.push({
+                emitted_by: emmitedBy.id,
+                reason: `Member kicked by user "${emmitedBy.displayName}" (id: ${emmitedBy.id})`,
+                timestamp: Date.now().toString(),
+            } as VoiceChannelEvent);
+            this.app.logger.info(`Kicked member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`);
+        } catch (error) {
+            console.log(error);
+            this.app.logger.info(`Could not kick member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
+            throw new CouldNotKickUserError(member.id);
+        }
+    }
+
+    /**
      * Kicks all members from a voice-based channel.
      * 
      * @param room - The voice-based channel to kick members from.
      * @param emmitedBy - The guild member who initiated the kick action.
-     * @throws CouldNotKickAllUsersError - If not all members could be kicked from the room.
+     * @throws CouldNotKickUserError - If not all members could be kicked from the room.
      */
     public async kickMembersFromRoom(room: VoiceBasedChannel, emmitedBy: GuildMember): Promise<void> {
         let roomData = await RoomModel.findById(room.id);
@@ -71,7 +108,7 @@ export default class RoomManager {
             roomData = await this.createRoomOnDatabase(room);
         }
 
-        let kickedAll = true;
+        let notKicked: GuildMember[] = [];
         for (const member of room.members.values()) {
             try {
                 const room = member.voice.channel;
@@ -84,12 +121,12 @@ export default class RoomManager {
                 this.app.logger.info(`Kicked member "${member.displayName}" (id: ${member.id}) from room  "${room?.name}"in guild "${member.guild.name}" (id: ${member.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`);
             } catch (error) {
                 this.app.logger.info(`Could not kick member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${member.guild.name}" (id: ${member.guild.id})`);
-                kickedAll = false;
+                notKicked.push(member);
                 continue;
             }
         }
-        if (!kickedAll) {
-            throw new CouldNotKickAllUsersError();
+        if (notKicked.length > 0) {
+            throw new CouldNotKickUserError(notKicked[0].id)
         }
     }
 

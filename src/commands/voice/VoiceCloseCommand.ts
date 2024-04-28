@@ -1,5 +1,5 @@
 import { BaseCommand } from "@baseCommand";
-import { ChannelNotTemporaryError, CouldNotKickAllUsersError, NotInVoiceChannelError, UnauthorizedError, UnauthorizedErrorReason } from "@types";
+import { ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError, UnauthorizedError, UnauthorizedErrorReason } from "@types";
 import { Colors, EmbedBuilder, GuildMember, VoiceBasedChannel } from "discord.js";
 
 export default class VoiceCloseCommand extends BaseCommand {
@@ -33,7 +33,7 @@ export default class VoiceCloseCommand extends BaseCommand {
     }
 
     private mountErrorEmbed(error: Error): EmbedBuilder {
-        if (error instanceof NotInVoiceChannelError || error instanceof ChannelNotTemporaryError || error instanceof UnauthorizedError || error instanceof CouldNotKickAllUsersError) {
+        if (error instanceof NotInVoiceChannelError || error instanceof ChannelNotTemporaryError || error instanceof UnauthorizedError || error instanceof CouldNotKickUserError) {
             return new EmbedBuilder()
                 .setTitle("Error")
                 .setDescription(error.message)

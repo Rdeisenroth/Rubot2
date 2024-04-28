@@ -13,7 +13,7 @@ import CouldNotFindQueueError from "./errors/CouldNotFindQueueError";
 import CouldNotFindQueueForSessionError from "./errors/CouldNotFindQueueForSessionError";
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
 import CouldNotFindTypeInFileError from "./errors/CouldNotFindTypeError";
-import CouldNotKickAllUsersError from "./errors/CouldNotKickAllUsersError";
+import CouldNotKickUserError from "./errors/CouldNotKickUserError";
 import CouldNotRemoveRoleError from "./errors/CouldNotRemoveRoleError";
 import GuildHasNoQueueError from "./errors/GuildHasNoQueueError";
 import InteractionNotInGuildError from "./errors/InteractionNotInGuildError";
@@ -42,7 +42,7 @@ export {
     CouldNotFindRoleError,
     CouldNotAssignRoleError,
     CouldNotRemoveRoleError,
-    CouldNotKickAllUsersError,
+    CouldNotKickUserError,
     ChannelNotTemporaryError,
     RoleNotInDatabaseError,
     CouldNotFindTypeInFileError,

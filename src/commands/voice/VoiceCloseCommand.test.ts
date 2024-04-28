@@ -124,7 +124,7 @@ describe("VoiceCloseCommand", () => {
             embeds: [{
                 data: {
                     title: "Error",
-                    description: `Could not kick all users from the voice channel.`,
+                    description: `Could not kick user ${roomMembers[0]} from the voice channel.`,
                     color: Colors.Red
                 }
             }]
