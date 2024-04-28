@@ -1,5 +1,5 @@
 import { MockDiscord } from "@tests/mockDiscord";
-import { ChatInputCommandInteraction, ApplicationCommandOptionType, VoiceState, ChannelType, Colors, PermissionOverwriteManager } from "discord.js";
+import { ChatInputCommandInteraction, ApplicationCommandOptionType, VoiceState, ChannelType, Colors } from "discord.js";
 import VoiceKickCommand from "./VoiceKickCommand";
 import { mongoose } from "@typegoose/typegoose";
 

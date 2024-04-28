@@ -1,7 +1,6 @@
 import { Application } from "@application"
 import { Guild } from "@models/Guild";
 import { Queue } from "@models/Queue";
-import { QueueEntry } from "@models/QueueEntry";
 import { VoiceChannel as DatabaseVoiceChannel } from "@models/VoiceChannel";
 import { VoiceChannelSpawner } from "@models/VoiceChannelSpawner";
 import { ChannelType, Guild as DiscordGuild, GuildMember, GuildPremiumTier, OverwriteData, VoiceBasedChannel, VoiceChannel } from "discord.js";
@@ -10,11 +9,10 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError, CouldNotKickUserError, NotInVoiceChannelError } from "@types";
+import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
-import { emit } from "process";
 
 @injectable()
 @singleton()
@@ -23,6 +21,34 @@ export default class RoomManager {
 
     constructor(@inject(delay(() => Application)) app: Application) {
         this.app = app;
+    }
+
+    /**
+     * Retrieves the temporary voice channel associated with a guild member.
+     * @param dbGuild - The guild object from the database.
+     * @param member - The guild member for whom to retrieve the temporary voice channel.
+     * @returns An object containing the voice channel and its corresponding database voice channel.
+     * @throws {NotInVoiceChannelError} If the member is not in a voice channel.
+     * @throws {ChannelNotTemporaryError} If the voice channel is not temporary.
+     */
+    public async getTemporaryVoiceChannel(dbGuild: Guild, member: GuildMember): Promise<{ voiceChannel: VoiceBasedChannel, databaseVoiceChannel: DatabaseVoiceChannel }> {
+        // Check if user is in Voice Channel
+        const channel = member?.voice.channel;
+        if (!member || !channel) {
+            this.app.logger.info("User is not in a voice channel.");
+            throw new NotInVoiceChannelError();
+        }
+
+        // Get channel from DB
+        const dbChannel = dbGuild.voice_channels.find(vc => vc._id === channel.id);
+
+        // Check if channel is temporary
+        if (!dbChannel?.temporary) {
+            this.app.logger.info("Channel is not temporary.");
+            throw new ChannelNotTemporaryError();
+        }
+
+        return { voiceChannel: channel, databaseVoiceChannel: dbChannel};
     }
 
     /**
@@ -49,7 +75,7 @@ export default class RoomManager {
                     reason: `Automated member move by queue "${queue.name}"`,
                     timestamp: Date.now().toString(),
                 } as VoiceChannelEvent);
-                this.app.logger.info(`Moved member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`)    
+                this.app.logger.info(`Moved member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`)
             } catch (error) {
                 this.app.logger.info(`Could not move member "${member.displayName}" (id: ${member.id}) to room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
                 continue;
@@ -210,7 +236,7 @@ export default class RoomManager {
             spawner = {
                 owner: member.id,
                 supervisor_roles: queueChannelData?.supervisors ?? [],
-                permission_overwrites: [ ...permissionOverwrites ],
+                permission_overwrites: [...permissionOverwrites],
                 max_users: 5,
                 parent: queueChannel?.parentId ?? undefined,
                 lock_initially: true,

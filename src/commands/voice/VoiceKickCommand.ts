@@ -23,9 +23,10 @@ export default class VoiceKickCommand extends BaseCommand {
     public async execute(): Promise<void> {
         try {
             const memberToKick = await this.getMemberToKick();
-            console.log(memberToKick.id);
-            const { voiceChannel, databaseVoiceChannel } = await this.getChannel(memberToKick);
-            this.checkIfUserToKickIsOwner(memberToKick, databaseVoiceChannel);
+            this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild!);
+            const member = this.interaction.member as GuildMember;
+            const { voiceChannel, databaseVoiceChannel } = await this.app.roomManager.getTemporaryVoiceChannel(this.dbGuild, member);
+            this.checkKickPermissions(member, memberToKick, databaseVoiceChannel);
             await this.app.roomManager.kickMemberFromRoom(memberToKick, voiceChannel, this.interaction.member as GuildMember);
             await this.removeKickedMemberPrivileges(memberToKick, voiceChannel, databaseVoiceChannel);
             const embed = this.mountVoiceKickEmbed(memberToKick);
@@ -75,34 +76,14 @@ export default class VoiceKickCommand extends BaseCommand {
         return await this.interaction.guild?.members.fetch(memberId)!;
     }
 
-    private async getChannel(memberToKick: GuildMember): Promise<{ voiceChannel: VoiceBasedChannel, databaseVoiceChannel: VoiceChannel }> {
-        // Check if user is in Voice Channel
-        const member = this.interaction.member as GuildMember | null;
-        const channel = member?.voice.channel;
-        if (!member || !channel) {
-            this.app.logger.info("User is not in a voice channel.");
-            throw new NotInVoiceChannelError();
-        }
-
-        // Get channel from DB
-        this.dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild!);
-        const dbChannel = this.dbGuild.voice_channels.find(vc => vc._id === channel.id);
-
-        if (!dbChannel?.temporary) {
-            this.app.logger.info("Channel is not temporary.");
-            throw new ChannelNotTemporaryError();
-        }
-
+    private checkKickPermissions(member: GuildMember, memberToKick: GuildMember, databaseVoiceChannel: VoiceChannel): void {
         // Check if user has permission to kick the member
-        if (!(dbChannel.owner === member.id || (dbChannel.supervisors && dbChannel.supervisors.includes(member.id)))) {
+        if (!(databaseVoiceChannel.owner === member.id || (databaseVoiceChannel.supervisors && databaseVoiceChannel.supervisors.includes(member.id)))) {
             this.app.logger.info("User is not authorized to kick a member from the channel.");
             throw new UnauthorizedError(UnauthorizedErrorReason.KickMember);
         }
 
-        return { voiceChannel: channel, databaseVoiceChannel: dbChannel};
-    }
-
-    private checkIfUserToKickIsOwner(memberToKick: GuildMember, databaseVoiceChannel: VoiceChannel): void {
+        // Check if user is trying to kick the owner of the channel
         if (memberToKick.id === databaseVoiceChannel.owner) {
             this.app.logger.info("User is trying to kick the owner of the channel.");
             throw new UnauthorizedError(UnauthorizedErrorReason.KickOwner);

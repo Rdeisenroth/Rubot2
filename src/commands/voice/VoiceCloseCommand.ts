@@ -1,4 +1,5 @@
 import { BaseCommand } from "@baseCommand";
+import { VoiceChannel } from "@models/VoiceChannel";
 import { ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError, UnauthorizedError, UnauthorizedErrorReason } from "@types";
 import { Colors, EmbedBuilder, GuildMember, VoiceBasedChannel } from "discord.js";
 
@@ -10,8 +11,11 @@ export default class VoiceCloseCommand extends BaseCommand {
     public async execute() {
         await this.defer();
         try {
-            const voiceChannel = await this.getChannel()
-            await this.app.roomManager.kickMembersFromRoom(voiceChannel, this.interaction.member as GuildMember);
+            const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild!);
+            const member = this.interaction.member as GuildMember;
+            const { voiceChannel, databaseVoiceChannel } = await this.app.roomManager.getTemporaryVoiceChannel(dbGuild, member);
+            this.checkClosePermissions(member, databaseVoiceChannel);
+            await this.app.roomManager.kickMembersFromRoom(voiceChannel, member);
             const embed = this.mountVoiceCloseEmbed(voiceChannel);
             await this.send({ embeds: [embed] });
         } catch (error) {
@@ -42,30 +46,10 @@ export default class VoiceCloseCommand extends BaseCommand {
         throw error;
     }
 
-    private async getChannel(): Promise<VoiceBasedChannel> {
-        // Check if user is in Voice Channel
-        const member = this.interaction.member as GuildMember | null;
-        const channel = member?.voice.channel;
-        if (!member || !channel) {
-            this.app.logger.info("User is not in a voice channel.");
-            throw new NotInVoiceChannelError();
-        }
-
-        // Get channel from DB
-        const dbGuild = await this.app.configManager.getGuildConfig(this.interaction.guild!);
-        const dbChannel = dbGuild.voice_channels.find(vc => vc._id === channel.id);
-
-        if (!dbChannel?.temporary) {
-            this.app.logger.info("Channel is not temporary.");
-            throw new ChannelNotTemporaryError();
-        }
-
+    private checkClosePermissions(member: GuildMember, databaseVoiceChannel: VoiceChannel) {
         // Check if user has permission to close the channel
-        if (!(dbChannel.owner === member.id || (dbChannel.supervisors && dbChannel.supervisors.includes(member.id)))) {
-            this.app.logger.info("User is not authorized to close the channel.");
+        if (!(databaseVoiceChannel.owner === member.id || (databaseVoiceChannel.supervisors && databaseVoiceChannel.supervisors.includes(member.id)))) {
             throw new UnauthorizedError(UnauthorizedErrorReason.CloseChannel);
         }
-
-        return channel;
-    }
+    } 
 }
