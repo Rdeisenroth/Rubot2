@@ -294,7 +294,7 @@ describe("VoiceChannelUpdateEvent", () => {
             const joinSpy = jest.spyOn(eventInstance as any, "handleVoiceJoin")
             const leaveSpy = jest.spyOn(eventInstance as any, "handleVoiceLeave")
             const sendQueueLeaveMessage = jest.spyOn(discord.getApplication().dmManager, "sendActuallyLeaveQueueMessage").mockResolvedValue()
-            const leaveQueueSpy = jest.spyOn(discord.getApplication().queueManager, "leaveQueue").mockResolvedValue("leave message")
+            const leaveQueueSpy = jest.spyOn(discord.getApplication().queueManager, "leaveQueueWithTimeout").mockResolvedValue("leave message")
 
             await eventInstance.execute(oldState, newState)
             // wait so leave queue can be called
