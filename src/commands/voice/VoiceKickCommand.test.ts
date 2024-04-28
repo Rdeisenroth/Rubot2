@@ -37,7 +37,6 @@ describe("VoiceKickCommand", () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
 
         const memberToKick = discord.mockGuildMember(undefined, interaction.guild!);
-        console.log(memberToKick.id);
         const voiceChannel = discord.mockVoiceChannel(interaction.guild!, { members: [memberToKick] });
 
         dbGuild.voice_channels.push({
@@ -264,7 +263,7 @@ describe("VoiceKickCommand", () => {
         }))
     })
 
-    it("should fail if the user is not authorized to close the channel", async () => {
+    it("should fail if the user is not authorized to kick a user", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
 
         const memberToKick = discord.mockGuildMember(undefined, interaction.guild!);

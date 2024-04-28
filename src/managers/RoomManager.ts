@@ -114,7 +114,6 @@ export default class RoomManager {
             } as VoiceChannelEvent);
             this.app.logger.info(`Kicked member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`);
         } catch (error) {
-            console.log(error);
             this.app.logger.info(`Could not kick member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
             throw new CouldNotKickUserError(member.id);
         }

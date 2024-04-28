@@ -63,8 +63,8 @@ export default class VoiceKickCommand extends BaseCommand {
         // Change permitted users in database
         if (databaseVoiceChannel.permitted.includes(member.id)) {
             databaseVoiceChannel.permitted.splice(databaseVoiceChannel.permitted.indexOf(member.id), 1);
+            await this.dbGuild.save();
         }
-        await this.dbGuild.save();
 
         // Remove user from permission overwrites
         await voiceChannel.permissionOverwrites.delete(member.id);
@@ -72,7 +72,6 @@ export default class VoiceKickCommand extends BaseCommand {
 
     private async getMemberToKick(): Promise<GuildMember> {
         const memberId = this.getOptionValue(VoiceKickCommand.options[0]);
-        console.log(memberId);
         return await this.interaction.guild?.members.fetch(memberId)!;
     }
 
