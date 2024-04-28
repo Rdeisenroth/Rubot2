@@ -61,6 +61,7 @@ export class MockDiscord {
         } as any;
         Object.defineProperty(voiceChannel, "permissionOverwrites", {
             value: {
+                edit: jest.fn(() => Promise.resolve()),
                 delete: jest.fn(() => Promise.resolve())
             }
         });

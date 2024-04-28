@@ -25,6 +25,7 @@ import QueueAlreadyExistsError from "./errors/QueueAlreadyExistsError";
 import QueueIsEmptyError from "./errors/QueueIsEmptyError";
 import QueueLockedError from "./errors/QueueLockedError";
 import RoleNotInDatabaseError from "./errors/RoleNotInDatabaseError";
+import RoomAlreadyLockedError from "./errors/RoomAlreadyLockedError";
 import SessionHasNoQueueError from "./errors/SessionHasNoQueueError";
 import UnauthorizedError, { UnauthorizedErrorReason } from "./errors/UnauthorizedError";
 import UserHasActiveSessionError from "./errors/UserHasActiveSessionError";
@@ -61,6 +62,7 @@ export {
     GuildHasNoQueueError,
     EventDate,
     QueueListItem,
+    RoomAlreadyLockedError,
     UnauthorizedError,
     UnauthorizedErrorReason,
 }

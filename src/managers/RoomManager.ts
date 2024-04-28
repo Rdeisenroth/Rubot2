@@ -9,7 +9,7 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError } from "@types";
+import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError, RoomAlreadyLockedError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
@@ -154,6 +154,43 @@ export default class RoomManager {
         if (notKicked.length > 0) {
             throw new CouldNotKickUserError(notKicked[0].id)
         }
+    }
+
+    /**
+     * Locks a room and updates its database entry.
+     * 
+     * @param dbGuild - The database guild document.
+     * @param room - The voice-based channel to be locked.
+     * @param databaseVoiceChannel - The database representation of the voice channel.
+     * @param emittedBy - The guild member who initiated the lock.
+     * @returns A promise that resolves when the room is locked.
+     * @throws {RoomAlreadyLockedError} If the room is already locked.
+     */
+    public async lockRoom(dbGuild: DocumentType<Guild>, room: VoiceBasedChannel, databaseVoiceChannel: DatabaseVoiceChannel, emittedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        if (databaseVoiceChannel.locked) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) is already locked.`);
+            throw new RoomAlreadyLockedError(room.id);
+        }
+
+        databaseVoiceChannel.locked = true;
+        await dbGuild.save();
+
+        roomData.events.push({
+            emitted_by: emittedBy.id,
+            reason: `Room locked by user "${emittedBy.displayName}" (id: ${emittedBy.id})`,
+            timestamp: Date.now().toString(),
+        } as VoiceChannelEvent);
+        await roomData.save();
+
+        await room.permissionOverwrites.edit(room.guild.roles.everyone, { "Connect": false, "Speak": false });
+
+        this.app.logger.info(`Locked room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
     }
 
     /**
