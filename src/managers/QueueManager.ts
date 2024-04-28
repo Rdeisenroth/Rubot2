@@ -163,7 +163,9 @@ export default class QueueManager {
         setTimeout(async () => {
             const pendingQueueStays = this.pendingQueueStays.get(queue.id);
             if (pendingQueueStays && pendingQueueStays.includes(user.id)) {
-                await this.leaveQueue(guild, user);
+                // Reload the guild to avoid version errors
+                const reloadedGuild = await this.app.configManager.getGuildConfig(guild._id);
+                await this.leaveQueue(reloadedGuild, user);
                 // Remove the user from the pending queue stays
                 this.pendingQueueStays.set(queue.id, this.pendingQueueStays.get(queue.id)!.filter(id => id !== user.id));
                 this.app.logger.info(`User "${user.username}" (id: ${user.id}) left queue "${queue.name}" after disconnect timeout`);
