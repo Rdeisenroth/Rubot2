@@ -4,13 +4,13 @@ import { Queue } from "@models/Queue";
 import { QueueEntry } from "@models/QueueEntry";
 import { VoiceChannel as DatabaseVoiceChannel } from "@models/VoiceChannel";
 import { VoiceChannelSpawner } from "@models/VoiceChannelSpawner";
-import { ChannelType, Guild as DiscordGuild, GuildMember, GuildPremiumTier, OverwriteData, VoiceChannel } from "discord.js";
+import { ChannelType, Guild as DiscordGuild, GuildMember, GuildPremiumTier, OverwriteData, VoiceBasedChannel, VoiceChannel } from "discord.js";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError } from "@types";
+import { ChannelCouldNotBeCreatedError, CouldNotKickAllUsersError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
@@ -37,7 +37,7 @@ export default class RoomManager {
     public async moveMembersToRoom(members: GuildMember[], room: VoiceChannel, emmitedBy: GuildMember, queue: Queue): Promise<void> {
         let roomData = await RoomModel.findById(room.id);
         if (!roomData) {
-            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one...`);
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
             roomData = await this.createRoomOnDatabase(room);
         }
         for (const member of members) {
@@ -58,12 +58,48 @@ export default class RoomManager {
     }
 
     /**
+     * Kicks all members from a voice-based channel.
+     * 
+     * @param room - The voice-based channel to kick members from.
+     * @param emmitedBy - The guild member who initiated the kick action.
+     * @throws CouldNotKickAllUsersError - If not all members could be kicked from the room.
+     */
+    public async kickMembersFromRoom(room: VoiceBasedChannel, emmitedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        let kickedAll = true;
+        for (const member of room.members.values()) {
+            try {
+                const room = member.voice.channel;
+                await member.voice.setChannel(null);
+                roomData.events.push({
+                    emitted_by: emmitedBy.id,
+                    reason: `Member kicked by user "${emmitedBy.displayName}" (id: ${emmitedBy.id})`,
+                    timestamp: Date.now().toString(),
+                } as VoiceChannelEvent);
+                this.app.logger.info(`Kicked member "${member.displayName}" (id: ${member.id}) from room  "${room?.name}"in guild "${member.guild.name}" (id: ${member.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`);
+            } catch (error) {
+                this.app.logger.info(`Could not kick member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${member.guild.name}" (id: ${member.guild.id})`);
+                kickedAll = false;
+                continue;
+            }
+        }
+        if (!kickedAll) {
+            throw new CouldNotKickAllUsersError();
+        }
+    }
+
+    /**
      * Creates a room entry in the database.
      * 
      * @param room - The voice channel representing the room.
      * @returns A promise that resolves to the created room data.
      */
-    private async createRoomOnDatabase(room: VoiceChannel): Promise<DocumentType<Room>> {
+    private async createRoomOnDatabase(room: VoiceBasedChannel): Promise<DocumentType<Room>> {
         const roomData = await RoomModel.create({
             _id: room.id,
             active: true,

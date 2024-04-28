@@ -9,7 +9,7 @@ import {
     mockChatInputCommandInteraction
 } from '@shoginn/discordjs-mock';
 import "reflect-metadata"
-import { APIGuildMember, APIRole, APIUser, ChannelType, ChatInputCommandInteraction, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceChannel, VoiceState } from 'discord.js';
+import { APIGuildMember, APIRole, APIUser, ChannelType, ChatInputCommandInteraction, Collection, DMChannel, Guild, GuildMember, Role, TextChannel, User, VoiceChannel, VoiceState } from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { randomInt } from 'crypto';
 import assert from 'assert';
@@ -47,12 +47,18 @@ export class MockDiscord {
         return mockTextChannel(this.app.client, guild);
     }
 
-    public mockVoiceChannel(guild: Guild): VoiceChannel {
-        return { 
+    public mockVoiceChannel(guild: Guild, {
+        members = [],
+    }: {
+        members?: GuildMember[],
+    } = {}): VoiceChannel {
+        return {
             id: randomInt(281474976710655).toString(),
             type: ChannelType.GuildVoice,
             name: "test voice channel",
             guild: guild,
+            members: new Collection(members.map(member => [member.id, member])),
+
         } as any;
     }
 
