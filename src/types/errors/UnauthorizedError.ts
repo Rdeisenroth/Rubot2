@@ -5,6 +5,8 @@ export enum UnauthorizedErrorReason {
     PermitMember = "permit a member to join the voice channel",
     LockChannel = "lock the channel",
     UnlockChannel = "unlock the channel",
+    HideChannel = "hide the channel",
+    ShowChannel = "show the channel",
 }
 
 export default class UnauthorizedError extends Error {

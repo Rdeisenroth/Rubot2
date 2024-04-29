@@ -222,6 +222,18 @@ export default class RoomManager {
         this.app.logger.info(`Locked room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
     }
 
+    /**
+     * Unlocks a room by updating its database entry and permissions.
+     * If the room does not have a database entry, it creates one.
+     * Throws an error if the room is already unlocked.
+     *
+     * @param dbGuild - The database guild document.
+     * @param room - The voice-based channel to unlock.
+     * @param databaseVoiceChannel - The corresponding database voice channel.
+     * @param emittedBy - The guild member who initiated the unlock.
+     * @returns A Promise that resolves when the room is successfully unlocked.
+     * @throws {RoomAlreadyUnlockedError} If the room is already unlocked.
+     */
     public async unlockRoom(dbGuild: DocumentType<Guild>, room: VoiceBasedChannel, databaseVoiceChannel: DatabaseVoiceChannel, emittedBy: GuildMember): Promise<void> {
         let roomData = await RoomModel.findById(room.id);
         if (!roomData) {
@@ -247,6 +259,62 @@ export default class RoomManager {
         await room.permissionOverwrites.edit(room.guild.roles.everyone, { "ViewChannel": true, "Connect": true, "Speak": true });
 
         this.app.logger.info(`Unlocked room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
+    }
+
+    /**
+     * Hides a room by modifying its permission overwrites.
+     * If the room does not have a database entry, it creates one before hiding the room.
+     * 
+     * @param dbGuild - The database representation of the guild.
+     * @param room - The voice-based channel to hide.
+     * @param emittedBy - The guild member who initiated the hiding of the room.
+     * @returns A promise that resolves when the room is successfully hidden.
+     */
+    public async hideRoom(dbGuild: DocumentType<Guild>, room: VoiceBasedChannel, emittedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        roomData.events.push({
+            emitted_by: emittedBy.id,
+            reason: `Room hidden by user "${emittedBy.displayName}" (id: ${emittedBy.id})`,
+            timestamp: Date.now().toString(),
+        } as VoiceChannelEvent);
+        await roomData.save();
+
+        await room.permissionOverwrites.edit(room.guild.roles.everyone, { "ViewChannel": false });
+
+        this.app.logger.info(`Hid room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
+    }
+
+    /**
+     * Shows a room by modifying its permissions.
+     * If the room does not have a database entry, it creates one.
+     * 
+     * @param dbGuild - The database representation of the guild.
+     * @param room - The voice-based channel to show.
+     * @param emittedBy - The guild member who initiated the action.
+     * @returns A Promise that resolves when the room is shown.
+     */
+    public async showRoom(dbGuild: DocumentType<Guild>, room: VoiceBasedChannel, emittedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        roomData.events.push({
+            emitted_by: emittedBy.id,
+            reason: `Room shown by user "${emittedBy.displayName}" (id: ${emittedBy.id})`,
+            timestamp: Date.now().toString(),
+        } as VoiceChannelEvent);
+        await roomData.save();
+
+        await room.permissionOverwrites.edit(room.guild.roles.everyone, { "ViewChannel": true });
+
+        this.app.logger.info(`Showed room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
     }
 
     /**
