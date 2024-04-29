@@ -9,7 +9,7 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, CouldNotPermitUserError, NotInVoiceChannelError, RoomAlreadyLockedError } from "@types";
+import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, CouldNotPermitUserError, NotInVoiceChannelError, RoomAlreadyLockedError, RoomAlreadyUnlockedError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
@@ -220,6 +220,33 @@ export default class RoomManager {
         await room.permissionOverwrites.edit(room.guild.roles.everyone, { "Connect": false, "Speak": false });
 
         this.app.logger.info(`Locked room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
+    }
+
+    public async unlockRoom(dbGuild: DocumentType<Guild>, room: VoiceBasedChannel, databaseVoiceChannel: DatabaseVoiceChannel, emittedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        if (!databaseVoiceChannel.locked) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) is not locked.`);
+            throw new RoomAlreadyUnlockedError(room.id);
+        }
+
+        databaseVoiceChannel.locked = false;
+        await dbGuild.save();
+
+        roomData.events.push({
+            emitted_by: emittedBy.id,
+            reason: `Room unlocked by user "${emittedBy.displayName}" (id: ${emittedBy.id})`,
+            timestamp: Date.now().toString(),
+        } as VoiceChannelEvent);
+        await roomData.save();
+
+        await room.permissionOverwrites.edit(room.guild.roles.everyone, { "ViewChannel": true, "Connect": true, "Speak": true });
+
+        this.app.logger.info(`Unlocked room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emittedBy.displayName}" (id: ${emittedBy.id})`);
     }
 
     /**
