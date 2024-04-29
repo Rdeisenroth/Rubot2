@@ -9,7 +9,7 @@ import { delay, inject, injectable, singleton } from "tsyringe";
 import { PermissionOverwriteData } from "@models/PermissionOverwriteData";
 import { interpolateString } from "@utils/interpolateString";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, NotInVoiceChannelError, RoomAlreadyLockedError } from "@types";
+import { ChannelCouldNotBeCreatedError, ChannelNotTemporaryError, CouldNotKickUserError, CouldNotPermitUserError, NotInVoiceChannelError, RoomAlreadyLockedError } from "@types";
 import { RoomModel } from "@models/Models";
 import { VoiceChannelEvent } from "@models/Event";
 import { Room } from "@models/Room";
@@ -85,6 +85,36 @@ export default class RoomManager {
     }
 
     /**
+     * Permits a member to join a room by granting necessary permissions and updating the room data.
+     * If the room does not have a database entry, it creates one.
+     * 
+     * @param member - The member to permit.
+     * @param room - The room to join.
+     * @param emmitedBy - The member who initiated the permission.
+     * @throws {CouldNotPermitUserError} if the member could not be permitted to join the room.
+     */
+    public async permitMemberToJoinRoom(member: GuildMember, room: VoiceBasedChannel, emmitedBy: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        try {
+            room.permissionOverwrites.edit(member, { "ViewChannel": true, "Connect": true, "Speak": true });
+            roomData.events.push({
+                emitted_by: emmitedBy.id,
+                reason: `Permitted member "${member.displayName}" (id: ${member.id}) to join room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`,
+                timestamp: Date.now().toString(),
+            } as VoiceChannelEvent);
+            this.app.logger.info(`Permitted member "${member.displayName}" (id: ${member.id}) to join room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
+        } catch (error) {
+            this.app.logger.info(`Could not permit member "${member.displayName}" (id: ${member.id}) to join room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id})`);
+            throw new CouldNotPermitUserError(member.id);
+        }
+    }
+
+    /**
      * Kicks a member from a room.
      * 
      * @param member - The member to be kicked from the room.
@@ -109,7 +139,7 @@ export default class RoomManager {
             await member.voice.setChannel(null);
             roomData.events.push({
                 emitted_by: emmitedBy.id,
-                reason: `Member kicked by user "${emmitedBy.displayName}" (id: ${emmitedBy.id})`,
+                reason: `Kicked member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`,
                 timestamp: Date.now().toString(),
             } as VoiceChannelEvent);
             this.app.logger.info(`Kicked member "${member.displayName}" (id: ${member.id}) from room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}), initiated by "${emmitedBy.displayName}" (id: ${emmitedBy.id})`);

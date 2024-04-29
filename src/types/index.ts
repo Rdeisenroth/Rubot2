@@ -14,6 +14,7 @@ import CouldNotFindQueueForSessionError from "./errors/CouldNotFindQueueForSessi
 import CouldNotFindRoleError from "./errors/CouldNotFindRoleError";
 import CouldNotFindTypeInFileError from "./errors/CouldNotFindTypeError";
 import CouldNotKickUserError from "./errors/CouldNotKickUserError";
+import CouldNotPermitUserError from "./errors/CouldNotPermitUserError";
 import CouldNotRemoveRoleError from "./errors/CouldNotRemoveRoleError";
 import GuildHasNoQueueError from "./errors/GuildHasNoQueueError";
 import InteractionNotInGuildError from "./errors/InteractionNotInGuildError";
@@ -30,6 +31,7 @@ import SessionHasNoQueueError from "./errors/SessionHasNoQueueError";
 import UnauthorizedError, { UnauthorizedErrorReason } from "./errors/UnauthorizedError";
 import UserHasActiveSessionError from "./errors/UserHasActiveSessionError";
 import UserHasNoActiveSessionError from "./errors/UserHasNoActiveSessionError";
+import UserNotInGuildError from "./errors/UserNotInGuildError";
 
 export {
     OptionRequirement,
@@ -42,6 +44,7 @@ export {
     CouldNotFindQueueForSessionError,
     CouldNotFindRoleError,
     CouldNotAssignRoleError,
+    CouldNotPermitUserError,
     CouldNotRemoveRoleError,
     CouldNotKickUserError,
     ChannelNotTemporaryError,
@@ -53,6 +56,7 @@ export {
     AlreadyInQueueError,
     UserHasActiveSessionError,
     UserHasNoActiveSessionError,
+    UserNotInGuildError,
     SessionHasNoQueueError,
     QueueLockedError,
     InvalidEventError,
