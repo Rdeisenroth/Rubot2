@@ -7,6 +7,7 @@ export enum UnauthorizedErrorReason {
     UnlockChannel = "unlock the channel",
     HideChannel = "hide the channel",
     ShowChannel = "show the channel",
+    TransferChannel = "transfer the ownership of the voice channel, since you are not the owner",
 }
 
 export default class UnauthorizedError extends Error {

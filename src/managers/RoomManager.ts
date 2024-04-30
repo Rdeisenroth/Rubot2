@@ -318,6 +318,46 @@ export default class RoomManager {
     }
 
     /**
+     * Transfers the ownership of a room to a new member.
+     * 
+     * @param dbGuild - The document representing the guild in the database.
+     * @param memberToTransfer - The member to whom the room ownership will be transferred.
+     * @param room - The voice-based channel to transfer ownership of.
+     * @param databaseVoiceChannel - The database representation of the voice channel.
+     * @param member - The member initiating the transfer.
+     * @returns A Promise that resolves when the room ownership transfer is complete.
+     */
+    public async transferRoomOwnership(dbGuild: DocumentType<Guild>, memberToTransfer: GuildMember, room: VoiceBasedChannel, databaseVoiceChannel: DatabaseVoiceChannel, member: GuildMember): Promise<void> {
+        let roomData = await RoomModel.findById(room.id);
+        if (!roomData) {
+            this.app.logger.info(`Room "${room.name}" in guild "${room.guild.name}" (id: ${room.guild.id}) does not have a database entry. Creating one.`);
+            roomData = await this.createRoomOnDatabase(room);
+        }
+
+        roomData.events.push({
+            emitted_by: member.id,
+            reason: `Room ownership transferred to user "${memberToTransfer.displayName}" (id: ${memberToTransfer.id}) by "${member.displayName}" (id: ${member.id})`,
+            timestamp: Date.now().toString(),
+        } as VoiceChannelEvent);
+        await roomData.save();
+
+        // Change permitted users in database
+        if (databaseVoiceChannel.permitted.includes(memberToTransfer.id)) {
+            databaseVoiceChannel.permitted.splice(databaseVoiceChannel.permitted.indexOf(memberToTransfer.id), 1);
+        }
+        if (!databaseVoiceChannel.permitted.includes(member.id)) {
+            databaseVoiceChannel.permitted.push(member.id);
+        }
+
+        databaseVoiceChannel.owner = memberToTransfer.id;
+        await dbGuild.save();
+
+        // Ensure both new and old owners have the necessary permissions
+        await room.permissionOverwrites.edit(memberToTransfer, { "ViewChannel": true, "Connect": true, "Speak": true });
+        await room.permissionOverwrites.edit(member, { "ViewChannel": true, "Connect": true, "Speak": true });
+    }
+
+    /**
      * Creates a room entry in the database.
      * 
      * @param room - The voice channel representing the room.

@@ -3,6 +3,7 @@ import OptionRequirement from "./OptionRequirement";
 import { QueueListItem } from "./QueueListItem";
 import { StringReplacements } from "./StringReplacements";
 import AlreadyInQueueError from "./errors/AlreadyInQueueError";
+import CanNotTransferToYourselfError from "./errors/CanNotTransferToYourselfError";
 import ChannelAlreadyInfoChannelError from "./errors/ChannelAlreadyInfoChannelError";
 import ChannelCouldNotBeCreatedError from "./errors/ChannelCouldNotBeCreatedError";
 import ChannelNotInfoChannelError from "./errors/ChannelNotInfoChannelError";
@@ -40,6 +41,7 @@ export {
     QueueAlreadyExistsError,
     QueueIsEmptyError,
     MissingOptionError,
+    CanNotTransferToYourselfError,
     CouldNotFindChannelError,
     CouldNotFindQueueError,
     CouldNotFindQueueForSessionError,
