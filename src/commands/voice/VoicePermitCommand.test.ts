@@ -196,7 +196,7 @@ describe("VoicePermitCommand", () => {
         }))
     })
 
-    it("should fail if the user is not authorized to lock the room", async () => {
+    it("should fail if the user is not authorized to permit a user to join the room", async () => {
         const dbGuild = await discord.getApplication().configManager.getGuildConfig(interaction.guild!);
 
         const memberToPermit = discord.mockGuildMember(undefined, interaction.guild!);
