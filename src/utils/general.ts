@@ -150,7 +150,7 @@ export const interpolateString = (str: string, replacements?: StringReplacements
         "mem_usage": `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
     };
     for (const [key, value] of Object.entries({ ...default_replacements, ...replacements })) {
-        str = str.replace(`\${${key}}`, value as string);
+        str = str.replaceAll(`\${${key}}`, value as string);
     }
     return str;
 };
