@@ -95,14 +95,3 @@ const rooms =
                 ],
         },
     ];
-/**
- * guilds
- * sessions
- * rooms: {
- *      active: boolean
- *      events: {
- *          create|join|mute|move|kick|leave|destroy
- *      }
- * }
- * users
- */

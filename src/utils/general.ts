@@ -1,5 +1,5 @@
-import { ConfigHandler } from "./../handlers/configHandler";
-import { DBRole, InternalRoles, RoleScopes } from "./../models/bot_roles";
+import { ConfigHandler } from "../handlers/configHandler";
+import { DBRole, InternalRoles, RoleScopes } from "../models/bot_roles";
 import ChannelType, {
     CommandInteraction,
     Guild as DiscrodGuild,
@@ -15,14 +15,13 @@ import ChannelType, {
 } from "discord.js";
 import moment from "moment";
 import { Command, StringReplacements } from "../../typings";
-import { GuildModel } from "../models/guilds";
 import { Bot } from "../bot";
-import { UserModel } from "../models/users";
 import * as cryptojs from "crypto-js";
 import { ArraySubDocumentType, DocumentType } from "@typegoose/typegoose";
 import { Queue } from "../models/queues";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
 import { QueueEventType } from "../models/events";
+import {GuildModel, UserModel} from "../models/models";
 
 /**
  * Checks if a given Variable is an array[] with at least a length of one or not

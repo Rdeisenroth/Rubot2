@@ -1,8 +1,8 @@
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
-import { VoiceChannelSpawner } from "./../../../models/voice_channel_spawner";
+import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
+import {GuildModel} from "../../../models/models";
 import { mongoose } from "@typegoose/typegoose";
 
 const command: Command = {

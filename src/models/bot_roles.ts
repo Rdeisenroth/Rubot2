@@ -1,4 +1,4 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 export enum InternalRoles {
     SERVER_OWNER = "server_owner",
@@ -62,9 +62,3 @@ export interface BotRole extends DBRole {
      */
     scope: RoleScopes.GLOBAL,
 }
-
-export const DBRoleModel = getModelForClass(DBRole, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

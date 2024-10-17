@@ -1,6 +1,6 @@
 import { ExecuteEvent } from "../../typings";
 import { ActivityType, ApplicationCommandData } from "discord.js";
-import { GuildModel } from "../models/guilds";
+import { GuildModel } from "../models/models";
 
 export const execute: ExecuteEvent<"ready"> = async (client) => {
     // -- Setup Databases -- //

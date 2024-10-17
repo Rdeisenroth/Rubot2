@@ -3,12 +3,10 @@ import { VoiceChannelEvent as EVT, QueueEventType, VoiceChannelEventType } from 
 import { PermissionOverwriteData } from "../../../models/permission_overwrite_data";
 import ChannelType, { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { UserModel } from "../../../models/users";
-import { RoomModel } from "../../../models/rooms";
 import { VoiceChannelSpawner } from "../../../models/voice_channel_spawner";
 import { mongoose } from "@typegoose/typegoose";
 import QueueInfoService from "../../../service/queue-info/QueueInfoService";
+import {GuildModel, RoomModel, UserModel} from "../../../models/models";
 
 const command: Command = {
     name: "pick",

@@ -1,5 +1,5 @@
-import { RoomModel } from "./rooms";
-import { DocumentType, getModelForClass, prop, mongoose } from "@typegoose/typegoose";
+import { DocumentType, prop, mongoose } from "@typegoose/typegoose";
+import {RoomModel} from "./models"
 export enum sessionRole {
     "participant" = "participant",
     "coach" = "coach",
@@ -74,9 +74,3 @@ export class Session {
         return amount;
     }
 }
-
-export const SessionModel = getModelForClass(Session, {
-    schemaOptions: {
-        autoCreate: true,
-    },
-});
