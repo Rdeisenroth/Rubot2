@@ -33,7 +33,11 @@ const command: Command = {
                 amount = 1;
             } else {
                 if (isNaN(+amountstr)) {
-                    await interaction.channel.send(`${amountstr} is Not a Number.`);
+                    if (interaction.channel instanceof TextChannel) {
+                        await interaction.channel.send(`${amountstr} is Not a Number.`);
+                    } else {
+                        await interaction.reply(`${amountstr} is Not a Number.`);
+                    }
                     return;
                 }
                 amount = +amountstr;
