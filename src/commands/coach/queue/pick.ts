@@ -89,7 +89,7 @@ const command: Command = {
             // Get Room Spawner
 
             let spawner: VoiceChannelSpawner | undefined = queueData.room_spawner?.toObject();
-            const queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue == queue);
+            const queue_channel_data = guildData.voice_channels.find(x => x.queue && x.queue._id.equals(queue));
             const queue_channel = g.channels.cache.get(queue_channel_data?._id ?? "");
             const member = client.utils.general.getMember(interaction)!;
             if (!spawner) {
