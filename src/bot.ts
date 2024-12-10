@@ -150,7 +150,6 @@ export class Bot extends Client {
 
         const queueGuardJob = new CronJob("*/30 * * * * *", async () => {
             for (const g of this.guilds.cache.values()) {
-                console.log(new Date().toLocaleString());
 
                 const guildData = await GuildModel.findById(g.id);
                 if (!guildData) {
@@ -184,10 +183,10 @@ export class Bot extends Client {
                             return;
                         }
                     } else {
-                        console.log(`queue Still ${queueData.locked ? "locked" : "unlocked"} - ${queueData.name}`);
+                        const date = new Date().toLocaleString();
+                        console.log(`${date}: Queue Still ${queueData.locked ? "locked" : "unlocked"} - ${queueData.name}`);
                     }
                     try {
-                        console.log(queueData.locked);
                         queueData.getWaitingRooms(guildData).forEach(async x => {
                             const c = (await this.channels.fetch(x._id)) as VoiceChannel;
                             await x.syncPermissions(c, (await guildData!.getVerifiedRole(this, c.guild))?.id || undefined, queueData.locked);
