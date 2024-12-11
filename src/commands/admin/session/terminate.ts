@@ -1,8 +1,7 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import moment from "moment";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
-import { SessionModel } from "../../../models/sessions";
+import {GuildModel, SessionModel} from "../../../models/models";
 
 const command: Command = {
     name: "terminate",

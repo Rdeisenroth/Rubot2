@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { UserModel } from "../../../models/users";
+import {UserModel} from "../../../models/models";
 
 const command: Command = {
     name: "unverify",

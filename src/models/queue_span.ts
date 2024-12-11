@@ -1,5 +1,5 @@
 import { WeekTimestamp, Weekday } from "./week_timestamp";
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 /**
  * A Queue Span - A Weekly Timespan with a start- and End Date that can be used to automate Events every week
@@ -118,6 +118,14 @@ export class QueueSpan {
         return this.end.getTime() + this.closeShift;
     }
 
+    public getActualEndTimeFormatted(): string {
+        return new Date(this.actualEndTime()).toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Europe/Berlin'
+        }).slice(0, 5);
+    }
+
     /**
      * Checks whether the span is active at a given Date (or now if no date was given)
      * 
@@ -186,9 +194,3 @@ export class QueueSpan {
         return this.begin.equals(other.begin) && this.end.equals(other.end) && this.openShift === other.openShift && this.closeShift === other.closeShift && this.startDate === other.startDate && this.endDate === other.endDate;
     }
 }
-
-export const QueueSpanModel = getModelForClass(QueueSpan, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});

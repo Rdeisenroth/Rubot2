@@ -1,8 +1,7 @@
 import { ExecuteEvent } from "../../typings";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
-import { GuildModel } from "../models/guilds";
+import { GuildModel, RoomModel } from "../models/models";
 import { QueueEntry } from "../models/queue_entry";
-import { RoomModel } from "../models/rooms";
 import { VoiceChannelEvent as EVT, VoiceChannelEventType } from "../models/events";
 import { manageJoinQueue } from "../utils/general";
 import QueueInfoService from "../service/queue-info/QueueInfoService";
@@ -95,19 +94,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     }
                 }
                 if (queue.join_message) {
-                    const replacements = {
-                        "limit": queue.limit,
-                        "member_id": newState.member!.id,
-                        "user": newState.member!.user,
-                        "name": queue.name,
-                        "description": queue.description,
-                        "eta": "null",
-                        "pos": queue.getPosition(queueEntry.discord_id) + 1,
-                        "total": queue.entries.length,
-                        "time_spent": "0s",
-                    };
-                    // Interpolate String
-                    const join_message = client.utils.general.interpolateString(queue.join_message, replacements);
+                    const join_message = await queue.getJoinMessage()
                     const row = new ActionRowBuilder<ButtonBuilder>({
                         components:
                             [
@@ -196,7 +183,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                     if (queue.disconnect_timeout) {
                         await client.utils.embeds.SimpleEmbed(dm, {
                             title: "Queue System",
-                            text: queue.getLeaveRoomMessage(member_id),
+                            text: await queue.getLeaveRoomMessage(member_id),
                             components: [
                                 new ActionRowBuilder<ButtonBuilder>(
                                     {
@@ -232,7 +219,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEventType.LEAVE);
                             await client.utils.embeds.SimpleEmbed(dm, {
                                 title: "Queue System",
-                                text: leave_msg,
+                                text: await leave_msg,
                             });
                         }, queue.disconnect_timeout);
                     } else {
@@ -246,7 +233,7 @@ export const execute: ExecuteEvent<"voiceStateUpdate"> = async (client, oldState
                             await member.roles.remove(waiting_role);
                         }
                         await QueueInfoService.logQueueActivity(guild, member.user, queue, QueueEventType.LEAVE);
-                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: leave_msg });
+                        await client.utils.embeds.SimpleEmbed(dm, { title: "Queue System", text: await leave_msg });
                     }
                 }
 

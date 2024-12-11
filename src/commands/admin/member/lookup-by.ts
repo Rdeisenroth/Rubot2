@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, EmbedField, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { UserModel, User } from "../../../models/users";
+import { User } from "../../../models/users";
 import { FilterQuery } from "mongoose";
 import { DocumentType, mongoose } from "@typegoose/typegoose";
 import { FilterOutFunctionKeys } from "@typegoose/typegoose/lib/types";
+import {UserModel} from "../../../models/models";
 
 const command: Command = {
     name: "lookup-by",

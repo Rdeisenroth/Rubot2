@@ -1,7 +1,8 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import moment from "moment";
 import { ButtonInteraction } from "../../../../typings";
-import { GuildModel, Guild } from "../../../models/guilds";
+import { Guild } from "../../../models/guilds";
+import { GuildModel } from "../../../models/models";
 import { Queue } from "../../../models/queues";
 import { DocumentType } from "@typegoose/typegoose";
 

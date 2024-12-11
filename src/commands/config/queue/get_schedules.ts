@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, Message } from "discord.js";
 import { Command } from "../../../../typings";
-import { GuildModel } from "../../../models/guilds";
+import {GuildModel} from "../../../models/models";
 import { QueueSpan } from "../../../models/queue_span";
 import { WeekTimestamp } from "../../../models/week_timestamp";
 

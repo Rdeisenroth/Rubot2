@@ -1,5 +1,5 @@
 import { ChannelType, TextChannelType } from "discord.js";
-import { getModelForClass, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 /**
  * Database Representation of a Discord Channel
@@ -56,9 +56,3 @@ export class TextChannel implements Channel {
         rage_channel?: boolean;
 
 }
-
-export const TextChannelModel = getModelForClass(TextChannel, {
-    schemaOptions: {
-        autoCreate: false,
-    },
-});
